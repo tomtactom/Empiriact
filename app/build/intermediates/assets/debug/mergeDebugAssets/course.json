@@ -1,0 +1,51 @@
+
+{
+  "modules": [
+    {
+      "id": "module1",
+      "title": "Modul 1: Psychoedukation & Störungsmodell",
+      "description": "Lerne die Grundlagen der Verhaltensaktivierung kennen und verstehe, wie deine Aktivitäten und deine Stimmung zusammenhängen.",
+      "lessons": [
+        {
+          "id": "m1_l1",
+          "title": "Willkommen & Einführung",
+          "content": [
+            { "coachMessage": "Hallo! Ich bin Leo, dein persönlicher Coach. Ich freue mich riesig, dich auf dieser Reise zu begleiten! In den nächsten Wochen werden wir gemeinsam daran arbeiten, dass du dich wieder stabiler und besser fühlst." },
+            { "coachMessage": "Das Ziel ist, dass du lernst, wie du besser mit depressiver Stimmung und Antriebslosigkeit umgehen kannst. Wir probieren Dinge aus und finden heraus, was dir persönlich hilft." },
+            { "coachMessage": "Es geht darum, deine persönlichen Werte zu entdecken und diese durch Aktivitäten wieder mehr in deinen Alltag zu bringen. Keine Sorge, du bist nicht allein – ich bin an deiner Seite! Wir machen das Schritt für Schritt." }
+          ],
+          "task": null
+        },
+        {
+          "id": "m1_l2",
+          "title": "Aktivitäten & Stimmung beobachten",
+          "content": [
+            { "coachMessage": "Lass uns zuerst ein Bild von deiner aktuellen Situation machen. Der erste Schritt ist, deine täglichen Aktivitäten und deine Stimmung dabei zu beobachten. Das hilft uns, Muster zu erkennen." },
+            { "coachMessage": "Ich möchte dich bitten, ab jetzt stündlich einzutragen, was du machst und wie du dich dabei fühlst. Das klingt vielleicht nach viel, aber es ist super wertvoll, um Zusammenhänge zu verstehen." },
+            { "coachMessage": "Wenn du in einer Stunde mehrere Dinge tust, trag einfach die Hauptaktivität ein oder die, die für dich am wichtigsten war. Für die Stimmung nutzen wir eine einfache Skala von -- (sehr schlecht) bis ++ (sehr gut)." }
+          ],
+          "task": {
+            "description": "Gehe zum 'Heute'-Bildschirm und beginne mit der stündlichen Protokollierung deiner Aktivitäten und deiner Stimmung.",
+            "targetScreen": "today"
+          }
+        },
+        {
+          "id": "m1_l3",
+          "title": "Dein individuelles Störungsmodell (AVK)",
+          "content": [
+            { "coachMessage": "Super, du hast schon mit der Beobachtung begonnen! Jetzt schauen wir uns an, wie Depressionen entstehen und was sie aufrechterhält. Wir benutzen dafür das AVK-Modell: Auslöser, Verhalten, Konsequenz." },
+            { "coachMessage": "Denk mal darüber nach: Was waren die ursprünglichen Auslöser für deine depressive Stimmung? Und welche kleinen Dinge im Alltag lösen sie heute aus?" },
+            { "coachMessage": "Dein Verhalten als Reaktion darauf (z.B. Rückzug, Grübeln) ist ein verständlicher Versuch, mit der Situation umzugehen. Es ist kein persönliches Versagen! Lass uns gemeinsam verstehen, welche kurzfristigen und langfristigen Konsequenzen dieses Verhalten hat." }
+          ],
+          "task": null
+        }
+      ]
+    },
+    {
+        "id": "module2",
+        "title": "Modul 2: Aktivitätsbeobachtung und Werteklärung",
+        "description": "Wir werten deine Beobachtungen aus, entdecken deine persönlichen Werte und finden passende, werteorientierte Aktivitäten.",
+        "lessons": []
+    }
+  ]
+}
