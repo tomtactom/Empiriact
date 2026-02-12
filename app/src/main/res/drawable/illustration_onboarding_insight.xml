@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Compass Body -->
+    <path
+        android:strokeColor="#2A6F97"
+        android:strokeWidth="4"
+        android:pathData="M100,100 m-80,0 a 80,80 0 1,0 160,0 a 80,80 0 1,0 -160,0" />
+
+    <!-- Compass Needle pointing to a Value (Diamond) -->
+    <path
+        android:fillColor="#D95D39"
+        android:pathData="M 100,100 L 140,60 L 100,120 L 60,140 Z" />
+
+    <!-- Value Symbol (Diamond) -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M 135,55 L 145,55 L 140,45 Z"/>
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M 140,45 L 145,35 L 135,35 Z"/>
+
+</vector>

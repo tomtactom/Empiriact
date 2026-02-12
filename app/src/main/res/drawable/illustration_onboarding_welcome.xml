@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Abstract friendly shape -->
+    <path
+        android:fillColor="#2A6F97"
+        android:pathData="M100,50 C 40,50 40,150 100,150 S 160,150 160,100 S 160,50 100,50 Z"/>
+
+    <!-- Surrealistic waving hand -->
+    <path
+        android:strokeColor="#D95D39"
+        android:strokeWidth="8"
+        android:strokeLineCap="round"
+        android:pathData="M 70,100 C 50,80 80,70 90,80 S 70,120 60,110"/>
+
+    <!-- Sparkle elements -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M 150,60 L 155,55 L 160,60 L 155,65 Z"/>
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M 50,140 L 55,135 L 60,140 L 55,145 Z"/>
+
+</vector>

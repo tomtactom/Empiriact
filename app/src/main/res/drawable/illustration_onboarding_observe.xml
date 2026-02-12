@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Timeline Path -->
+    <path
+        android:strokeColor="#2A6F97"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M 20,100 C 60,140 140,60 180,100"/>
+
+    <!-- Abstract Hand placing an 'activity' -->
+    <path
+        android:fillColor="#D95D39"
+        android:pathData="M 90,40 L 110,40 L 115,60 L 85,60 Z"/>
+    <path
+        android:strokeColor="#D95D39"
+        android:strokeWidth="6"
+        android:pathData="M 100,60 V 80"/>
+
+    <!-- Activity/Moment Circle -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M 95,85 a 10,10 0 1,1 0.001,0 Z"/>
+
+</vector>

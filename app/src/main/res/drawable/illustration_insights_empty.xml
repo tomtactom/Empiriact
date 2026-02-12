@@ -1,0 +1,34 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="120dp"
+    android:viewportWidth="160"
+    android:viewportHeight="120">
+
+    <!-- Stylized Magnifying Glass using new primary color -->
+    <path
+        android:strokeColor="#FFD95D39"
+        android:strokeWidth="4"
+        android:pathData="M 80,55 m -45,0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0"
+        />
+    <path
+        android:strokeColor="#FFD95D39"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M 115,90 l 25,20"
+        />
+
+    <!-- Abstract data points inside, using new secondary and tertiary colors -->
+    <path
+        android:fillColor="#FF2A6F97"
+        android:pathData="M 70,45 a 4,4 0 1,1 0.001,0 Z"/>
+    <path
+        android:fillColor="#FFE9C46A"
+        android:pathData="M 90,65 a 5,5 0 1,1 0.001,0 Z"/>
+    <path
+        android:fillColor="#FF2A6F97"
+        android:pathData="M 105,50 a 3,3 0 1,1 0.001,0 Z"/>
+    <path
+        android:fillColor="#FFE9C46A"
+        android:pathData="M 65,70 a 3,3 0 1,1 0.001,0 Z"/>
+
+</vector>

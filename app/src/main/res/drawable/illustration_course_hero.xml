@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="140dp"
+    android:viewportWidth="200"
+    android:viewportHeight="140">
+
+    <!-- Open Book using secondary and background colors -->
+    <path
+        android:fillColor="#FEF9F3"
+        android:strokeColor="#2A6F97"
+        android:strokeWidth="3"
+        android:pathData="M10,120 Q100,80 190,120 L190,130 L10,130 Z" />
+    <path
+        android:fillColor="#FEF9F3"
+        android:strokeColor="#2A6F97"
+        android:strokeWidth="3"
+        android:pathData="M15,122 L 185,122" />
+
+    <!-- Plant Stem using primary color -->
+    <path
+        android:strokeColor="#D95D39"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M100,100 C110,60 80,40 90,10" />
+
+    <!-- Leaves using tertiary color -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M90,40 C70,45 80,60 95,55 Z" />
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M105,70 C90,80 110,90 115,75 Z" />
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M90,10 a 5,5 0 1,1 0.001,0 Z"/>
+
+</vector>

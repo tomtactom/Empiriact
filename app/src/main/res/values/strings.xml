@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Empiriact</string>
+
+    <!-- Overview Screen Tabs -->
+    <string name="overview_tab_protocol">Protokoll</string>
+    <string name="overview_tab_analysis">Analyse</string>
+    <string name="overview_tab_resources">Ressourcen</string>
+
+    <!-- Analysis Tab -->
+    <string name="analysis_tab_title">Deine Muster</string>
+    <string name="analysis_tab_subtitle">Hier siehst du, welche wiederholten Aktivitäten deine Stimmung tendenziell heben oder senken.</string>
+    <string name="analysis_tab_mood_boosters_title">😊 Stimmungsaufheller</string>
+    <string name="analysis_tab_mood_boosters_empty">Noch nicht genügend Daten für eine Analyse.</string>
+    <string name="analysis_tab_mood_dampers_title">😕 Stimmungsdämpfer</string>
+    <string name="analysis_tab_mood_dampers_empty">Keine klaren Stimmungsdämpfer gefunden.</string>
+
+    <!-- Protocol Tab -->
+    <string name="protocol_tab_title">Tagesprotokoll</string>
+    <string name="protocol_tab_empty">Für heute wurden noch keine Einträge gespeichert.</string>
+
+    <!-- Resources Tab -->
+    <string name="resources_tab_title">Ressourcen-Bewertungen</string>
+    <string name="resources_tab_empty">Bisher wurden keine Übungen bewertet.</string>
+
+    <!-- Exercise Names -->
+    <string name="exercise_rumination">Ruminations-Übung</string>
+    <string name="exercise_five_four_three_two_one">5-4-3-2-1 Übung</string>
+</resources>
