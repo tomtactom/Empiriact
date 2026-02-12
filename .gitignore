@@ -1,0 +1,15 @@
+# Gradle and build outputs
+.gradle/
+.gradle-wrapper/
+**/build/
+
+# Local environment config (machine-specific)
+local.properties
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# OS artifacts
+.DS_Store
+Thumbs.db
