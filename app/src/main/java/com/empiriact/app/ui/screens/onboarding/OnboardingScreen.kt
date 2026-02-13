@@ -47,7 +47,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import kotlinx.coroutines.launch
 
 private data class IntroPage(
     val title: String,
@@ -58,34 +57,33 @@ private data class IntroPage(
 @Composable
 fun OnboardingScreen(onFinished: () -> Unit) {
     val context = LocalContext.current
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val pages = remember {
         listOf(
             IntroPage(
                 title = "Willkommen bei Empiriact",
-                subtitle = "Schön, dass du da bist. Du bestimmst dein Tempo – wir begleiten dich Schritt für Schritt.",
+                subtitle = "Schön, dass du da bist. Du wählst dein Tempo, wir unterstützen dich Schritt für Schritt.",
                 bullets = listOf(
-                    "Du musst nichts perfekt machen: kleine Schritte zählen.",
-                    "Wir arbeiten mit alltagsnahen, verhaltenstherapeutischen Übungen.",
-                    "Du kannst jederzeit überspringen, pausieren oder später anpassen."
+                    "Du kannst mit kleinen Schritten starten – jeder Schritt bringt dich weiter.",
+                    "Die Übungen sind alltagsnah und helfen dir, wirksame Gewohnheiten aufzubauen.",
+                    "Du entscheidest jederzeit selbst, was heute gut für dich passt."
                 )
             ),
             IntroPage(
                 title = "So unterstützt dich die App",
-                subtitle = "Damit du sofort Orientierung hast, hier der Überblick über die wichtigsten Bereiche.",
+                subtitle = "Hier siehst du, wie du die App für dich nutzen kannst.",
                 bullets = listOf(
-                    "Heute: kurze, machbare Impulse für den aktuellen Tag.",
-                    "Check-in & Übersicht: Muster erkennen und Fortschritte sehen.",
-                    "Lernen & Ressourcen: Wissen + konkrete Übungen für den Alltag."
+                    "Heute: kurze Impulse, die du direkt umsetzen kannst.",
+                    "Check-in & Übersicht: du erkennst Muster und machst Fortschritte sichtbar.",
+                    "Lernen & Ressourcen: du vertiefst Wissen und übst konkret im Alltag."
                 )
             ),
             IntroPage(
-                title = "Empathisch, klar, ohne Druck",
-                subtitle = "Moderne Verhaltensänderung funktioniert besser mit Selbstbestimmung statt Zwang.",
+                title = "Klar, freundlich und selbstbestimmt",
+                subtitle = "Veränderung gelingt oft besser, wenn du sie an deinen Alltag und deine Ziele anpasst.",
                 bullets = listOf(
-                    "Du entscheidest, welche Übungen zu dir passen.",
-                    "Reflexion statt Selbstkritik: neugierig beobachten, nicht bewerten.",
-                    "Konsistenz ist wichtiger als Intensität – auch 2 Minuten sind wertvoll."
+                    "Du wählst die Übungen, die dich gerade am besten unterstützen.",
+                    "Du beobachtest dich neugierig und lernst daraus Schritt für Schritt.",
+                    "Regelmäßigkeit zählt: schon wenige Minuten täglich machen einen Unterschied."
                 )
             )
         )
@@ -100,15 +98,6 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            OutlinedButton(onClick = onFinished) {
-                Text("Überspringen")
-            }
-        }
-
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f)
@@ -116,7 +105,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             if (page < pages.size) {
                 IntroContentPage(page = pages[page])
             } else {
-                SystemPermissionsPage(context = context)
+                SystemPermissionsPage(context = context, onFinished = onFinished)
             }
         }
 
@@ -125,37 +114,6 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             currentPage = pagerState.currentPage,
             modifier = Modifier.padding(top = 12.dp, bottom = 16.dp)
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = {
-                    if (pagerState.currentPage == 0) {
-                        onFinished()
-                    } else {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-                    }
-                },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(if (pagerState.currentPage == 0) "Später" else "Zurück")
-            }
-
-            Button(
-                onClick = {
-                    if (pagerState.currentPage == pageCount - 1) {
-                        onFinished()
-                    } else {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                    }
-                },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(if (pagerState.currentPage == pageCount - 1) "Los geht's" else "Weiter")
-            }
-        }
     }
 }
 
@@ -194,7 +152,7 @@ private fun IntroContentPage(page: IntroPage) {
 }
 
 @Composable
-private fun SystemPermissionsPage(context: Context) {
+private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
     var notificationsEnabled by remember { mutableStateOf(areNotificationsEnabled(context)) }
@@ -267,6 +225,15 @@ private fun SystemPermissionsPage(context: Context) {
             actionText = "Einstellung öffnen"
         ) {
             openBatteryOptimizationSettings(context, batteryOptimizationLauncher::launch)
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = onFinished,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Einführung abschließen")
         }
     }
 }
