@@ -44,9 +44,18 @@ fun TakeEvaluationScreen(type: String, onEvaluationComplete: () -> Unit) {
             ))
         )
     }
-    val questionnaire = remember(type) { questionnaires.first { it.type == type } }
-    val answers = remember { mutableStateListOf<Int>() }
-    questionnaire.questions.forEach { _ -> answers.add(0) }
+    val questionnaire = remember(type) { questionnaires.find { it.type == type } }
+
+    if (questionnaire == null) {
+        Column(Modifier.fillMaxSize().padding(16.dp)) {
+            Text("Unbekannter Fragebogen: $type", style = MaterialTheme.typography.bodyLarge)
+        }
+        return
+    }
+
+    val answers = remember(questionnaire.type) {
+        mutableStateListOf<Int>().apply { repeat(questionnaire.questions.size) { add(0) } }
+    }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Text(questionnaire.type, style = MaterialTheme.typography.headlineMedium)

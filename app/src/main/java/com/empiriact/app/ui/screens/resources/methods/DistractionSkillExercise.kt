@@ -173,10 +173,23 @@ fun DistractionSkillExercise(
                     },
                     onFinish = { navController.navigate(Route.ExerciseRating.createRoute("distraction_skill_exercise", from)) }
                 )
-                DistractionScreenState.SHAKE_SCREEN -> ShakeScreen(
-                    category = selectedCategory!!,
-                    onFinish = { navController.navigate(Route.ExerciseRating.createRoute("distraction_skill_exercise", from)) }
-                )
+                DistractionScreenState.SHAKE_SCREEN -> {
+                    val category = selectedCategory
+                    if (category != null) {
+                        ShakeScreen(
+                            category = category,
+                            onFinish = { navController.navigate(Route.ExerciseRating.createRoute("distraction_skill_exercise", from)) }
+                        )
+                    } else {
+                        CategoryChoiceScreen(
+                            onCategorySelected = { selected ->
+                                selectedCategory = selected
+                                state = DistractionScreenState.SHAKE_SCREEN
+                            },
+                            onFinish = { navController.navigate(Route.ExerciseRating.createRoute("distraction_skill_exercise", from)) }
+                        )
+                    }
+                }
             }
         }
     }
