@@ -70,6 +70,7 @@ dependencies {
     androidTestImplementation(composeBom)
 
     implementation(libs.compose.ui)
+    implementation(libs.compose.foundation)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons)
@@ -77,10 +78,6 @@ dependencies {
 
     androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.test.manifest)
-
-    // Accompanist (Restored for Pager)
-    implementation("com.google.accompanist:accompanist-pager:0.24.13-rc")
-    implementation("com.google.accompanist:accompanist-pager-indicators:0.24.13-rc")
 
     // Navigation
     implementation(libs.navigation.compose)
