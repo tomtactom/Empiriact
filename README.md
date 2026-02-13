@@ -19,3 +19,8 @@ Grundgerüst für eine Offline-Android-App (Kotlin, Compose, Room, DataStore, Wo
 
 ## KI-optimierte Dokumentation
 - Vollständige KI-Developer-Doku: `AI_DEVELOPMENT_DOCUMENTATION.md`
+
+## Modulare Zielstruktur (neu)
+- Neue vorbereitende Modul-Struktur unter `modules/` für schrittweise Entkopplung.
+- Architektur- und Migrationsplan unter `docs/architecture/MODULARISIERUNG_ROADMAP.md`.
+- Ziel: feature-orientierte Entwicklung, klare Verantwortlichkeiten, bessere Wartbarkeit.
