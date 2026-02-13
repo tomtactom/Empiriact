@@ -9,9 +9,14 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class SettingsRepository(context: Context) {
+    private val scope = CoroutineScope(Dispatchers.IO)
     private val dataStore = context.dataStore
 
     private object PreferencesKeys {
@@ -50,6 +55,12 @@ class SettingsRepository(context: Context) {
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { settings ->
             settings[PreferencesKeys.ONBOARDING_COMPLETED] = completed
+        }
+    }
+
+    fun completeOnboarding() {
+        scope.launch {
+            setOnboardingCompleted(true)
         }
     }
 }
