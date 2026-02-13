@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
             val application = application as EmpiriactApplication
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    EmpiriactApp(application.viewModelFactory)
+                    EmpiriactApp(application.viewModelFactory, application.settingsRepository)
                 }
             }
         }

@@ -1,6 +1,9 @@
 package com.empiriact.app.ui.navigation
 
 sealed class Route(val route: String) {
+    object Entry : Route("entry")
+    object Onboarding : Route("onboarding")
+
     object Today : Route("today")
     object Overview : Route("overview")
     object Leo : Route("leo")
