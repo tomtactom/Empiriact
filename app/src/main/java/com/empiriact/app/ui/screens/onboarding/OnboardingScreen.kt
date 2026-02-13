@@ -61,29 +61,29 @@ fun OnboardingScreen(onFinished: () -> Unit) {
         listOf(
             IntroPage(
                 title = "Willkommen bei Empiriact",
-                subtitle = "Schön, dass du da bist. Du wählst dein Tempo, wir unterstützen dich Schritt für Schritt.",
+                subtitle = "Empiriact ist eine App für den Alltag: Sie begleitet dich dabei, innere Erfahrungen im aktuellen Moment bewusster wahrzunehmen und stimmige Schritte auszuwählen.",
                 bullets = listOf(
-                    "Du kannst mit kleinen Schritten starten – jeder Schritt bringt dich weiter.",
-                    "Die Übungen sind alltagsnah und helfen dir, wirksame Gewohnheiten aufzubauen.",
-                    "Du entscheidest jederzeit selbst, was heute gut für dich passt."
+                    "Gegenwärtigkeit (Achtsamkeit): Du richtest den Blick auf das, was gerade da ist – Gedanken, Gefühle und Körperreaktionen – ohne sofort reagieren zu müssen.",
+                    "Akzeptanz: Du nimmst innere Erfahrungen wahr und ordnest sie Schritt für Schritt: Was ist passiert, was ging dir durch den Kopf, was hast du gefühlt und wie hast du reagiert?",
+                    "Mit kleinen, wiederholten Schritten entsteht nach und nach die Erfahrung: \"Ich kann wirksam handeln.\""
                 )
             ),
             IntroPage(
-                title = "So unterstützt dich die App",
-                subtitle = "Hier siehst du, wie du die App für dich nutzen kannst.",
+                title = "Wenn es innen unruhig wird",
+                subtitle = "Du findest kurze Übungen für intensive Momente, um Abstand zu Gedankenschleifen zu gewinnen und dich auf den nächsten hilfreichen Schritt auszurichten.",
                 bullets = listOf(
-                    "Heute: kurze Impulse, die du direkt umsetzen kannst.",
-                    "Check-in & Übersicht: du erkennst Muster und machst Fortschritte sichtbar.",
-                    "Lernen & Ressourcen: du vertiefst Wissen und übst konkret im Alltag."
+                    "Für Phasen hoher Anspannung stehen einfache, direkt nutzbare Strategien zur Verfügung.",
+                    "Kognitive Defusion: Du nimmst Gedanken als mentale Ereignisse wahr, statt sie als Anweisung zu behandeln.",
+                    "Selbst als Kontext (Beobachter-Selbst): Du bist mehr als der Inhalt einzelner Gedanken oder Gefühle.",
                 )
             ),
             IntroPage(
-                title = "Klar, freundlich und selbstbestimmt",
-                subtitle = "Veränderung gelingt oft besser, wenn du sie an deinen Alltag und deine Ziele anpasst.",
+                title = "Dein Weg, in deinem Tempo",
+                subtitle = "Du entscheidest, was heute passt. Die App unterstützt dich dabei, nach deinen persönlichen Werten zu handeln und dabei flexibel zu bleiben.",
                 bullets = listOf(
-                    "Du wählst die Übungen, die dich gerade am besten unterstützen.",
-                    "Du beobachtest dich neugierig und lernst daraus Schritt für Schritt.",
-                    "Regelmäßigkeit zählt: schon wenige Minuten täglich machen einen Unterschied."
+                    "Du wählst zwischen passenden Übungen und passt sie flexibel an deinen Alltag an.",
+                    "Werte: Du klärst, was dir wichtig ist – zum Beispiel Verbundenheit, Selbstachtung oder Fürsorge – und richtest Schritte daran aus.",
+                    "Engagiertes Handeln (Commitment): So bauen die Seiten aufeinander auf – wahrnehmen, Abstand gewinnen, werteorientiert handeln."
                 )
             )
         )
