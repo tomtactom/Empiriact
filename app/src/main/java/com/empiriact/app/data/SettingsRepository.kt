@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -23,6 +24,13 @@ class SettingsRepository(context: Context) {
         val HOURLY_PROMPTS_ENABLED = booleanPreferencesKey("hourly_prompts_enabled")
         val DATA_DONATION_ENABLED = booleanPreferencesKey("data_donation_enabled")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
+    }
+
+    enum class ThemeMode {
+        SYSTEM,
+        LIGHT,
+        DARK
     }
 
     val hourlyPromptsEnabled: Flow<Boolean> = dataStore.data
@@ -61,6 +69,24 @@ class SettingsRepository(context: Context) {
     fun completeOnboarding() {
         scope.launch {
             setOnboardingCompleted(true)
+        }
+    }
+
+    val themeMode: Flow<ThemeMode> = dataStore.data
+        .map { preferences ->
+            ThemeMode.entries.firstOrNull { it.name == preferences[PreferencesKeys.THEME_MODE] }
+                ?: ThemeMode.SYSTEM
+        }
+
+    suspend fun setThemeMode(mode: ThemeMode) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.THEME_MODE] = mode.name
+        }
+    }
+
+    suspend fun clearAllSettings() {
+        dataStore.edit { settings ->
+            settings.clear()
         }
     }
 }
