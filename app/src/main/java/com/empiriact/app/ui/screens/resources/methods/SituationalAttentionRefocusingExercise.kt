@@ -62,10 +62,14 @@ private sealed class SarScreenState {
             },
             restore = { saved ->
                 when {
-                    saved.startsWith("EXERCISE:") -> EXERCISE(SarSense.valueOf(saved.removePrefix("EXERCISE:")))
+                    saved.startsWith("EXERCISE:") -> {
+                        val senseName = saved.removePrefix("EXERCISE:")
+                        val sense = SarSense.entries.firstOrNull { it.name == senseName }
+                        if (sense != null) EXERCISE(sense) else INTRO
+                    }
                     saved == "INTRO" -> INTRO
                     saved == "SENSE_CHOICE" -> SENSE_CHOICE
-                    else -> throw IllegalArgumentException("Unknown screen state: $saved")
+                    else -> INTRO
                 }
             }
         )
