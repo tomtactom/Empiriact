@@ -13,12 +13,14 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraphBuilder
@@ -154,6 +156,8 @@ private fun NavGraphBuilder.staticGraph(factory: ViewModelFactory, navController
             if (questionnaireId == "well_being") {
                 val questionnaire = application.checkinRepository.getWellbeingQuestionnaire()
                 QuestionnaireDetailScreen(questionnaire) { navController.popBackStack() }
+            } else {
+                UnsupportedQuestionnaireScreen(onBack = { navController.popBackStack() })
             }
         }
     }
@@ -177,42 +181,42 @@ private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navControlle
         route = Route.SituationalAttentionRefocusingExercise.route,
         arguments = listOf(navArgument("from") { type = NavType.StringType })
     ) { backStackEntry ->
-        val from = backStackEntry.arguments?.getString("from")!!
+        val from = backStackEntry.arguments?.getString("from") ?: "resources"
         SituationalAttentionRefocusingExercise(navController, from)
     }
     composable(
         route = Route.FiveFourThreeTwoOneExercise.route,
         arguments = listOf(navArgument("from") { type = NavType.StringType })
     ) { backStackEntry ->
-        val from = backStackEntry.arguments?.getString("from")!!
+        val from = backStackEntry.arguments?.getString("from") ?: "resources"
         FiveFourThreeTwoOneExerciseScreen(navController, from)
     }
     composable(
         route = Route.SelectiveAttentionExercise.route,
         arguments = listOf(navArgument("from") { type = NavType.StringType })
     ) { backStackEntry ->
-        val from = backStackEntry.arguments?.getString("from")!!
+        val from = backStackEntry.arguments?.getString("from") ?: "resources"
         SelectiveAttentionExercise(navController, from)
     }
     composable(
         route = Route.AttentionSwitchingExercise.route,
         arguments = listOf(navArgument("from") { type = NavType.StringType })
     ) { backStackEntry ->
-        val from = backStackEntry.arguments?.getString("from")!!
+        val from = backStackEntry.arguments?.getString("from") ?: "resources"
         AttentionSwitchingExercise(navController, from)
     }
     composable(
         route = Route.SharedAttentionExercise.route,
         arguments = listOf(navArgument("from") { type = NavType.StringType })
     ) { backStackEntry ->
-        val from = backStackEntry.arguments?.getString("from")!!
+        val from = backStackEntry.arguments?.getString("from") ?: "resources"
         SharedAttentionExercise(navController, from)
     }
     composable(
         route = Route.DistractionSkillExercise.route,
         arguments = listOf(navArgument("from") { type = NavType.StringType })
     ) { backStackEntry ->
-        val from = backStackEntry.arguments?.getString("from")!!
+        val from = backStackEntry.arguments?.getString("from") ?: "resources"
         DistractionSkillExercise(navController, from)
     }
     composable(
@@ -245,3 +249,24 @@ private data class BottomNavItem(
     val label: String,
     val icon: ImageVector,
 )
+
+@Composable
+private fun UnsupportedQuestionnaireScreen(onBack: () -> Unit) {
+    androidx.compose.foundation.layout.Column(
+        modifier = Modifier
+            .padding(24.dp)
+            .fillMaxSize(),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+    ) {
+        Text(
+            text = "Dieser Check-in ist aktuell noch nicht verfügbar.",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        androidx.compose.material3.Button(
+            onClick = onBack,
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text("Zurück")
+        }
+    }
+}

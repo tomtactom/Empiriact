@@ -83,8 +83,12 @@ fun QuestionnaireDetailScreen(questionnaire: WellbeingQuestionnaire, onBack: () 
 
             if (showResult) {
                 val totalScore = answers.values.sum()
-                val interpretation = questionnaire.interpretations.first { totalScore in it.scoreRange }
-                ResultView(interpretation, onBack)
+                val interpretation = questionnaire.interpretations.firstOrNull { totalScore in it.scoreRange }
+                if (interpretation != null) {
+                    ResultView(interpretation, onBack)
+                } else {
+                    FallbackResultView(onBack)
+                }
             } else {
                 HorizontalPager(state = pagerState, userScrollEnabled = answers.size >= pagerState.currentPage) { page ->
                     when (page) {
@@ -186,6 +190,20 @@ private fun ResultView(interpretation: ScoreInterpretation, onFinish: () -> Unit
             }
         }
         item {
+            Spacer(modifier = Modifier.height(Dimensions.spacingLarge))
+            Button(onClick = onFinish, modifier = Modifier.fillMaxWidth()) { Text("Abschließen") }
+        }
+    }
+}
+
+
+@Composable
+private fun FallbackResultView(onFinish: () -> Unit) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(Dimensions.paddingMedium)) {
+        item {
+            Text(text = "Auswertung", style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.height(Dimensions.spacingLarge))
+            Text(text = "Für deine Antworten liegt aktuell noch keine passende Interpretation vor.", style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(Dimensions.spacingLarge))
             Button(onClick = onFinish, modifier = Modifier.fillMaxWidth()) { Text("Abschließen") }
         }
