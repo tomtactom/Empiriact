@@ -1,5 +1,6 @@
 package com.empiriact.app.ui.screens.settings
 
+import android.app.ActivityManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.empiriact.app.EmpiriactApplication
@@ -67,8 +68,15 @@ class SettingsViewModel(
 
     fun resetAppToFactoryDefaults() {
         viewModelScope.launch {
-            application.clearApplicationUserData()
-            _statusMessage.value = "App-Daten wurden auf Werkseinstellungen zurückgesetzt."
+            val resetSuccessful = application
+                .getSystemService(ActivityManager::class.java)
+                ?.clearApplicationUserData() == true
+
+            _statusMessage.value = if (resetSuccessful) {
+                "App-Daten wurden auf Werkseinstellungen zurückgesetzt."
+            } else {
+                "App-Daten konnten nicht zurückgesetzt werden."
+            }
         }
     }
 
