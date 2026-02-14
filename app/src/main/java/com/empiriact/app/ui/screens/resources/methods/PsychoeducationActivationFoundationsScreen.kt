@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -28,11 +27,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -86,35 +87,48 @@ fun PsychoeducationActivationFoundationsScreen(navController: NavController) {
             )
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Surface(
+                tonalElevation = 2.dp,
+                shadowElevation = 4.dp
             ) {
-                IconButton(
-                    onClick = {
-                        if (pagerState.currentPage > 0) {
-                            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-                        }
-                    },
-                    enabled = pagerState.currentPage > 0
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Vorherige Seite")
-                }
-
-                PageIndicator(currentPage = pagerState.currentPage, pageCount = pageCount)
-
-                if (pagerState.currentPage < pageCount - 1) {
                     IconButton(
-                        onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } }
+                        onClick = {
+                            if (pagerState.currentPage > 0) {
+                                scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+                            }
+                        },
+                        enabled = pagerState.currentPage > 0
                     ) {
-                        Icon(Icons.Default.ArrowForward, contentDescription = "Nächste Seite")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Vorherige Seite")
                     }
-                } else {
-                    TextButton(onClick = { navController.popBackStack() }) {
-                        Text("Fertig")
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Seite ${pagerState.currentPage + 1} von $pageCount",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        PageIndicator(currentPage = pagerState.currentPage, pageCount = pageCount)
+                    }
+
+                    if (pagerState.currentPage < pageCount - 1) {
+                        FilledTonalButton(
+                            onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } }
+                        ) {
+                            Text("Weiter")
+                        }
+                    } else {
+                        TextButton(onClick = { navController.popBackStack() }) {
+                            Text("Fertig")
+                        }
                     }
                 }
             }
@@ -259,12 +273,13 @@ private fun ModulePage(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 content = {
                     AndroidModuleBanner()
                     Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -273,8 +288,8 @@ private fun ModulePage(
                         contentDescription = "Illustration zu $title",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(160.dp)
-                            .clip(RoundedCornerShape(10.dp)),
+                            .height(148.dp)
+                            .clip(RoundedCornerShape(16.dp)),
                         contentScale = ContentScale.Crop
                     )
                     content()
@@ -290,7 +305,7 @@ private fun AndroidModuleBanner() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(999.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f))
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -305,7 +320,7 @@ private fun AndroidModuleBanner() {
             Text(
                 text = "Material Design, kleine Schritte, klare Struktur",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.9f)
             )
         }
     }

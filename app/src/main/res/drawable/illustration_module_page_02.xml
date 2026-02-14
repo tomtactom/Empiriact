@@ -3,10 +3,10 @@
     android:height="180dp"
     android:viewportWidth="320"
     android:viewportHeight="180">
-    <path android:fillColor="#FFF1EDE0" android:pathData="M0,0h320v180h-320z"/>
-    <path android:fillColor="#FFDAB785" android:pathData="M0,128h320v52h-320z"/>
-    <path android:fillColor="#FF457B9D" android:pathData="M26,30h90v90h-90z"/>
-    <path android:fillColor="#FFE76F51" android:pathData="M132,18h70v70h-70z"/>
-    <path android:fillColor="#FF6D597A" android:pathData="M214,28h80v100h-80z"/>
-    <path android:strokeColor="#FF1D3557" android:strokeWidth="5" android:strokeLineCap="round" android:pathData="M38,106l30,-30 26,20 20,-18 28,24 28,-34 28,36 30,-18"/>
+    <path android:fillColor="#FFF8F5EF" android:pathData="M0,0h320v180h-320z"/>
+    <path android:fillColor="#FFECE4D5" android:pathData="M0,126h320v54h-320z"/>
+    <path android:fillColor="#FFD6E3E9" android:pathData="M28,34h88v88h-88z"/>
+    <path android:fillColor="#FFE8DCCB" android:pathData="M128,24h74v76h-74z"/>
+    <path android:fillColor="#FFDCE1D6" android:pathData="M214,30h82v96h-82z"/>
+    <path android:strokeColor="#FF6A7F88" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M40,104l28,-24 24,16 18,-14 24,18 24,-26 24,28 26,-14"/>
 </vector>
