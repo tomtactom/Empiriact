@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
-    val pages = moduleOneTwoNarrationPages()
+    val pages = moduleOneTwoPages()
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
 
@@ -47,7 +47,7 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Modul 1.2 · Leo zeigt dir Aktivität-Stimmungs-Muster",
+            text = "Modul 1.2 · Aktivität und Stimmung beobachten",
             style = MaterialTheme.typography.headlineSmall
         )
 
@@ -61,7 +61,7 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
         ) {
             Icon(Icons.Outlined.Swipe, contentDescription = null)
             Text(
-                text = "Swipe durch das Modul: Jeder Abschnitt baut auf dem vorherigen auf.",
+                text = "Wische nach links oder rechts, um die Seiten zu wechseln.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -72,25 +72,21 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
         ) { pageIndex ->
             val page = pages[pageIndex]
             Card(modifier = Modifier.fillMaxSize()) {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    Text(
-                        text = "Schritt ${pageIndex + 1} von ${pages.size}: ${page.title}",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = page.narratorText,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    page.keyPoints.forEach { point ->
-                        TrackingHint(point)
+                    item {
+                        Text(
+                            text = "Schritt ${pageIndex + 1} von ${pages.size}: ${page.title}",
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
-                    if (page.exercisePrompt.isNotBlank()) {
+                    item { Text(page.mainText, style = MaterialTheme.typography.bodyLarge) }
+                    items(page.keyPoints) { TrackingHint(it) }
+                    item {
                         Card(modifier = Modifier.fillMaxWidth()) {
                             Column(
                                 modifier = Modifier
@@ -98,7 +94,7 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
                                     .padding(12.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text("Reflexionsimpuls", style = MaterialTheme.typography.titleSmall)
+                                Text("Übung", style = MaterialTheme.typography.titleSmall)
                                 Text(page.exercisePrompt, style = MaterialTheme.typography.bodyMedium)
                             }
                         }
@@ -119,9 +115,7 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
                 },
                 enabled = pagerState.currentPage > 0,
                 modifier = Modifier.weight(1f)
-            ) {
-                Text("Zurück")
-            }
+            ) { Text("Zurück") }
 
             OutlinedButton(
                 onClick = {
@@ -131,9 +125,7 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
                 },
                 enabled = pagerState.currentPage < pages.lastIndex,
                 modifier = Modifier.weight(1f)
-            ) {
-                Text("Weiter")
-            }
+            ) { Text("Weiter") }
         }
 
         Card(modifier = Modifier.fillMaxWidth()) {
@@ -143,21 +135,21 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Tracking-Architektur in 3 Schritten", style = MaterialTheme.typography.titleMedium)
+                Text("Tracking in 3 Schritten", style = MaterialTheme.typography.titleMedium)
                 TrackingStep(
                     icon = Icons.Outlined.Timeline,
-                    title = "1) Aktivität kurz benennen",
-                    description = "Eintrag in 5–10 Sekunden: Was mache ich gerade?"
+                    title = "1) Aktivität benennen",
+                    description = "Kurzer Eintrag: Was mache ich gerade?"
                 )
                 TrackingStep(
                     icon = Icons.Outlined.BarChart,
-                    title = "2) Stimmung als Momentwert markieren",
-                    description = "Nutze die 5er-Skala von -- bis ++ ohne lange Analyse."
+                    title = "2) Stimmung markieren",
+                    description = "Nutze die Skala von -- bis ++."
                 )
                 TrackingStep(
                     icon = Icons.Outlined.CheckCircle,
-                    title = "3) Nach 5–10 Einträgen Muster lesen",
-                    description = "Du erkennst auslösende Situationen, statt dich auf Gefühlsschätzungen zu verlassen."
+                    title = "3) Muster erkennen",
+                    description = "Lies nach einigen Einträgen wiederkehrende Zusammenhänge ab."
                 )
             }
         }
@@ -169,15 +161,18 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Icon(Icons.Outlined.Psychology, contentDescription = null)
-                    Text("Leo erklärt die Stimmungsskala", style = MaterialTheme.typography.titleMedium)
+                    Text("Stimmungsskala", style = MaterialTheme.typography.titleMedium)
                 }
-                MoodBar(label = "++", widthFactor = 1.0f, color = Color(0xFF2E7D32), meaning = "deutlich stabilisierend")
-                MoodBar(label = "+", widthFactor = 0.8f, color = Color(0xFF66BB6A), meaning = "leicht stabilisierend")
-                MoodBar(label = "0", widthFactor = 0.6f, color = Color(0xFFFFCA28), meaning = "neutral / unverändert")
-                MoodBar(label = "-", widthFactor = 0.8f, color = Color(0xFFFFA726), meaning = "leicht belastend")
-                MoodBar(label = "--", widthFactor = 1.0f, color = Color(0xFFE53935), meaning = "deutlich belastend")
+                MoodBar(label = "++", widthFactor = 1.0f, color = Color(0xFF2E7D32), meaning = "sehr angenehm")
+                MoodBar(label = "+", widthFactor = 0.8f, color = Color(0xFF66BB6A), meaning = "angenehm")
+                MoodBar(label = "0", widthFactor = 0.6f, color = Color(0xFFFFCA28), meaning = "ausgeglichen")
+                MoodBar(label = "-", widthFactor = 0.8f, color = Color(0xFFFFA726), meaning = "eher niedrig")
+                MoodBar(label = "--", widthFactor = 1.0f, color = Color(0xFFE53935), meaning = "niedrig")
             }
         }
 
@@ -192,61 +187,61 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
 
 data class MonitoringNarrationPage(
     val title: String,
-    val narratorText: String,
+    val mainText: String,
     val keyPoints: List<String>,
-    val exercisePrompt: String = ""
+    val exercisePrompt: String
 )
 
-private fun moduleOneTwoNarrationPages(): List<MonitoringNarrationPage> = listOf(
+private fun moduleOneTwoPages(): List<MonitoringNarrationPage> = listOf(
     MonitoringNarrationPage(
-        title = "Worum es in diesem Modul geht",
-        narratorText = "Ich bin Leo, willkommen in Modul 1.2. Dieses Modul ist eigenständig nutzbar und funktioniert auch dann, wenn dein Alltag gerade chaotisch ist. Unsere therapeutische Idee: Stimmung wird klarer, wenn Verhalten sichtbar wird. Deshalb machen wir aus diffusen Eindrücken ein leichtes, alltagstaugliches Monitoring.",
+        title = "Worum es geht",
+        mainText = "Dieses Modul unterstützt dich dabei, Aktivität und Stimmung im Alltag leicht zu erfassen.",
         keyPoints = listOf(
-            "Du brauchst keine perfekte Tagesstruktur.",
-            "Kurze, regelmäßige Einträge sind wirksamer als lange Rückblicke.",
-            "Ziel ist Orientierung für Entscheidungen, nicht Selbstbewertung."
+            "Kurze Einträge reichen aus.",
+            "Regelmäßige Einträge zeigen klare Muster.",
+            "Du nutzt die Daten für deine nächsten Entscheidungen."
         ),
-        exercisePrompt = "Welche Tageszeit wäre für dich ein realistischer erster Tracking-Moment?"
+        exercisePrompt = "Welche Tageszeit passt dir für einen ersten Tracking-Moment?"
     ),
     MonitoringNarrationPage(
-        title = "Vom Ereignis zur Beobachtung",
-        narratorText = "Viele Menschen merken nur: ‚Mir geht es plötzlich schlecht.‘ Wir schärfen den Blick davor: Was hast du gerade getan? Mit wem warst du? Welche Aufgabe lag an? Das ist klassische verhaltenstherapeutische Verhaltensanalyse in kompakter Form. Je konkreter die Situation, desto besser die Ableitung für den nächsten Tag.",
+        title = "Vom Moment zur Beobachtung",
+        mainText = "Erfasse kurz den Kontext: Ort, Person oder Aufgabe. So wird jeder Eintrag klar und gut vergleichbar.",
         keyPoints = listOf(
-            "Ein Kontextsignal reicht: Ort, Person oder Aufgabe.",
-            "Beschreibe neutral: ‚Meeting seit 30 Minuten‘ statt ‚Katastrophe‘.",
-            "Kontext + Stimmung ergibt verwertbare Daten."
+            "Ein Kontextsignal pro Eintrag ist ausreichend.",
+            "Nutze kurze, neutrale Formulierungen.",
+            "Kontext und Stimmung ergeben ein hilfreiches Bild."
         ),
-        exercisePrompt = "Formuliere einen neutralen Beispiel-Eintrag aus deinem Alltag."
+        exercisePrompt = "Schreibe einen kurzen Beispiel-Eintrag aus deinem Alltag."
     ),
     MonitoringNarrationPage(
-        title = "Skalieren statt Grübeln",
-        narratorText = "Wenn du skaliert einträgst (-- bis ++), entlastest du dein Arbeitsgedächtnis. Das ist gute Usability: geringe Eingabelast, klare Entscheidungspunkte, hohe Wiederholbarkeit. Gleichzeitig unterstützt ASIB deine Autonomie: Du entscheidest, wie fein du differenzierst und wann du Einträge vereinfachst.",
+        title = "Skalieren",
+        mainText = "Die Skala von -- bis ++ ist schnell nutzbar und unterstützt eine regelmäßige Anwendung.",
         keyPoints = listOf(
-            "Skalen sind schneller als freie Texteingabe.",
-            "Weniger Aufwand erhöht die Chance auf langfristige Nutzung.",
-            "Du passt das System an dich an – nicht umgekehrt."
+            "Die Skala spart Zeit.",
+            "Wiederholbare Einträge helfen dir über mehrere Tage.",
+            "Du kannst Detailgrad und Häufigkeit selbst wählen."
         ),
-        exercisePrompt = "Lege fest: Möchtest du 3 oder 5 Einträge pro Tag als Startziel?"
+        exercisePrompt = "Möchtest du mit 3 oder 5 Einträgen pro Tag starten?"
     ),
     MonitoringNarrationPage(
-        title = "Muster erkennen und Hypothesen testen",
-        narratorText = "Nach einigen Tagen suchst du nicht nach ‚der Wahrheit‘, sondern nach Arbeitshypothesen: ‚Kurze Bewegung hebt meine Stimmung oft um eine Stufe‘ oder ‚Unklare Aufgaben drücken mich auf -‘. Daraus entstehen kleine Experimente. Dieses iterative Vorgehen ist ein Kern moderner digitaler Gesundheitsinterventionen.",
+        title = "Muster lesen",
+        mainText = "Nach einigen Tagen kannst du wiederkehrende Zusammenhänge erkennen und daraus kleine Experimente planen.",
         keyPoints = listOf(
-            "Erst Daten sammeln, dann deuten.",
-            "Muster sind Wahrscheinlichkeiten, keine starren Regeln.",
-            "Aus jeder Hypothese entsteht ein testbarer nächster Schritt."
+            "Sammle zuerst Einträge.",
+            "Leite dann eine einfache Annahme ab.",
+            "Plane einen konkreten nächsten Schritt."
         ),
-        exercisePrompt = "Welche erste Hypothese möchtest du in den nächsten 3 Tagen prüfen?"
+        exercisePrompt = "Welche erste Annahme möchtest du in den nächsten 3 Tagen prüfen?"
     ),
     MonitoringNarrationPage(
-        title = "Transfer in deinen Alltag",
-        narratorText = "Zum Abschluss: Dieses Modul endet nicht beim Tracking, sondern bei Handlung. Wenn du erkennst, was stabilisiert, planst du davon bewusst mehr. Wenn du erkennst, was belastet, baust du Schutzfaktoren ein. Genau so entsteht Schritt für Schritt Selbstwirksamkeit – datenbasiert, freundlich und in deinem Tempo.",
+        title = "Transfer",
+        mainText = "Nutze deine Erkenntnisse direkt für den nächsten Tag. So wächst Schritt für Schritt deine Selbstwirksamkeit.",
         keyPoints = listOf(
-            "Du nutzt Daten zur Unterstützung, nicht zur Selbstkritik.",
-            "Kleine Anpassungen haben über Wochen große Wirkung.",
-            "Du bleibst Autor:in deiner Entscheidungen."
+            "Daten unterstützen deinen Alltag.",
+            "Kleine Anpassungen wirken über die Zeit.",
+            "Du triffst deine Entscheidungen in deinem Tempo."
         ),
-        exercisePrompt = "Vervollständige: ‚Auf Basis meines Trackings plane ich morgen konkret …‘"
+        exercisePrompt = "Vervollständige: Auf Basis meines Trackings plane ich morgen ..."
     )
 )
 
