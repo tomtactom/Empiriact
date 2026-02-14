@@ -22,23 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.empiriact.app.ui.common.getExerciseDisplayName
 import com.empiriact.app.ui.common.ViewModelFactory
 import com.empiriact.app.ui.navigation.Route
-
-/**
- * Konvertiert die exerciseId zu einem lesbaren Ressourcennamen
- * MUSS identisch mit getExerciseName() in OverviewScreen.kt sein!
- */
-private fun getExerciseName(exerciseId: String): String {
-    return when (exerciseId) {
-        "rumination_exercise" -> "Ruminations-Übung"
-        "five_four_three_two_one" -> "5-4-3-2-1 Übung"
-        "selective_attention" -> "Selektive Aufmerksamkeit"
-        "attention_switching" -> "Aufmerksamkeitswechsel"
-        "shared_attention" -> "Geteilte Aufmerksamkeit"
-        else -> exerciseId
-    }
-}
 
 @Composable
 fun ExerciseRatingScreen(
@@ -51,7 +37,7 @@ fun ExerciseRatingScreen(
     var selectedRating by remember { mutableStateOf<Int?>(null) }
 
     // Ressourcennamen extrahieren und anzeigen
-    val exerciseName = getExerciseName(exerciseId)
+    val exerciseName = getExerciseDisplayName(exerciseId)
 
     Column(
         modifier = Modifier
