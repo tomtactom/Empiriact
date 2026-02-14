@@ -19,8 +19,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import android.net.Uri
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.empiriact.app.data.model.Course
@@ -88,13 +89,13 @@ fun ResourcesScreen(navController: NavController) {
         }
         when (selectedTabIndex) {
             0 -> ExercisesList(navController)
-            1 -> EducationList()
+            1 -> EducationList(navController)
         }
     }
 }
 
 @Composable
-private fun EducationList() {
+private fun EducationList(navController: NavController) {
     val context = LocalContext.current
     val modules by produceState(initialValue = emptyList<Module>(), context) {
         value = loadEducationModules(context)
@@ -126,7 +127,9 @@ private fun EducationList() {
                 ResourceCard(
                     title = module.title,
                     description = module.description,
-                    onClick = {}
+                    onClick = {
+                        navController.navigate(Route.ModuleDetail.createRoute(Uri.encode(module.id)))
+                    }
                 )
             }
         }
