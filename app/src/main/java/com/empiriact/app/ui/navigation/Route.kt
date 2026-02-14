@@ -6,14 +6,8 @@ sealed class Route(val route: String) {
 
     object Today : Route("today")
     object Overview : Route("overview")
-    object Leo : Route("leo")
     object Course : Route("course")
     object Profile : Route("profile")
-    object Checkin : Route("checkin")
-    object QuestionnaireDetail : Route("questionnaire_detail/{questionnaireId}") {
-        fun createRoute(questionnaireId: String) = "questionnaire_detail/$questionnaireId"
-    }
-
     object ModuleDetail : Route("module_detail/{moduleId}") {
         fun createRoute(moduleId: String) = "module_detail/$moduleId"
     }
@@ -22,11 +16,6 @@ sealed class Route(val route: String) {
         fun createRoute(valueName: String) = "activity_planner/$valueName"
     }
     object Reflect : Route("reflect")
-    object Learn : Route("learn")
-    object LearnBasics : Route("learn_basics")
-    object LearnAdvanced : Route("learn_advanced")
-    object LearnPractice : Route("learn_practice")
-    object LearnTest : Route("learn_test")
     object Resources : Route("resources")
     object Skills : Route("skills")
     object RuminationExercise : Route("rumination_exercise")
