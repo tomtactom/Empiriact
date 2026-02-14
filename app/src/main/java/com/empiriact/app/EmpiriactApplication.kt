@@ -4,7 +4,6 @@ import android.app.Application
 import com.empiriact.app.data.db.EmpiriactDatabase
 import com.empiriact.app.data.repo.ActivityLogRepository
 import com.empiriact.app.data.CheckinRepository
-import com.empiriact.app.data.CourseRepository
 import com.empiriact.app.data.ExerciseRepository
 import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.repo.GratitudeRepository
@@ -19,7 +18,6 @@ class EmpiriactApplication : Application() {
     val exerciseRepository by lazy { ExerciseRepository(database.exerciseRatingDao()) }
     val gratitudeRepository by lazy { GratitudeRepository(database.gratitudeDao()) }
     val checkinRepository by lazy { CheckinRepository() }
-    val courseRepository by lazy { CourseRepository(this) }
     val settingsRepository by lazy { SettingsRepository(this) }
 
     private val jsonExportService by lazy { JsonExportService() }

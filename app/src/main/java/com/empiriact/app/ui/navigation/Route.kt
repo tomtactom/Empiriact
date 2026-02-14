@@ -6,11 +6,7 @@ sealed class Route(val route: String) {
 
     object Today : Route("today")
     object Overview : Route("overview")
-    object Course : Route("course")
     object Profile : Route("profile")
-    object ModuleDetail : Route("module_detail/{moduleId}") {
-        fun createRoute(moduleId: String) = "module_detail/$moduleId"
-    }
     object Values : Route("values")
     object ActivityPlanner : Route("activity_planner/{valueName}") {
         fun createRoute(valueName: String) = "activity_planner/$valueName"

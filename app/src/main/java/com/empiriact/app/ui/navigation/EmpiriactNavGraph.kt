@@ -31,7 +31,6 @@ import androidx.compose.runtime.collectAsState
 import com.empiriact.app.ui.screens.onboarding.OnboardingScreen
 import com.empiriact.app.ui.screens.overview.OverviewScreen
 import com.empiriact.app.ui.screens.rating.ExerciseRatingScreen
-import com.empiriact.app.ui.screens.resources.ModuleDetailScreen
 import com.empiriact.app.ui.screens.resources.ResourcesScreen
 import com.empiriact.app.ui.screens.resources.methods.AttentionSwitchingExercise
 import com.empiriact.app.ui.screens.resources.methods.DistractionSkillExercise
@@ -130,15 +129,6 @@ private fun NavGraphBuilder.staticGraph(factory: ViewModelFactory, navController
 
 private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navController: NavController) {
     composable(Route.Resources.route) { ResourcesScreen(navController) }
-    composable(
-        route = Route.ModuleDetail.route,
-        arguments = listOf(navArgument("moduleId") { type = NavType.StringType })
-    ) { backStackEntry ->
-        val moduleId = backStackEntry.arguments?.getString("moduleId")
-        if (moduleId != null) {
-            ModuleDetailScreen(moduleId)
-        }
-    }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }
     composable(Route.FlowChartExercise.route) { FlowChartExerciseScreen(navController) }
 

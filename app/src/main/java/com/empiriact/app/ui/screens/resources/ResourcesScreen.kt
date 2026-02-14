@@ -10,24 +10,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import android.net.Uri
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.empiriact.app.data.model.Course
-import com.empiriact.app.data.model.Module
 import com.empiriact.app.ui.navigation.Route
-import kotlinx.serialization.json.Json
 
 private data class ResourceExercise(
     val title: String,
@@ -75,89 +63,6 @@ private val allExercises = listOf(
 
 @Composable
 fun ResourcesScreen(navController: NavController) {
-    var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("Übungen", "Edukation")
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = selectedTabIndex) {
-            tabs.forEachIndexed { index, title ->
-                Tab(text = { Text(title) },
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index }
-                )
-            }
-        }
-        when (selectedTabIndex) {
-            0 -> ExercisesList(navController)
-            1 -> EducationList(navController)
-        }
-    }
-}
-
-@Composable
-private fun EducationList(navController: NavController) {
-    val context = LocalContext.current
-    val modules by produceState(initialValue = emptyList<Module>(), context) {
-        value = loadEducationModules(context)
-    }
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Text("Edukation", style = MaterialTheme.typography.headlineMedium)
-            Text(
-                "Hier findest du psychoedukative Inhalte rund um Grübeln, Aufmerksamkeit und hilfreiche Strategien im Alltag.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        if (modules.isEmpty()) {
-            item {
-                Text(
-                    "Aktuell sind keine Module verfügbar.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        } else {
-            items(modules) { module ->
-                ResourceCard(
-                    title = module.title,
-                    description = module.description,
-                    onClick = {
-                        navController.navigate(Route.ModuleDetail.createRoute(Uri.encode(module.id)))
-                    }
-                )
-            }
-        }
-    }
-}
-
-private fun loadEducationModules(context: android.content.Context): List<Module> {
-    val json = Json { ignoreUnknownKeys = true }
-    val candidateFiles = listOf("courses/gruebeln_foundation.json", "course.json")
-
-    for (file in candidateFiles) {
-        val modules = runCatching {
-            context.assets.open(file).bufferedReader().use { reader ->
-                val course = json.decodeFromString<Course>(reader.readText())
-                course.modules
-            }
-        }.getOrNull()
-
-        if (!modules.isNullOrEmpty()) {
-            return modules
-        }
-    }
-
-    return emptyList()
-}
-
-@Composable
-private fun ExercisesList(navController: NavController) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -167,7 +72,7 @@ private fun ExercisesList(navController: NavController) {
         item {
             Text("Inhalte", style = MaterialTheme.typography.headlineMedium)
             Text(
-                "Hier findest du eine Sammlung von Übungen, die dir helfen können, mit Grübeln und schwierigen Gefühlen umzugehen.",
+                "Hier findest du eine stabile Grundlage mit praktischen Übungen, die dir helfen können, mit Grübeln und schwierigen Gefühlen umzugehen.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -175,7 +80,7 @@ private fun ExercisesList(navController: NavController) {
             ResourceCard(
                 title = exercise.title,
                 description = exercise.description,
-                onClick = { 
+                onClick = {
                     when (exercise.route) {
                         is Route.FiveFourThreeTwoOneExercise -> {
                             navController.navigate(Route.FiveFourThreeTwoOneExercise.createRoute(from = "resources"))
