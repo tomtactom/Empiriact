@@ -35,6 +35,7 @@ import com.empiriact.app.ui.screens.resources.ResourcesScreen
 import com.empiriact.app.ui.screens.resources.methods.AttentionSwitchingExercise
 import com.empiriact.app.ui.screens.resources.methods.DistractionSkillExercise
 import com.empiriact.app.ui.screens.resources.methods.FiveFourThreeTwoOneExerciseScreen
+import com.empiriact.app.ui.screens.resources.methods.PsychoeducationActivationFoundationsScreen
 import com.empiriact.app.ui.screens.resources.methods.SelectiveAttentionExercise
 import com.empiriact.app.ui.screens.resources.methods.SharedAttentionExercise
 import com.empiriact.app.ui.screens.resources.methods.SituationalAttentionRefocusingExercise
@@ -131,6 +132,7 @@ private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navControlle
     composable(Route.Resources.route) { ResourcesScreen(navController) }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }
     composable(Route.FlowChartExercise.route) { FlowChartExerciseScreen(navController) }
+    composable(Route.PsychoeducationActivationFoundations.route) { PsychoeducationActivationFoundationsScreen(navController) }
 
     composable(
         route = Route.SituationalAttentionRefocusingExercise.route,

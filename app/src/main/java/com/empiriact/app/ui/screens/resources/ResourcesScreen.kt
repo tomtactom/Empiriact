@@ -39,7 +39,20 @@ private data class ResourceSection(
     val exercises: List<ResourceExercise>
 )
 
-private val moduleSections: List<ResourceSection> = emptyList()
+private val moduleSections = listOf(
+    ResourceSection(
+        title = "Gute Ausgangsbedingungen schaffen",
+        description = "Psychoedukation zur werteorientierten Verhaltensaktivierung: aktiv werden als Lernprozess statt Perfektionsanspruch.",
+        exercises = listOf(
+            ResourceExercise(
+                title = "Psychoedukation: Gute Ausgangsbedingungen schaffen",
+                learningGoal = "Einen klaren, unterstützenden Rahmen aufbauen und eine aktive Rolle im Veränderungsprozess einnehmen.",
+                whyItMatters = "Kleine, werteorientierte Experimente zwischen Check-ins stärken Selbstwirksamkeit, liefern Lernhinweise und können langfristig antidepressiv wirksam sein.",
+                route = Route.PsychoeducationActivationFoundations
+            )
+        )
+    )
+)
 
 private val exerciseSections = listOf(
     ResourceSection(
