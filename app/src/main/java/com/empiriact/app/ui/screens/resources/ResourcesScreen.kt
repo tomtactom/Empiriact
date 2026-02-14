@@ -1,5 +1,6 @@
 package com.empiriact.app.ui.screens.resources
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,16 +9,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.empiriact.app.ui.common.UiConstants
 import com.empiriact.app.ui.navigation.Route
+import kotlinx.coroutines.launch
 
 private data class ResourceExercise(
     val title: String,
@@ -97,27 +104,77 @@ private val exerciseSections = listOf(
     )
 )
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ResourcesScreen(navController: NavController) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item {
+    val tabs = listOf("Module", "Übungen")
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = UiConstants.PADDING_LARGE,
+                    end = UiConstants.PADDING_LARGE,
+                    top = UiConstants.PADDING_LARGE,
+                    bottom = UiConstants.PADDING_MEDIUM
+                ),
+            verticalArrangement = Arrangement.spacedBy(UiConstants.PADDING_SMALL)
+        ) {
             Text("Inhalte", style = MaterialTheme.typography.headlineMedium)
             Text(
-                "Hier findest du alle psychoedukativen Inhalte strukturiert in Module und Übungen.",
+                "Hier findest du alle psychoedukativen Inhalte in einem klaren Ablauf: erst verstehen, dann üben.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
 
+        PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    text = { Text(title) },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    }
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            when (page) {
+                0 -> ModulesTab(navController)
+                1 -> ExercisesTab(navController)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModulesTab(navController: NavController) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(UiConstants.PADDING_LARGE),
+        verticalArrangement = Arrangement.spacedBy(UiConstants.ARRANGEMENT_SPACING_MEDIUM)
+    ) {
         item {
-            Text("Module", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-            if (moduleSections.isEmpty()) {
+            Text(
+                "Module unterstützen dich dabei, Hintergründe zu verstehen und neue Bewältigungsstrategien schrittweise aufzubauen.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        if (moduleSections.isEmpty()) {
+            item {
                 Text(
-                    "Aktuell sind noch keine Module verfügbar. Neue Module erscheinen hier, sobald sie erstellt wurden.",
+                    "Aktuell sind noch keine Module verfügbar. Sobald neue Inhalte bereitstehen, erscheinen sie hier.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -130,52 +187,7 @@ fun ResourcesScreen(navController: NavController) {
                     title = exercise.title,
                     learningGoal = exercise.learningGoal,
                     whyItMatters = exercise.whyItMatters,
-                    onClick = { navController.navigate(exercise.route.route) }
-                )
-            }
-        }
-
-        item {
-            Text("Übungen", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-            Text(
-                "Alle aktuell verfügbaren Übungen und Ressourcen mit verhaltenstherapeutischem Fokus.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        exerciseSections.forEach { section ->
-            item { SectionHeader(title = section.title, description = section.description) }
-
-            items(section.exercises) { exercise ->
-                ResourceCard(
-                    title = exercise.title,
-                    learningGoal = exercise.learningGoal,
-                    whyItMatters = exercise.whyItMatters,
-                    onClick = {
-                        when (exercise.route) {
-                            is Route.FiveFourThreeTwoOneExercise -> {
-                                navController.navigate(Route.FiveFourThreeTwoOneExercise.createRoute(from = "resources"))
-                            }
-                            is Route.SelectiveAttentionExercise -> {
-                                navController.navigate(Route.SelectiveAttentionExercise.createRoute(from = "resources"))
-                            }
-                            is Route.AttentionSwitchingExercise -> {
-                                navController.navigate(Route.AttentionSwitchingExercise.createRoute(from = "resources"))
-                            }
-                            is Route.SharedAttentionExercise -> {
-                                navController.navigate(Route.SharedAttentionExercise.createRoute(from = "resources"))
-                            }
-                            is Route.DistractionSkillExercise -> {
-                                navController.navigate(Route.DistractionSkillExercise.createRoute(from = "resources"))
-                            }
-                            is Route.SituationalAttentionRefocusingExercise -> {
-                                navController.navigate(Route.SituationalAttentionRefocusingExercise.createRoute(from = "resources"))
-                            }
-                            else -> {
-                                navController.navigate(exercise.route.route)
-                            }
-                        }
-                    }
+                    onClick = { navController.navigateToExercise(exercise.route) }
                 )
             }
         }
@@ -183,10 +195,66 @@ fun ResourcesScreen(navController: NavController) {
 }
 
 @Composable
+private fun ExercisesTab(navController: NavController) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(UiConstants.PADDING_LARGE),
+        verticalArrangement = Arrangement.spacedBy(UiConstants.ARRANGEMENT_SPACING_MEDIUM)
+    ) {
+        item {
+            Text(
+                "Übungen helfen dir, Gedanken und Aufmerksamkeit aktiv zu steuern – kurz, konkret und alltagsnah.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+
+        exerciseSections.forEach { section ->
+            item { SectionHeader(title = section.title, description = section.description) }
+            items(section.exercises) { exercise ->
+                ResourceCard(
+                    title = exercise.title,
+                    learningGoal = exercise.learningGoal,
+                    whyItMatters = exercise.whyItMatters,
+                    onClick = { navController.navigateToExercise(exercise.route) }
+                )
+            }
+        }
+    }
+}
+
+private fun NavController.navigateToExercise(route: Route) {
+    when (route) {
+        is Route.FiveFourThreeTwoOneExercise -> {
+            navigate(Route.FiveFourThreeTwoOneExercise.createRoute(from = "resources"))
+        }
+        is Route.SelectiveAttentionExercise -> {
+            navigate(Route.SelectiveAttentionExercise.createRoute(from = "resources"))
+        }
+        is Route.AttentionSwitchingExercise -> {
+            navigate(Route.AttentionSwitchingExercise.createRoute(from = "resources"))
+        }
+        is Route.SharedAttentionExercise -> {
+            navigate(Route.SharedAttentionExercise.createRoute(from = "resources"))
+        }
+        is Route.DistractionSkillExercise -> {
+            navigate(Route.DistractionSkillExercise.createRoute(from = "resources"))
+        }
+        is Route.SituationalAttentionRefocusingExercise -> {
+            navigate(Route.SituationalAttentionRefocusingExercise.createRoute(from = "resources"))
+        }
+        else -> {
+            navigate(route.route)
+        }
+    }
+}
+
+@Composable
 private fun SectionHeader(title: String, description: String) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.padding(top = 8.dp)
+        verticalArrangement = Arrangement.spacedBy(UiConstants.PADDING_SMALL),
+        modifier = Modifier.padding(top = UiConstants.PADDING_MEDIUM)
     ) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(description, style = MaterialTheme.typography.bodySmall)
@@ -207,10 +275,10 @@ private fun ResourceCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            modifier = Modifier.padding(UiConstants.PADDING_LARGE),
+            verticalArrangement = Arrangement.spacedBy(UiConstants.PADDING_MEDIUM)
         ) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text("Ziel: $learningGoal", style = MaterialTheme.typography.bodyMedium)
             Text("Warum: $whyItMatters", style = MaterialTheme.typography.bodySmall)
         }
