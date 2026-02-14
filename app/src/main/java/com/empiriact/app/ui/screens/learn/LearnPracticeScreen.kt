@@ -1,5 +1,6 @@
 package com.empiriact.app.ui.screens.learn
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,34 +23,81 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.empiriact.app.ui.common.ContentDescriptions
+import com.empiriact.app.ui.navigation.Route
 
-data class PracticeExercise(val title: String, val difficulty: String, val description: String)
+data class PracticeExercise(
+    val title: String,
+    val source: String,
+    val description: String,
+    val route: Route? = null
+)
 
 private val exercises = listOf(
     PracticeExercise(
-        "Reflexionstagebuch",
-        "Anfänger",
-        "Schreibe täglich auf, was du gelernt hast und wie du es anwenden kannst."
+        title = "AB 1 - Schlechter Denkstil oder konstruktives Denken?",
+        source = "Modul 1",
+        description = "Vergleiche eine aktuelle Gedankenschleife mit konstruktivem Problemlösen (konkret, lösungsorientiert, zeitlich begrenzt)."
     ),
     PracticeExercise(
-        "Zielanalyse",
-        "Mittelstufe",
-        "Analysiere deine Ziele und erstelle einen umsetzbaren Plan."
+        title = "AB 2 - 3-Fragen-Daumenregel",
+        source = "Modul 1",
+        description = "Wende die 3 Fragen direkt auf eine aktuelle Grübelsituation an und entscheide, ob du im Rumination-Modus bist."
     ),
     PracticeExercise(
-        "Gewohnheitsprotokoll",
-        "Mittelstufe",
-        "Dokumentiere deine täglichen Gewohnheiten und identifiziere Verbesserungspotenziale."
+        title = "AB 3 - Münztrick (Impact-Technik)",
+        source = "Modul 1",
+        description = "Markiere den Wechsel von Erzählen zu Grübeln mit einem klaren Signal und kehre zum roten Faden zurück."
     ),
     PracticeExercise(
-        "Fallstudienanalyse",
-        "Fortgeschritten",
-        "Untersuche reale Fallstudien und entwickle deine Problemlösungsfähigkeiten."
+        title = "AB 4-6 - Funktionsanalyse",
+        source = "Modul 1",
+        description = "Erarbeite eine vollständige Mikro-/Makroanalyse mit Situation, Reaktion, Konsequenzen, Vulnerabilitäten und aufrechterhaltenden Faktoren."
     ),
     PracticeExercise(
-        "Integrationsprojekt",
-        "Fortgeschritten",
-        "Wende mehrere gelernte Techniken in einem umfassenden Projekt an."
+        title = "AB 7 - Individueller Behandlungsplan",
+        source = "Modul 1",
+        description = "Leite aus der Funktionsanalyse konkrete Therapieziele und Interventionen ab (Auslöser, Aufrechterhaltung, Prädisposition, Hindernisse)."
+    ),
+    PracticeExercise(
+        title = "AB 8 - Therapietracker",
+        source = "Modul 1",
+        description = "Tracke Leidensdruck, Häufigkeit, Dauer, Auslöser, eingesetzte Skills und Schwierigkeiten über mehrere Zeitpunkte."
+    ),
+    PracticeExercise(
+        title = "Ablenkung als situativer Skill",
+        source = "Integrierte Ressourcenübung",
+        description = "Nutze bewussten Aufmerksamkeitswechsel, um Grübeln kurzfristig zu unterbrechen.",
+        route = Route.DistractionSkillExercise
+    ),
+    PracticeExercise(
+        title = "Refokussierung nach außen",
+        source = "Integrierte Ressourcenübung",
+        description = "Verankere dich im Außenfokus und reduziere Bedrohungsmonitoring sowie Selbstfokussierung.",
+        route = Route.SituationalAttentionRefocusingExercise
+    ),
+    PracticeExercise(
+        title = "5-4-3-2-1",
+        source = "Integrierte Ressourcenübung",
+        description = "Stabilisiere dich im Hier-und-Jetzt über Sinnesanker.",
+        route = Route.FiveFourThreeTwoOneExercise
+    ),
+    PracticeExercise(
+        title = "Selektive Aufmerksamkeit",
+        source = "Integrierte Ressourcenübung",
+        description = "Trainiere fokussierte Aufmerksamkeit statt automatischer Grübelschleifen.",
+        route = Route.SelectiveAttentionExercise
+    ),
+    PracticeExercise(
+        title = "Aufmerksamkeitswechsel",
+        source = "Integrierte Ressourcenübung",
+        description = "Steigere kognitive Flexibilität durch geplanten Fokuswechsel.",
+        route = Route.AttentionSwitchingExercise
+    ),
+    PracticeExercise(
+        title = "Geteilte Aufmerksamkeit",
+        source = "Integrierte Ressourcenübung",
+        description = "Erweitere den Aufmerksamkeitsraum und entlaste dominante negative Reize.",
+        route = Route.SharedAttentionExercise
     )
 )
 
@@ -59,10 +107,13 @@ fun LearnPracticeScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Praktische Übungen") },
+                title = { Text("Modul 1: Übungen & Ressourcen") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = ContentDescriptions.BACK_BUTTON)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = ContentDescriptions.BACK_BUTTON
+                        )
                     }
                 }
             )
@@ -73,22 +124,44 @@ fun LearnPracticeScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            item {
+                Text(
+                    text = "Alle Arbeitsblätter (AB) und integrierten Ressourcen-Übungen für Modul 1 an einem Ort.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             items(exercises) { exercise ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .let { base ->
+                            val target = exercise.route
+                            if (target != null) {
+                                base.clickable {
+                                    val route = when (target) {
+                                        is Route.FiveFourThreeTwoOneExercise -> target.createRoute("learn")
+                                        is Route.SelectiveAttentionExercise -> target.createRoute("learn")
+                                        is Route.AttentionSwitchingExercise -> target.createRoute("learn")
+                                        is Route.SharedAttentionExercise -> target.createRoute("learn")
+                                        is Route.DistractionSkillExercise -> target.createRoute("learn")
+                                        is Route.SituationalAttentionRefocusingExercise -> target.createRoute("learn")
+                                        else -> target.route
+                                    }
+                                    navController.navigate(route)
+                                }
+                            } else {
+                                base
+                            }
+                        }
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = exercise.title, style = MaterialTheme.typography.titleMedium)
                         Text(
-                            text = exercise.title,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = "Schwierigkeit: ${exercise.difficulty}",
+                            text = exercise.source,
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -97,6 +170,13 @@ fun LearnPracticeScreen(navController: NavController) {
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 8.dp)
                         )
+                        if (exercise.route != null) {
+                            Text(
+                                text = "Tippe, um die Übung zu starten.",
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
                     }
                 }
             }
