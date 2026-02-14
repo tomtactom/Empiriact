@@ -30,6 +30,11 @@ private val allExercises = listOf(
         route = Route.ModuleOneOneInitialConditions
     ),
     ResourceExercise(
+        title = "Modul 1.2 · Aktivitäten und Stimmung beobachten",
+        description = "Edukatives Kernmodul zur strukturierten Alltagsbeobachtung: Aktivitäten und Stimmung zeitnah dokumentieren, Muster erkennen und eine praktikable, autonomiefördernde Erfassungsroutine aufbauen.",
+        route = Route.ModuleOneTwoActivityMoodMonitoring
+    ),
+    ResourceExercise(
         title = "Ablenkung als situativer Skill",
         description = "Kurzfristige, bewusste Hinwendung zu einer externen Tätigkeit mit dem Ziel, Grübeln zu unterbrechen. Die Ablenkung wird als zeitlich begrenzter Aufmerksamkeitswechsel verstanden, nicht als dauerhafte Vermeidung.",
         route = Route.DistractionSkillExercise
