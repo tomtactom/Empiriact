@@ -28,6 +28,7 @@ class EmpiriactApplication : Application() {
         ViewModelFactory(
             activityLogRepository = activityLogRepository,
             exerciseRepository = exerciseRepository,
+            exerciseRatingDao = database.exerciseRatingDao(),
             gratitudeRepository = gratitudeRepository,
             jsonExportService = jsonExportService,
             settingsRepository = settingsRepository
