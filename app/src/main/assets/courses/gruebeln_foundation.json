@@ -6,22 +6,389 @@
   "modules": [
     {
       "id": "g1",
-      "title": "Verstehen, was Grübeln ist",
-      "description": "Psychoedukation und erste Einordnung.",
+      "title": "Modul 1: RND verstehen & funktional analysieren (vollständig)",
+      "description": "Aufeinander aufbauendes Verhaltenstherapie-Modul mit integrierten Infos, Arbeitsblättern (AB 1-8) und app-tauglichen Übungen vom Verständnis bis zum individuellen Behandlungsplan.",
       "lessons": [
-        { "id": "g1_l1", "title": "Einstieg & Standortbestimmung", "content": [], "interactiveExercise": null },
-        { "id": "g1_l2", "title": "Grübeln vs. Problemlösen", "content": [], "interactiveExercise": null },
-        { "id": "g1_l3", "title": "Kosten-Nutzen-Bilanz", "content": [], "interactiveExercise": null }
-      ]
+        {
+          "id": "g1_l1",
+          "title": "INFO 1-4: RND definieren und einordnen",
+          "durationMin": 7,
+          "sequence": 1,
+          "learningGoals": [
+            "Repetitives negatives Denken (RND) fachlich korrekt definieren",
+            "Rumination von konstruktivem Nachdenken und Sorgen abgrenzen",
+            "Zusammenhang zu psychischer Belastung in VT-Sprache verstehen"
+          ],
+          "content": [
+            {
+              "type": "coachMessage",
+              "text": "RND beschreibt wiederkehrende, schwer steuerbare Denkprozesse mit negativer Färbung. Das ist häufig, lernbar und veränderbar."
+            },
+            {
+              "type": "psychoeducation",
+              "text": "Rumination ist meist vergangenheitsorientiert (Warum ist das passiert?), Sorgen eher zukunftsorientiert (Was könnte passieren?). Beide können Belastung aufrechterhalten."
+            },
+            {
+              "type": "coachMessage",
+              "text": "Verhaltenstherapeutisch betrachten wir Funktion statt Schuld: Welchen kurzfristigen Zweck erfüllt das Denken, und welche langfristigen Kosten entstehen?"
+            }
+          ],
+          "interactiveExercise": {
+            "id": "rnd_baseline",
+            "type": "slider_checkin",
+            "ctaLabel": "Ausgangslage speichern",
+            "fields": [
+              {
+                "id": "leidensdruck",
+                "label": "Leidensdruck durch Grübeln",
+                "min": 0,
+                "max": 10
+              },
+              {
+                "id": "haeufigkeit",
+                "label": "Häufigkeit heute",
+                "min": 0,
+                "max": 5
+              }
+            ]
+          }
+        },
+        {
+          "id": "g1_l2",
+          "title": "INFO 5 + AB 1: Grübeln vs. konstruktives Denken",
+          "durationMin": 8,
+          "sequence": 2,
+          "learningGoals": [
+            "Abstraktes Kreisen von lösungsorientiertem Denken unterscheiden",
+            "Eigene Denkepisoden zuverlässig klassifizieren",
+            "Ersten Fokuswechsel als Verhaltensalternative festlegen"
+          ],
+          "content": [
+            {
+              "type": "psychoeducation",
+              "text": "Konstruktives Denken ist konkret, zeitlich begrenzt und führt zu einem nächsten Schritt. Grübeln bleibt abstrakt und wiederholt dieselbe Schleife."
+            },
+            {
+              "type": "example",
+              "text": "Hilfreich: „Ich notiere drei Optionen und entscheide um 18:00.“ Grübeln: „Warum bin ich immer so?“"
+            },
+            {
+              "type": "microReflection",
+              "prompt": "Woran merkst du innerhalb von 2 Minuten, dass du im Kreis statt in Richtung Lösung denkst?"
+            }
+          ],
+          "interactiveExercise": {
+            "id": "ab1_classify_thinking",
+            "type": "two_path_sort",
+            "worksheet": "AB 1",
+            "ctaLabel": "AB 1 abschließen",
+            "items": [
+              {
+                "text": "Ich definiere ein konkretes Ziel in einem Satz",
+                "target": "konstruktiv"
+              },
+              {
+                "text": "Ich wiederhole dieselbe Frage ohne neue Information",
+                "target": "gruebeln"
+              },
+              {
+                "text": "Ich plane einen nächsten Schritt mit Uhrzeit",
+                "target": "konstruktiv"
+              },
+              {
+                "text": "Ich verliere mich in Warum-Fragen ohne Ergebnis",
+                "target": "gruebeln"
+              }
+            ],
+            "outputPrompt": "Wenn ich Grübeln bemerke, dann mache ich für 60 Sekunden ________."
+          }
+        },
+        {
+          "id": "g1_l3",
+          "title": "INFO 6 + AB 2: 3-Fragen-Daumenregel",
+          "durationMin": 7,
+          "sequence": 3,
+          "learningGoals": [
+            "Rumination frühzeitig über drei Leitfragen erkennen",
+            "Belastende Denkspiralen unterbrechen, bevor sie sich verfestigen",
+            "Eine persönliche Wenn-Dann-Regel für den Alltag formulieren"
+          ],
+          "content": [
+            {
+              "type": "coachMessage",
+              "text": "AB 2 übersetzt Diagnostik in Alltag: kurze Prüfung, klare Entscheidung, schneller Wechsel in hilfreiches Verhalten."
+            },
+            {
+              "type": "checklist",
+              "items": [
+                "Bin ich im Warum-/Was-wäre-wenn-Modus?",
+                "Wird mein Denken klarer oder verworrener?",
+                "Fühle ich mich handlungsfähiger oder erschöpfter?"
+              ]
+            },
+            {
+              "type": "microReflection",
+              "prompt": "Bei welchen Themen antwortest du am häufigsten mit „verworrener“ und „erschöpfter“?"
+            }
+          ],
+          "interactiveExercise": {
+            "id": "ab2_thumb_rule",
+            "type": "three_question_check",
+            "worksheet": "AB 2",
+            "ctaLabel": "Wenn-Dann-Regel speichern",
+            "threshold": "2_or_3_rumination_answers",
+            "outputPrompt": "Wenn 2/3 Antworten auf Grübeln hindeuten, dann ________ (konkrete Alternative)."
+          }
+        },
+        {
+          "id": "g1_l4",
+          "title": "INFO 7-9 + AB 3: Grübeln erkennen und stoppen",
+          "durationMin": 8,
+          "sequence": 4,
+          "learningGoals": [
+            "Offenes und verdecktes Grübeln unterscheiden",
+            "Den Kipppunkt vom Erzählen ins Grübeln erkennen",
+            "Mit dem Münztrick (Impact-Technik) in den Arbeitsmodus zurückkehren"
+          ],
+          "content": [
+            {
+              "type": "psychoeducation",
+              "text": "Offenes Grübeln zeigt sich durch ausgedehnte Gedankenschleifen im Sprechen; verdecktes Grübeln eher durch Abwesenheit, stockende Antworten, inneres Festhängen."
+            },
+            {
+              "type": "exerciseIntro",
+              "text": "AB 3 nutzt einen Marker (Münze/Token), um den Wechsel ins Grübeln sichtbar zu machen und den roten Faden wiederherzustellen."
+            },
+            {
+              "type": "coachMessage",
+              "text": "Ziel ist nicht Unterdrückung von Gedanken, sondern flexible Aufmerksamkeitslenkung zurück auf das konkrete Problem."
+            }
+          ],
+          "interactiveExercise": {
+            "id": "ab3_coin_trick",
+            "type": "impact_marker_practice",
+            "worksheet": "AB 3",
+            "ctaLabel": "Stoppsignal festlegen",
+            "steps": [
+              "Episode kurz erzählen",
+              "Kipppunkt markieren",
+              "Stopp benennen",
+              "Zurück zu „Was ist der nächste Schritt?“"
+            ],
+            "outputPrompt": "Mein Stopp-Satz lautet: „Ich bin im Grübeln. Jetzt zurück zu ________.“"
+          }
+        },
+        {
+          "id": "g1_l5",
+          "title": "INFO 10 + AB 4-6: Funktionsanalyse (Mikro/Makro)",
+          "durationMin": 10,
+          "sequence": 5,
+          "learningGoals": [
+            "Auslöser, Reaktionen und Konsequenzen in einer Mikroanalyse erfassen",
+            "Vulnerabilitäten und aufrechterhaltende Bedingungen in der Makroanalyse benennen",
+            "Interventionsziele aus der Analyse ableiten"
+          ],
+          "content": [
+            {
+              "type": "coachMessage",
+              "text": "In der VT ist präzise Analyse die Grundlage wirksamer Intervention. Wir arbeiten entlang von Situation → Reaktion → Konsequenz."
+            },
+            {
+              "type": "psychoeducation",
+              "text": "Mikroanalyse: konkrete Episode. Makroanalyse: überdauernde Muster (Vulnerabilitäten, Lerngeschichte, Aufrechterhaltung)."
+            },
+            {
+              "type": "microReflection",
+              "prompt": "Welche typische Grübelsituation eignet sich heute für deine erste vollständige Analyse?"
+            }
+          ],
+          "interactiveExercise": {
+            "id": "ab4_ab6_functional_analysis",
+            "type": "functional_analysis_builder",
+            "worksheets": [
+              "AB 4",
+              "AB 5",
+              "AB 6"
+            ],
+            "ctaLabel": "Analyse speichern",
+            "sections": [
+              "Situation",
+              "Gedanken/Bilder",
+              "Gefühle/Körperreaktionen",
+              "Verhalten",
+              "Kurzfristige Konsequenzen",
+              "Langfristige Konsequenzen",
+              "Metakognitionen",
+              "Barrieren der Veränderung"
+            ]
+          }
+        },
+        {
+          "id": "g1_l6",
+          "title": "AB 5 vertiefen: Vulnerabilitäten, Auslösung, Aufrechterhaltung",
+          "durationMin": 9,
+          "sequence": 6,
+          "learningGoals": [
+            "Prädisponierende Bedingungen strukturiert erfassen",
+            "Lebensgeschichtliche Auslöser mit aktuellen Mustern verknüpfen",
+            "Internale und externale Funktionalität von Grübeln verstehen"
+          ],
+          "content": [
+            {
+              "type": "psychoeducation",
+              "text": "Typische Vulnerabilitäten: rigide Annahmen, Unsicherheitsintoleranz, Emotionsvermeidung, modelliertes Grübeln, chronische Belastungen."
+            },
+            {
+              "type": "psychoeducation",
+              "text": "Aufrechterhaltung erfolgt häufig über mentale Strategien (z. B. Unterdrückung) und behaviorale Strategien (Vermeidung, Rückversicherung)."
+            },
+            {
+              "type": "microReflection",
+              "prompt": "Welche zwei Faktoren sind bei dir am stärksten: auslösend, aufrechterhaltend, oder beides?"
+            }
+          ],
+          "interactiveExercise": {
+            "id": "ab5_macro_map",
+            "type": "cause_maintenance_map",
+            "worksheet": "AB 5",
+            "ctaLabel": "Makroanalyse abschließen",
+            "columns": [
+              "Vulnerabilitäten",
+              "Lebensgeschichtliche Auslöser",
+              "Aktuelle Aufrechterhaltung",
+              "Veränderungsbarrieren"
+            ]
+          }
+        },
+        {
+          "id": "g1_l7",
+          "title": "AB 7: Individueller Behandlungsplan aus dem Störungsmodell",
+          "durationMin": 9,
+          "sequence": 7,
+          "learningGoals": [
+            "Analyseergebnisse in konkrete Therapieziele übersetzen",
+            "Pro Analyseebene passende Interventionen auswählen",
+            "Prioritäten für die nächsten 7 Tage festlegen"
+          ],
+          "content": [
+            {
+              "type": "coachMessage",
+              "text": "Jetzt folgt der Transfer: Aus Verständnis wird Veränderungsplanung. Kleine, spezifische Schritte sind wirksamer als globale Vorsätze."
+            },
+            {
+              "type": "psychoeducation",
+              "text": "Wir planen getrennt für auslösende, aufrechterhaltende und prädisponierende Bedingungen sowie Hindernisse der Umsetzung."
+            },
+            {
+              "type": "microReflection",
+              "prompt": "Welche Intervention hat bei dir die höchste Wirksamkeit bei gleichzeitig niedriger Hürde?"
+            }
+          ],
+          "interactiveExercise": {
+            "id": "ab7_treatment_plan",
+            "type": "goal_intervention_matrix",
+            "worksheet": "AB 7",
+            "ctaLabel": "Behandlungsplan speichern",
+            "rows": [
+              "Auslösende Bedingungen",
+              "Aufrechterhaltende Bedingungen",
+              "Prädisponierende Bedingungen",
+              "Hindernisse"
+            ],
+            "fields": [
+              "Ziel",
+              "Intervention",
+              "Konkreter Schritt",
+              "Zeitpunkt",
+              "Erfolgskriterium"
+            ]
+          }
+        },
+        {
+          "id": "g1_l8",
+          "title": "INFO 11 + AB 8: Gemeinsame Problemdefinition & Therapietracker",
+          "durationMin": 8,
+          "sequence": 8,
+          "learningGoals": [
+            "Problemfokus auf Denkstil („Wie“) statt bloßen Inhalt („Was“) ausrichten",
+            "Verlauf über standardisierte Indikatoren monitoren",
+            "Rückfälle früh erkennen und adaptiv reagieren"
+          ],
+          "content": [
+            {
+              "type": "coachMessage",
+              "text": "Kernidee: Nicht jeder negative Gedanke ist problematisch. Entscheidend ist die starre, kreisende Beziehung zu Gedanken."
+            },
+            {
+              "type": "psychoeducation",
+              "text": "AB 8 misst regelmäßig Leidensdruck, Häufigkeit, Dauer, Auslöser und Wirkung eingesetzter Skills. So wird Fortschritt sichtbar und steuerbar."
+            },
+            {
+              "type": "microReflection",
+              "prompt": "Welcher Indikator ist für dich der beste Frühwarnmarker für eine Grübelzunahme?"
+            }
+          ],
+          "interactiveExercise": {
+            "id": "ab8_therapy_tracker",
+            "type": "longitudinal_tracker",
+            "worksheet": "AB 8",
+            "ctaLabel": "Wochentracker starten",
+            "metrics": [
+              {
+                "id": "leidensdruck",
+                "scale": "0-10"
+              },
+              {
+                "id": "haeufigkeit",
+                "scale": "0-5"
+              },
+              {
+                "id": "dauer",
+                "scale": "1-4"
+              },
+              {
+                "id": "skillwirkung",
+                "scale": "+ / +/- / -"
+              }
+            ],
+            "extraFields": [
+              "Auslöser",
+              "Eingesetzte Alternativen",
+              "Umsetzungshindernisse"
+            ]
+          }
+        }
+      ],
+      "appDelivery": {
+        "progression": "sequential_unlock",
+        "microlearning": "5_to_10_min",
+        "language": "verhaltenstherapeutisch-validierend-konkrete-handlung",
+        "worksheetCoverage": "AB_1_bis_AB_8_vollständig_integriert"
+      }
     },
     {
       "id": "g2",
       "title": "Muster erkennen",
       "description": "Trigger, Themen und Frühwarnzeichen erkennen.",
       "lessons": [
-        { "id": "g2_l1", "title": "Persönliche Grübel-Auslöser", "content": [], "interactiveExercise": null },
-        { "id": "g2_l2", "title": "Denkspiralen kartieren", "content": [], "interactiveExercise": null },
-        { "id": "g2_l3", "title": "Frühwarnzeichen erfassen", "content": [], "interactiveExercise": null }
+        {
+          "id": "g2_l1",
+          "title": "Persönliche Grübel-Auslöser",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g2_l2",
+          "title": "Denkspiralen kartieren",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g2_l3",
+          "title": "Frühwarnzeichen erfassen",
+          "content": [],
+          "interactiveExercise": null
+        }
       ]
     },
     {
@@ -29,9 +396,24 @@
       "title": "Grübeln unterbrechen",
       "description": "Akute Unterbrechungsstrategien trainieren.",
       "lessons": [
-        { "id": "g3_l1", "title": "Aufmerksamkeitswechsel in 90 Sekunden", "content": [], "interactiveExercise": null },
-        { "id": "g3_l2", "title": "Grübel-Stopp und Re-Fokussierung", "content": [], "interactiveExercise": null },
-        { "id": "g3_l3", "title": "Körperbasierte Deeskalation", "content": [], "interactiveExercise": null }
+        {
+          "id": "g3_l1",
+          "title": "Aufmerksamkeitswechsel in 90 Sekunden",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g3_l2",
+          "title": "Grübel-Stopp und Re-Fokussierung",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g3_l3",
+          "title": "Körperbasierte Deeskalation",
+          "content": [],
+          "interactiveExercise": null
+        }
       ]
     },
     {
@@ -39,9 +421,24 @@
       "title": "Konstruktiv mit Gedanken umgehen",
       "description": "Kognitive Distanz und hilfreiche Perspektiven.",
       "lessons": [
-        { "id": "g4_l1", "title": "Gedanken als Ereignisse beobachten", "content": [], "interactiveExercise": null },
-        { "id": "g4_l2", "title": "Grübelgedanken entkräften", "content": [], "interactiveExercise": null },
-        { "id": "g4_l3", "title": "Von 'Warum?' zu 'Was jetzt?'", "content": [], "interactiveExercise": null }
+        {
+          "id": "g4_l1",
+          "title": "Gedanken als Ereignisse beobachten",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g4_l2",
+          "title": "Grübelgedanken entkräften",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g4_l3",
+          "title": "Von 'Warum?' zu 'Was jetzt?'",
+          "content": [],
+          "interactiveExercise": null
+        }
       ]
     },
     {
@@ -49,9 +446,24 @@
       "title": "Werteorientiertes Handeln trotz Grübeln",
       "description": "Handlungsfähigkeit trotz innerer Unruhe stärken.",
       "lessons": [
-        { "id": "g5_l1", "title": "Wertekompass bei Gedankenkreisen", "content": [], "interactiveExercise": null },
-        { "id": "g5_l2", "title": "Mini-Schritte statt Aufschub", "content": [], "interactiveExercise": null },
-        { "id": "g5_l3", "title": "Schutzfaktoren im Alltag", "content": [], "interactiveExercise": null }
+        {
+          "id": "g5_l1",
+          "title": "Wertekompass bei Gedankenkreisen",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g5_l2",
+          "title": "Mini-Schritte statt Aufschub",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g5_l3",
+          "title": "Schutzfaktoren im Alltag",
+          "content": [],
+          "interactiveExercise": null
+        }
       ]
     },
     {
@@ -59,9 +471,24 @@
       "title": "Stabilisieren & Rückfallprophylaxe",
       "description": "Langfristige Sicherung und persönlicher Notfallplan.",
       "lessons": [
-        { "id": "g6_l1", "title": "Persönliche Risikosituationen", "content": [], "interactiveExercise": null },
-        { "id": "g6_l2", "title": "Notfallkarte bei Grübelspitzen", "content": [], "interactiveExercise": null },
-        { "id": "g6_l3", "title": "4-Wochen-Erhaltungsplan", "content": [], "interactiveExercise": null }
+        {
+          "id": "g6_l1",
+          "title": "Persönliche Risikosituationen",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g6_l2",
+          "title": "Notfallkarte bei Grübelspitzen",
+          "content": [],
+          "interactiveExercise": null
+        },
+        {
+          "id": "g6_l3",
+          "title": "4-Wochen-Erhaltungsplan",
+          "content": [],
+          "interactiveExercise": null
+        }
       ]
     }
   ]
