@@ -72,15 +72,16 @@ fun TodayScreen(navController: NavController) {
     val unsavedChanges by vm.unsavedChanges.collectAsState()
 
     val now = LocalDateTime.now()
+    val today = now.toLocalDate()
     val currentHour = now.hour
-    var expandedHour by remember { mutableStateOf<Int?>(null) }
+    var expandedEntry by remember { mutableStateOf<HourEntryKey?>(null) }
     var showAllHours by remember { mutableStateOf(false) }
 
-    if (expandedHour == null && logs.findForHourOnDate(currentHour, now.toLocalDate()) == null) {
-        expandedHour = currentHour
+    if (expandedEntry == null && logs.findForHourOnDate(currentHour, today) == null) {
+        expandedEntry = HourEntryKey(today, currentHour)
     }
 
-    val items = remember(showAllHours, currentHour) {
+    val items = remember(showAllHours, currentHour, today) {
         val hoursInOrder = (currentHour downTo 0) + (23 downTo currentHour + 1)
         val displayedHours = if (showAllHours) hoursInOrder else hoursInOrder.take(3)
 
@@ -124,8 +125,14 @@ fun TodayScreen(navController: NavController) {
                     HourEntry(
                         hour = item.hour,
                         log = logs.findForHourOnDate(item.hour, item.date),
-                        isExpanded = expandedHour == item.hour,
-                        onExpand = { expandedHour = if (expandedHour == item.hour) null else item.hour },
+                        isExpanded = expandedEntry == HourEntryKey(item.date, item.hour),
+                        onExpand = {
+                            expandedEntry = if (expandedEntry == HourEntryKey(item.date, item.hour)) {
+                                null
+                            } else {
+                                HourEntryKey(item.date, item.hour)
+                            }
+                        },
                         onSave = { activity, valence ->
                             vm.upsertActivityForHour(
                                 item.date,
@@ -135,8 +142,8 @@ fun TodayScreen(navController: NavController) {
                             )
                         },
                         suggestions = uniqueActivities,
-                        cachedData = unsavedChanges[item.hour],
-                        onCacheChanged = { cache -> vm.cacheHourEntry(item.hour, cache) }
+                        cachedData = unsavedChanges[HourEntryKey(item.date, item.hour)],
+                        onCacheChanged = { cache -> vm.cacheHourEntry(item.date, item.hour, cache) }
                     )
                 }
                 is TodayScreenItem.ShowMoreButton -> {
@@ -261,6 +268,12 @@ private fun HourEntry(
                 verticalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge),
                 modifier = Modifier.padding(top = Dimensions.paddingLarge)
             ) {
+                Text(
+                    text = "Fokussiere dich auf 1-3 Hauptaktivitäten dieser Stunde.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
                 if (activityChips.size < 3) {
                     OutlinedTextField(
                         value = activityInputText,
@@ -278,7 +291,7 @@ private fun HourEntry(
                                 }
                             }
                         },
-                        label = { Text("Was war deine Hauptaktivität?") },
+                        label = { Text("Was war deine wichtigste Aktivität?") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .onFocusChanged { if (!it.isFocused) addChipFromInput() }
@@ -354,7 +367,7 @@ private fun HourEntry(
                     enabled = activityInputText.isNotBlank() || activityChips.isNotEmpty(),
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text("Speichern")
+                    Text("Eintrag speichern")
                 }
             }
         }
@@ -364,7 +377,11 @@ private fun HourEntry(
 @Composable
 private fun ValencePicker(selectedValence: Int, onValenceSelected: (Int) -> Unit) {
     val valences = listOf(-2, -1, 0, 1, 2)
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+        verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+    ) {
         valences.forEach { v ->
             val isSelected = selectedValence == v
             FilledTonalButton(
@@ -381,10 +398,10 @@ private fun ValencePicker(selectedValence: Int, onValenceSelected: (Int) -> Unit
 }
 
 private fun valenceLabel(v: Int): String = when (v) {
-    -2 -> "--"
-    -1 -> "-"
-    0 -> "0"
-    1 -> "+"
-    2 -> "++"
-    else -> "0"
+    -2 -> "Sehr belastend"
+    -1 -> "Eher belastend"
+    0 -> "Neutral"
+    1 -> "Eher hilfreich"
+    2 -> "Sehr hilfreich"
+    else -> "Neutral"
 }
