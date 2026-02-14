@@ -24,5 +24,13 @@ class EmpiriactApplication : Application() {
 
     private val jsonExportService by lazy { JsonExportService() }
 
-    val viewModelFactory by lazy { ViewModelFactory(activityLogRepository, exerciseRepository, gratitudeRepository, jsonExportService) }
+    val viewModelFactory by lazy {
+        ViewModelFactory(
+            activityLogRepository = activityLogRepository,
+            exerciseRepository = exerciseRepository,
+            gratitudeRepository = gratitudeRepository,
+            jsonExportService = jsonExportService,
+            settingsRepository = settingsRepository
+        )
+    }
 }

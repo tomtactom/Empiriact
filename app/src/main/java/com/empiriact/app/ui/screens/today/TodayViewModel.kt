@@ -2,6 +2,7 @@ package com.empiriact.app.ui.screens.today
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.db.ActivityLogEntity
 import com.empiriact.app.data.repo.ActivityLogRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,11 +18,22 @@ import java.time.LocalDate
 data class HourEntryCache(val activities: List<String> = emptyList(), val valence: Int = 0, val inputText: String = "")
 data class HourEntryKey(val date: LocalDate, val hour: Int)
 
-class TodayViewModel(private val repository: ActivityLogRepository) : ViewModel() {
+class TodayViewModel(
+    private val repository: ActivityLogRepository,
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
 
     // Cache for unsaved changes. Key is the hour of the day.
     private val _unsavedChanges = MutableStateFlow<Map<HourEntryKey, HourEntryCache>>(emptyMap())
     val unsavedChanges: StateFlow<Map<HourEntryKey, HourEntryCache>> = _unsavedChanges.asStateFlow()
+
+
+    val todayIntroCompleted: StateFlow<Boolean> = settingsRepository.todayIntroCompleted
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     // Flow for logs of the last 2 days to cover "yesterday" entries shown after midnight.
     val todayLogs: StateFlow<List<ActivityLogEntity>> = repository.getLogsForDay(
@@ -78,4 +90,11 @@ class TodayViewModel(private val repository: ActivityLogRepository) : ViewModel(
             _unsavedChanges.value = currentCache
         }
     }
+
+    fun completeTodayIntro() {
+        viewModelScope.launch {
+            settingsRepository.setTodayIntroCompleted(true)
+        }
+    }
+
 }
