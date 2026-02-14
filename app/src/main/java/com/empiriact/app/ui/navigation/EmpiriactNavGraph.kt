@@ -1,27 +1,20 @@
 package com.empiriact.app.ui.navigation
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraphBuilder
@@ -32,18 +25,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navigation
-import com.empiriact.app.EmpiriactApplication
 import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.ui.common.ViewModelFactory
-import com.empiriact.app.ui.screens.checkin.CheckinScreen
-import com.empiriact.app.ui.screens.checkin.QuestionnaireDetailScreen
-import com.empiriact.app.ui.screens.learn.LearnAdvancedScreen
-import com.empiriact.app.ui.screens.learn.LearnBasicsScreen
-import com.empiriact.app.ui.screens.learn.LearnPracticeScreen
-import com.empiriact.app.ui.screens.learn.LearnScreen
-import com.empiriact.app.ui.screens.learn.LearnTestScreen
-import com.empiriact.app.ui.screens.leo.LeoScreen
 import androidx.compose.runtime.collectAsState
 import com.empiriact.app.ui.screens.onboarding.OnboardingScreen
 import com.empiriact.app.ui.screens.overview.OverviewScreen
@@ -69,10 +52,7 @@ fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRep
 
     val bottomNavItems = listOf(
         BottomNavItem(Route.Today, "Heute", Icons.Default.Today),
-        BottomNavItem(Route.Checkin, "Check-in", Icons.Default.CheckCircle),
         BottomNavItem(Route.Overview, "Übersicht", Icons.Default.Assessment),
-        BottomNavItem(Route.Learn, "Lernen", Icons.Default.School),
-        BottomNavItem(Route.Leo, "Leo", Icons.Default.Person),
         BottomNavItem(Route.Resources, "Ressourcen", Icons.Default.AutoStories),
     )
 
@@ -89,9 +69,7 @@ fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRep
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
-                                if (isSelected && item.route == Route.Checkin) {
-                                    navController.popBackStack("checkin_list", inclusive = false)
-                                } else if (isSelected) {
+                                if (isSelected) {
                                     navController.popBackStack(item.route.route, inclusive = false)
                                 } else {
                                     navigateToTopLevel(navController, item.route)
@@ -145,35 +123,11 @@ private fun NavGraphBuilder.introGraph(
 private fun NavGraphBuilder.staticGraph(factory: ViewModelFactory, navController: NavController) {
     composable(Route.Today.route) { TodayScreen(navController) }
 
-    navigation(startDestination = "checkin_list", route = Route.Checkin.route) {
-        composable("checkin_list") { CheckinScreen(factory, navController) }
-        composable(
-            route = Route.QuestionnaireDetail.route,
-            arguments = listOf(navArgument("questionnaireId") { type = NavType.StringType })
-        ) {
-            val context = LocalContext.current
-            val application = context.applicationContext as EmpiriactApplication
-            val questionnaireId = it.arguments?.getString("questionnaireId")
-            if (questionnaireId == "well_being") {
-                val questionnaire = application.checkinRepository.getWellbeingQuestionnaire()
-                QuestionnaireDetailScreen(questionnaire) { navController.popBackStack() }
-            } else {
-                UnsupportedQuestionnaireScreen(onBack = { navController.popBackStack() })
-            }
-        }
-    }
-
     composable(Route.Overview.route) { OverviewScreen(factory, navController) }
     composable(Route.Settings.route) { SettingsScreen() }
 }
 
 private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navController: NavController) {
-    composable(Route.Learn.route) { LearnScreen(navController) }
-    composable(Route.LearnBasics.route) { LearnBasicsScreen(navController) }
-    composable(Route.LearnAdvanced.route) { LearnAdvancedScreen(navController) }
-    composable(Route.LearnPractice.route) { LearnPracticeScreen(navController) }
-    composable(Route.LearnTest.route) { LearnTestScreen(navController) }
-    composable(Route.Leo.route) { LeoScreen() }
     composable(Route.Resources.route) { ResourcesScreen(factory, navController) }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }
     composable(Route.FlowChartExercise.route) { FlowChartExerciseScreen(navController) }
@@ -251,23 +205,3 @@ private data class BottomNavItem(
     val icon: ImageVector,
 )
 
-@Composable
-private fun UnsupportedQuestionnaireScreen(onBack: () -> Unit) {
-    androidx.compose.foundation.layout.Column(
-        modifier = Modifier
-            .padding(24.dp)
-            .fillMaxSize(),
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-    ) {
-        Text(
-            text = "Dieser Check-in ist aktuell noch nicht verfügbar.",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        androidx.compose.material3.Button(
-            onClick = onBack,
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Zurück")
-        }
-    }
-}

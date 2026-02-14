@@ -23,13 +23,11 @@ object AppStructure {
 
     val staticPages = listOf(
         AppDestinationMeta(Route.Today, AppLayer.STATIC_CONTENT),
-        AppDestinationMeta(Route.Checkin, AppLayer.STATIC_CONTENT),
         AppDestinationMeta(Route.Overview, AppLayer.STATIC_CONTENT),
         AppDestinationMeta(Route.Settings, AppLayer.STATIC_CONTENT)
     )
 
     val modularPages = listOf(
-        AppDestinationMeta(Route.Learn, AppLayer.MODULAR_CONTENT),
         AppDestinationMeta(Route.Resources, AppLayer.MODULAR_CONTENT),
         AppDestinationMeta(Route.Evaluations, AppLayer.MODULAR_CONTENT)
     )
