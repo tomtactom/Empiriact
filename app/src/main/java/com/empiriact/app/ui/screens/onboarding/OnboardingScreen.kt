@@ -2,6 +2,7 @@ package com.empiriact.app.ui.screens.onboarding
 
 import android.Manifest
 import android.content.Context
+import android.os.Build
 import android.content.Intent
 import android.net.Uri
 import android.os.PowerManager
@@ -19,18 +20,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.PsychologyAlt
+import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -38,53 +44,72 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.launch
 
 private data class IntroPage(
+    val label: String,
+    val icon: ImageVector,
     val title: String,
     val subtitle: String,
-    val bullets: List<String>
+    val highlights: List<String>,
+    val microAction: String
 )
 
 @Composable
 fun OnboardingScreen(onFinished: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val pages = remember {
         listOf(
             IntroPage(
+                label = "Schritt 1 · Orientierung",
+                icon = Icons.Default.AutoAwesome,
                 title = "Willkommen bei Empiriact",
-                subtitle = "Empiriact ist eine App für den Alltag: Sie begleitet dich dabei, innere Erfahrungen im aktuellen Moment bewusster wahrzunehmen und stimmige Schritte auszuwählen.",
-                bullets = listOf(
-                    "Gegenwärtigkeit (Achtsamkeit): Du richtest den Blick auf das, was gerade da ist – Gedanken, Gefühle und Körperreaktionen – ohne sofort reagieren zu müssen.",
-                    "Akzeptanz: Du nimmst innere Erfahrungen wahr und ordnest sie Schritt für Schritt: Was ist passiert, was ging dir durch den Kopf, was hast du gefühlt und wie hast du reagiert?",
-                    "Mit kleinen, wiederholten Schritten entsteht nach und nach die Erfahrung: \"Ich kann wirksam handeln.\""
-                )
+                subtitle = "Du lernst, was gerade in dir passiert, ohne dich davon steuern zu lassen. Das ist die Grundlage für ruhige, wirksame Entscheidungen im Alltag.",
+                highlights = listOf(
+                    "Kurze Check-ins statt Überforderung: 30–90 Sekunden reichen für einen guten Start.",
+                    "Verhaltenstherapeutisch fundiert: Wahrnehmen → benennen → handlungsfähig bleiben.",
+                    "Keine Perfektion nötig: kleine Schritte sind wirksamer als seltene große Vorsätze."
+                ),
+                microAction = "Nimm dir heute einmal 1 Minute für einen bewussten Atemzug + Körper-Check."
             ),
             IntroPage(
-                title = "Wenn es innen unruhig wird",
-                subtitle = "Du findest kurze Übungen für intensive Momente, um Abstand zu Gedankenschleifen zu gewinnen und dich auf den nächsten hilfreichen Schritt auszurichten.",
-                bullets = listOf(
-                    "Für Phasen hoher Anspannung stehen einfache, direkt nutzbare Strategien zur Verfügung.",
-                    "Kognitive Defusion: Du nimmst Gedanken als mentale Ereignisse wahr, statt sie als Anweisung zu behandeln.",
-                    "Selbst als Kontext (Beobachter-Selbst): Du bist mehr als der Inhalt einzelner Gedanken oder Gefühle.",
-                )
+                label = "Schritt 2 · In schwierigen Momenten",
+                icon = Icons.Default.PsychologyAlt,
+                title = "Wenn der Kopf laut wird",
+                subtitle = "Empiriact unterstützt dich in Stressmomenten mit klaren, konkreten Übungen, damit aus Grübeln wieder Orientierung wird.",
+                highlights = listOf(
+                    "Defusion: Gedanken als Gedanken erkennen – nicht als Befehl.",
+                    "Emotionsregulation: Anspannung spürbar senken, bevor du entscheidest.",
+                    "Soforthilfe mit Struktur: Beobachten, erden, nächsten hilfreichen Schritt wählen."
+                ),
+                microAction = "Lege innerlich den Satz fest: ‚Ich bemerke gerade den Gedanken, dass …‘"
             ),
             IntroPage(
-                title = "Dein Weg, in deinem Tempo",
-                subtitle = "Du entscheidest, was heute passt. Die App unterstützt dich dabei, nach deinen persönlichen Werten zu handeln und dabei flexibel zu bleiben.",
-                bullets = listOf(
-                    "Du wählst zwischen passenden Übungen und passt sie flexibel an deinen Alltag an.",
-                    "Werte: Du klärst, was dir wichtig ist – zum Beispiel Verbundenheit, Selbstachtung oder Fürsorge – und richtest Schritte daran aus.",
-                    "Engagiertes Handeln (Commitment): So bauen die Seiten aufeinander auf – wahrnehmen, Abstand gewinnen, werteorientiert handeln."
-                )
+                label = "Schritt 3 · Wertebasiert handeln",
+                icon = Icons.Default.TrackChanges,
+                title = "Vom Verstehen ins Tun",
+                subtitle = "Du verknüpfst Übungen mit deinen Werten, damit Veränderungen im Alltag stabil und realistisch werden.",
+                highlights = listOf(
+                    "Kleine Commitments: 1 konkreter Schritt pro Tag schlägt vage Vorsätze.",
+                    "Selbstwirksamkeit wächst durch Wiederholung, nicht durch Druck.",
+                    "Du entscheidest das Tempo – die App passt sich deinem Alltag an."
+                ),
+                microAction = "Wähle heute einen Mini-Schritt, der zu einem deiner Werte passt."
             )
         )
     }
@@ -98,6 +123,21 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Einführung",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            TextButton(onClick = onFinished) {
+                Text("Überspringen")
+            }
+        }
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f)
@@ -106,6 +146,35 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 IntroContentPage(page = pages[page])
             } else {
                 SystemPermissionsPage(context = context, onFinished = onFinished)
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedButton(
+                onClick = {
+                    if (pagerState.currentPage > 0) {
+                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+                    }
+                },
+                enabled = pagerState.currentPage > 0
+            ) {
+                Text("Zurück")
+            }
+
+            Button(
+                onClick = {
+                    if (pagerState.currentPage < pageCount - 1) {
+                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                    }
+                }
+            ) {
+                Text(if (pagerState.currentPage == pageCount - 1) "Fertig" else "Weiter")
             }
         }
 
@@ -123,8 +192,26 @@ private fun IntroContentPage(page: IntroPage) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start
     ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = page.icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = page.label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = page.title,
             style = MaterialTheme.typography.headlineMedium,
@@ -143,9 +230,23 @@ private fun IntroContentPage(page: IntroPage) {
             )
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                page.bullets.forEach { bullet ->
+                page.highlights.forEach { bullet ->
                     Text(text = "• $bullet", style = MaterialTheme.typography.bodyMedium)
                 }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Mini-Experiment für heute",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(text = page.microAction, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
@@ -188,13 +289,13 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Noch 2 wichtige Einstellungen",
+            text = "Letzter Schritt: App zuverlässig machen",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Du entscheidest selbst. Diese Freigaben helfen der App nur dabei, dich zuverlässig zu unterstützen – auch im Hintergrund.",
+            text = "Du entscheidest selbst. Die folgenden Optionen erhöhen die Zuverlässigkeit von Erinnerungen und Übungen deutlich.",
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -233,7 +334,18 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
             onClick = onFinished,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Einführung abschließen")
+            Text("Jetzt mit Empiriact starten")
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsEnabled) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Hinweis: Ab Android 13 sind Benachrichtigungen standardmäßig deaktiviert.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -324,7 +436,10 @@ private fun PagerDots(pageCount: Int, currentPage: Int, modifier: Modifier = Mod
             Box(
                 modifier = Modifier
                     .padding(horizontal = 4.dp)
-                    .size(8.dp)
+                    .size(if (index == currentPage) 10.dp else 8.dp)
+                    .semantics {
+                        contentDescription = "Seite ${index + 1} von $pageCount"
+                    }
                     .background(color = color, shape = CircleShape)
             )
         }
