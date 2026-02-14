@@ -3,12 +3,16 @@ package com.empiriact.app.ui.screens.resources.methods
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AssistChip
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +26,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,62 +44,70 @@ fun ModuleOneOneInitialConditionsScreen(navController: NavController) {
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Modul 1.1 · Klar starten",
-            style = MaterialTheme.typography.headlineSmall
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Outlined.Swipe, contentDescription = null)
+        item {
             Text(
-                text = "Wische nach links oder rechts, um die Seiten zu wechseln.",
-                style = MaterialTheme.typography.bodyMedium
+                text = "Modul 1.1 · Klar starten",
+                style = MaterialTheme.typography.headlineSmall
             )
         }
 
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.weight(1f)
-        ) { pageIndex ->
-            val page = pages[pageIndex]
-            Card(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    item {
-                        Text(
-                            text = "Schritt ${pageIndex + 1} von ${pages.size}: ${page.title}",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    item { Text(page.mainText, style = MaterialTheme.typography.bodyLarge) }
-                    items(page.keyPoints) { StoryChip(text = it) }
-                    item {
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("Übung", style = MaterialTheme.typography.titleSmall)
-                                Text(page.practicePrompt, style = MaterialTheme.typography.bodyMedium)
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Outlined.Swipe, contentDescription = null)
+                Text(
+                    text = "Wische nach links oder rechts, um die Seiten zu wechseln.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+        item {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 320.dp, max = 420.dp)
+            ) { pageIndex ->
+                val page = pages[pageIndex]
+                Card(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        item {
+                            Text(
+                                text = "Schritt ${pageIndex + 1} von ${pages.size}: ${page.title}",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        item { Text(page.mainText, style = MaterialTheme.typography.bodyLarge) }
+                        items(page.keyPoints) { StoryChip(text = it) }
+                        item {
+                            Card(modifier = Modifier.fillMaxWidth()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text("Übung", style = MaterialTheme.typography.titleSmall)
+                                    Text(page.practicePrompt, style = MaterialTheme.typography.bodyMedium)
+                                }
                             }
                         }
                     }
@@ -102,76 +115,113 @@ fun ModuleOneOneInitialConditionsScreen(navController: NavController) {
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage((pagerState.currentPage - 1).coerceAtLeast(0))
-                    }
-                },
-                enabled = pagerState.currentPage > 0,
-                modifier = Modifier.weight(1f)
-            ) { Text("Zurück") }
-
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage((pagerState.currentPage + 1).coerceAtMost(pages.lastIndex))
-                    }
-                },
-                enabled = pagerState.currentPage < pages.lastIndex,
-                modifier = Modifier.weight(1f)
-            ) { Text("Weiter") }
-        }
-
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
+        item {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Dein roter Faden aus Modul 1.1", style = MaterialTheme.typography.titleMedium)
-                JourneyStep(
-                    icon = Icons.Outlined.Flag,
-                    title = "Richtung wählen",
-                    description = "Wähle eine klare Richtung für diese Woche."
-                )
-                JourneyStep(
-                    icon = Icons.Outlined.Navigation,
-                    title = "Kleiner Schritt",
-                    description = "Plane einen Schritt für 5 bis 15 Minuten."
-                )
-                JourneyStep(
-                    icon = Icons.Outlined.Insights,
-                    title = "Eigener Stil",
-                    description = "Du wählst Tempo und Schwierigkeit passend für dich."
+                pages.indices.forEach { index ->
+                    val selected = index == pagerState.currentPage
+                    AssistChip(
+                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                        label = { Text(if (selected) "Seite ${index + 1}" else "${index + 1}") }
+                    )
+                }
+            }
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage((pagerState.currentPage - 1).coerceAtLeast(0))
+                        }
+                    },
+                    enabled = pagerState.currentPage > 0,
+                    modifier = Modifier.weight(1f)
+                ) { Text("Zurück") }
+
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage((pagerState.currentPage + 1).coerceAtMost(pages.lastIndex))
+                        }
+                    },
+                    enabled = pagerState.currentPage < pages.lastIndex,
+                    modifier = Modifier.weight(1f)
+                ) { Text("Weiter") }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text("Dein roter Faden aus Modul 1.1", style = MaterialTheme.typography.titleMedium)
+                    JourneyStep(
+                        icon = Icons.Outlined.Flag,
+                        title = "Richtung wählen",
+                        description = "Wähle eine klare Richtung für diese Woche."
+                    )
+                    JourneyStep(
+                        icon = Icons.Outlined.Navigation,
+                        title = "Kleiner Schritt",
+                        description = "Plane einen Schritt für 5 bis 15 Minuten."
+                    )
+                    JourneyStep(
+                        icon = Icons.Outlined.Insights,
+                        title = "Eigener Stil",
+                        description = "Du wählst Tempo und Schwierigkeit passend für dich."
+                    )
+                }
+            }
+        }
+
+        item {
+            Button(
+                onClick = { navController.navigate(Route.ActivityPlanner.createRoute("Lebensbalance")) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Jetzt Mini-Schritt im Aktivitätsplaner festlegen")
+            }
+        }
+
+        item {
+            OutlinedButton(
+                onClick = { navController.navigate(Route.ModuleOneTwoActivityMoodMonitoring.route) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Weiter zu Modul 1.2")
+            }
+        }
+
+        item {
+            Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+                Text(
+                    text = "Hinweis: Du bestimmst dein Tempo. Bereits ein kleiner, konsistenter Schritt ist wirksam.",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
 
-        Button(
-            onClick = { navController.navigate("activity_planner/Lebensbalance") },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Jetzt Mini-Schritt im Aktivitätsplaner festlegen")
-        }
-
-        OutlinedButton(
-            onClick = { navController.navigate(Route.ModuleOneTwoActivityMoodMonitoring.route) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Weiter zu Modul 1.2")
-        }
-
-        OutlinedButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Zurück zu Inhalte")
+        item {
+            OutlinedButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Zurück zu Inhalten")
+            }
         }
     }
 }
