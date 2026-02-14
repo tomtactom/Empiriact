@@ -25,6 +25,11 @@ private data class ResourceExercise(
 
 private val allExercises = listOf(
     ResourceExercise(
+        title = "Modul 1.1 · Gute Ausgangsbedingungen schaffen",
+        description = "Psychoedukatives Einstiegsmodul zur Klärung von Rollen, Erwartungen und dem gemeinsamen Lernprozess in der werteorientierten Verhaltensaktivierung – mit autonomiefördernder Ausrichtung (ASIB).",
+        route = Route.ModuleOneOneInitialConditions
+    ),
+    ResourceExercise(
         title = "Ablenkung als situativer Skill",
         description = "Kurzfristige, bewusste Hinwendung zu einer externen Tätigkeit mit dem Ziel, Grübeln zu unterbrechen. Die Ablenkung wird als zeitlich begrenzter Aufmerksamkeitswechsel verstanden, nicht als dauerhafte Vermeidung.",
         route = Route.DistractionSkillExercise
