@@ -9,65 +9,107 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.empiriact.app.ui.navigation.Route
 
 private data class ResourceExercise(
     val title: String,
-    val description: String,
+    val learningGoal: String,
+    val whyItMatters: String,
     val route: Route
 )
 
-private val allExercises = listOf(
-    ResourceExercise(
-        title = "Modul 1.1 · Gute Ausgangsbedingungen schaffen",
-        description = "Psychoedukatives Einstiegsmodul zur Klärung von Rollen, Erwartungen und dem gemeinsamen Lernprozess in der werteorientierten Verhaltensaktivierung – mit autonomiefördernder Ausrichtung (ASIB).",
-        route = Route.ModuleOneOneInitialConditions
+private data class ResourceSection(
+    val title: String,
+    val description: String,
+    val exercises: List<ResourceExercise>
+)
+
+private val psychoeducationalSections = listOf(
+    ResourceSection(
+        title = "Phase 1 · Verstehen & Orientierung",
+        description = "Klare, kurze Einstiegsinhalte: Du verstehst zuerst das Warum, bevor du ins Training gehst.",
+        exercises = listOf(
+            ResourceExercise(
+                title = "Modul 1.1 · Gute Ausgangsbedingungen",
+                learningGoal = "Rollen, Erwartungen und deinen eigenen Weg klären.",
+                whyItMatters = "Ein klarer Start stärkt Selbstwirksamkeit und unterstützt autonome Entscheidungen (ASIB).",
+                route = Route.ModuleOneOneInitialConditions
+            ),
+            ResourceExercise(
+                title = "Modul 1.2 · Aktivitäten & Stimmung beobachten",
+                learningGoal = "Belastung und Entlastung im Alltag systematisch erkennen.",
+                whyItMatters = "Beobachtung macht Muster sichtbar und schafft eine verhaltenstherapeutische Arbeitsgrundlage.",
+                route = Route.ModuleOneTwoActivityMoodMonitoring
+            )
+        )
     ),
-    ResourceExercise(
-        title = "Modul 1.2 · Aktivitäten und Stimmung beobachten",
-        description = "Edukatives Kernmodul zur strukturierten Alltagsbeobachtung: Aktivitäten und Stimmung zeitnah dokumentieren, Muster erkennen und eine praktikable, autonomiefördernde Erfassungsroutine aufbauen.",
-        route = Route.ModuleOneTwoActivityMoodMonitoring
+    ResourceSection(
+        title = "Phase 2 · Stabilisieren im Moment",
+        description = "Kurze Übungen für hohe innere Anspannung: Aufmerksamkeit gezielt nach außen lenken und beruhigen.",
+        exercises = listOf(
+            ResourceExercise(
+                title = "Refokussierung nach außen",
+                learningGoal = "Aufmerksamkeit auf sichere, neutrale Reize in der Umgebung lenken.",
+                whyItMatters = "Reduziert Grübeldruck und unterstützt Emotionsregulation im Hier und Jetzt.",
+                route = Route.SituationalAttentionRefocusingExercise
+            ),
+            ResourceExercise(
+                title = "5-4-3-2-1 Übung",
+                learningGoal = "Mit den Sinnen schnell Bodenkontakt herstellen.",
+                whyItMatters = "Ein strukturierter Ablauf hilft, in angespannten Situationen handlungsfähig zu bleiben.",
+                route = Route.FiveFourThreeTwoOneExercise
+            ),
+            ResourceExercise(
+                title = "Ablenkung als situativer Skill",
+                learningGoal = "Grübeln kurz unterbrechen und mentale Distanz gewinnen.",
+                whyItMatters = "Gezielte Kurzzeit-Ablenkung ist ein Skill zur Entlastung, nicht zur Vermeidung.",
+                route = Route.DistractionSkillExercise
+            )
+        )
     ),
-    ResourceExercise(
-        title = "Ablenkung als situativer Skill",
-        description = "Kurzfristige, bewusste Hinwendung zu einer externen Tätigkeit mit dem Ziel, Grübeln zu unterbrechen. Die Ablenkung wird als zeitlich begrenzter Aufmerksamkeitswechsel verstanden, nicht als dauerhafte Vermeidung.",
-        route = Route.DistractionSkillExercise
+    ResourceSection(
+        title = "Phase 3 · Aufmerksamkeit flexibel trainieren",
+        description = "Aufmerksamkeitskontrolle schrittweise erweitern: fokussieren, wechseln und weiten.",
+        exercises = listOf(
+            ResourceExercise(
+                title = "Selektive Aufmerksamkeit",
+                learningGoal = "Einen Reiz bewusst auswählen und halten.",
+                whyItMatters = "Trainiert kognitive Kontrolle und unterbricht automatische Grübelschleifen.",
+                route = Route.SelectiveAttentionExercise
+            ),
+            ResourceExercise(
+                title = "Aufmerksamkeitswechsel",
+                learningGoal = "Zwischen Reizen flexibel hin- und herschalten.",
+                whyItMatters = "Löst starre Aufmerksamkeitsmuster und fördert psychische Flexibilität.",
+                route = Route.AttentionSwitchingExercise
+            ),
+            ResourceExercise(
+                title = "Geteilte Aufmerksamkeit",
+                learningGoal = "Mehrere Reize gleichzeitig wahrnehmen und gewichten.",
+                whyItMatters = "Verbreitert den Aufmerksamkeitsraum und relativiert dominante Belastungsreize.",
+                route = Route.SharedAttentionExercise
+            )
+        )
     ),
-    ResourceExercise(
-        title = "Refokussierung nach außen (Situational Attention Refocusing)",
-        description = "Die Aufmerksamkeit wird bewusst auf äußere neutrale oder sichere Reize gelenkt (z. B. Umgebung, Gesprächspartner, Tätigkeit), insbesondere in Situationen mit erhöhter innerer Aktivierung. Abschwächung von Bedrohungsmonitoring; Stabilisierung im Hier-und-Jetzt; Unterstützung emotionaler Regulation durch Kontextorientierung.",
-        route = Route.SituationalAttentionRefocusingExercise
-    ),
-    ResourceExercise(
-        title = "5-4-3-2-1 Übung",
-        description = "Eine Achtsamkeitsübung, um dich im Hier und Jetzt zu verankern.",
-        route = Route.FiveFourThreeTwoOneExercise
-    ),
-    ResourceExercise(
-        title = "Selektive Aufmerksamkeit",
-        description = "Trainiere deine Fähigkeit, deine Aufmerksamkeit gezielt auf einen Reiz zu lenken und Grübelschleifen zu unterbrechen.",
-        route = Route.SelectiveAttentionExercise
-    ),
-    ResourceExercise(
-        title = "Aufmerksamkeitswechsel",
-        description = "Trainiere die Flexibilität deiner Aufmerksamkeit durch bewusstes Wechseln zwischen äußeren und inneren Reizen. Breche starre Aufmerksamkeitsmuster auf.",
-        route = Route.AttentionSwitchingExercise
-    ),
-    ResourceExercise(
-        title = "Geteilte Aufmerksamkeit",
-        description = "Lerne, deine Aufmerksamkeit zu weiten und mehrere Reize gleichzeitig wahrzunehmen. Entwickle einen breiten Aufmerksamkeitsraum und relativiere dominante Reize.",
-        route = Route.SharedAttentionExercise
-    ),
-    ResourceExercise(
-        title = "Flow-Landkarte",
-        description = "Entdecke, welche Aktivitäten dich in den Flow bringen.",
-        route = Route.FlowChartExercise
+    ResourceSection(
+        title = "Phase 4 · Transfer in den Alltag",
+        description = "Kompetenzen festigen und in persönliche, motivierende Aktivitäten übertragen.",
+        exercises = listOf(
+            ResourceExercise(
+                title = "Flow-Landkarte",
+                learningGoal = "Aktivitäten identifizieren, die Energie und Fokus fördern.",
+                whyItMatters = "Erleichtert die Planung von Verhalten, das zu deinen Werten und Zielen passt.",
+                route = Route.FlowChartExercise
+            )
+        )
     )
 )
 
@@ -77,59 +119,88 @@ fun ResourcesScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            Text("Inhalte", style = MaterialTheme.typography.headlineMedium)
+            Text("Module", style = MaterialTheme.typography.headlineMedium)
             Text(
-                "Hier findest du eine stabile Grundlage mit praktischen Übungen, die dir helfen können, mit Grübeln und schwierigen Gefühlen umzugehen.",
+                "Wähle den nächsten sinnvollen Schritt. Die Reihenfolge ist psychoedukativ aufgebaut: verstehen, stabilisieren, trainieren, übertragen.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
-        items(allExercises) { exercise ->
-            ResourceCard(
-                title = exercise.title,
-                description = exercise.description,
-                onClick = {
-                    when (exercise.route) {
-                        is Route.FiveFourThreeTwoOneExercise -> {
-                            navController.navigate(Route.FiveFourThreeTwoOneExercise.createRoute(from = "resources"))
-                        }
-                        is Route.SelectiveAttentionExercise -> {
-                            navController.navigate(Route.SelectiveAttentionExercise.createRoute(from = "resources"))
-                        }
-                        is Route.AttentionSwitchingExercise -> {
-                            navController.navigate(Route.AttentionSwitchingExercise.createRoute(from = "resources"))
-                        }
-                        is Route.SharedAttentionExercise -> {
-                            navController.navigate(Route.SharedAttentionExercise.createRoute(from = "resources"))
-                        }
-                        is Route.DistractionSkillExercise -> {
-                            navController.navigate(Route.DistractionSkillExercise.createRoute(from = "resources"))
-                        }
-                        is Route.SituationalAttentionRefocusingExercise -> {
-                            navController.navigate(Route.SituationalAttentionRefocusingExercise.createRoute(from = "resources"))
-                        }
-                        else -> {
-                            navController.navigate(exercise.route.route)
+
+        psychoeducationalSections.forEach { section ->
+            item {
+                SectionHeader(title = section.title, description = section.description)
+            }
+
+            items(section.exercises) { exercise ->
+                ResourceCard(
+                    title = exercise.title,
+                    learningGoal = exercise.learningGoal,
+                    whyItMatters = exercise.whyItMatters,
+                    onClick = {
+                        when (exercise.route) {
+                            is Route.FiveFourThreeTwoOneExercise -> {
+                                navController.navigate(Route.FiveFourThreeTwoOneExercise.createRoute(from = "resources"))
+                            }
+                            is Route.SelectiveAttentionExercise -> {
+                                navController.navigate(Route.SelectiveAttentionExercise.createRoute(from = "resources"))
+                            }
+                            is Route.AttentionSwitchingExercise -> {
+                                navController.navigate(Route.AttentionSwitchingExercise.createRoute(from = "resources"))
+                            }
+                            is Route.SharedAttentionExercise -> {
+                                navController.navigate(Route.SharedAttentionExercise.createRoute(from = "resources"))
+                            }
+                            is Route.DistractionSkillExercise -> {
+                                navController.navigate(Route.DistractionSkillExercise.createRoute(from = "resources"))
+                            }
+                            is Route.SituationalAttentionRefocusingExercise -> {
+                                navController.navigate(Route.SituationalAttentionRefocusingExercise.createRoute(from = "resources"))
+                            }
+                            else -> {
+                                navController.navigate(exercise.route.route)
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun ResourceCard(title: String, description: String, onClick: () -> Unit) {
+private fun SectionHeader(title: String, description: String) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.padding(top = 8.dp)
+    ) {
+        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(description, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun ResourceCard(
+    title: String,
+    learningGoal: String,
+    whyItMatters: String,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
-            Text(description, style = MaterialTheme.typography.bodyMedium)
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text("Ziel: $learningGoal", style = MaterialTheme.typography.bodyMedium)
+            Text("Warum: $whyItMatters", style = MaterialTheme.typography.bodySmall)
         }
     }
 }
