@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.empiriact.app.data.repo.ActivityLogRepository
 import com.empiriact.app.data.ExerciseRepository
+import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.repo.GratitudeRepository
 import com.empiriact.app.services.JsonExportService
 import com.empiriact.app.ui.screens.overview.OverviewViewModel
@@ -15,12 +16,13 @@ class ViewModelFactory(
     private val activityLogRepository: ActivityLogRepository,
     private val exerciseRepository: ExerciseRepository,
     private val gratitudeRepository: GratitudeRepository,
-    private val jsonExportService: JsonExportService
+    private val jsonExportService: JsonExportService,
+    private val settingsRepository: SettingsRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TodayViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TodayViewModel(activityLogRepository) as T
+            return TodayViewModel(activityLogRepository, settingsRepository) as T
         }
         if (modelClass.isAssignableFrom(OverviewViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

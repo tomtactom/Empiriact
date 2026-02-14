@@ -18,8 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -70,6 +73,7 @@ fun TodayScreen(navController: NavController) {
     val logs by vm.todayLogs.collectAsState()
     val uniqueActivities by vm.uniqueActivities.collectAsState()
     val unsavedChanges by vm.unsavedChanges.collectAsState()
+    val todayIntroCompleted by vm.todayIntroCompleted.collectAsState()
 
     val now = LocalDateTime.now()
     val today = now.toLocalDate()
@@ -109,6 +113,17 @@ fun TodayScreen(navController: NavController) {
         verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium),
         contentPadding = PaddingValues(vertical = Dimensions.paddingMedium)
     ) {
+        if (!todayIntroCompleted) {
+            item(key = "today_intro") {
+                TodayIntroCoachCard(
+                    onStart = {
+                        expandedEntry = HourEntryKey(today, currentHour)
+                    },
+                    onDismiss = { vm.completeTodayIntro() }
+                )
+            }
+        }
+
         items(
             items = items,
             key = { item ->
@@ -153,6 +168,60 @@ fun TodayScreen(navController: NavController) {
                     ) {
                         Text("Mehr anzeigen")
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TodayIntroCoachCard(
+    onStart: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium),
+            modifier = Modifier.padding(Dimensions.paddingMedium)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = "Beobachtungsplan: Dein Einstieg",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = Dimensions.paddingSmall)
+                )
+            }
+            Text(
+                text = "Du musst nichts perfekt machen. Wir sammeln nur Beobachtungen: 1–3 Hauptaktivitäten pro Stunde und die Stimmung dazu.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Tipp: Trage direkt nach der Stunde ein. Auch Routinen oder \"wenig produktive\" Zeiten sind wertvolle Hinweise.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                FilledTonalButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
+                    Text("Später")
+                }
+                Button(onClick = {
+                    onStart()
+                    onDismiss()
+                }, modifier = Modifier.weight(1f)) {
+                    Text("Jetzt starten")
                 }
             }
         }
@@ -269,7 +338,7 @@ private fun HourEntry(
                 modifier = Modifier.padding(top = Dimensions.paddingLarge)
             ) {
                 Text(
-                    text = "Fokussiere dich auf 1-3 Hauptaktivitäten dieser Stunde.",
+                    text = "Fokussiere dich auf 1–3 Hauptaktivitäten dieser Stunde. Es geht um Beobachtung, nicht Bewertung.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -291,7 +360,7 @@ private fun HourEntry(
                                 }
                             }
                         },
-                        label = { Text("Was war deine wichtigste Aktivität?") },
+                        label = { Text("Was war heute in dieser Stunde am wichtigsten?") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .onFocusChanged { if (!it.isFocused) addChipFromInput() }

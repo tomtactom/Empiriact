@@ -24,6 +24,7 @@ class SettingsRepository(context: Context) {
         val HOURLY_PROMPTS_ENABLED = booleanPreferencesKey("hourly_prompts_enabled")
         val DATA_DONATION_ENABLED = booleanPreferencesKey("data_donation_enabled")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val TODAY_INTRO_COMPLETED = booleanPreferencesKey("today_intro_completed")
         val THEME_MODE = stringPreferencesKey("theme_mode")
     }
 
@@ -63,6 +64,17 @@ class SettingsRepository(context: Context) {
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { settings ->
             settings[PreferencesKeys.ONBOARDING_COMPLETED] = completed
+        }
+    }
+
+    val todayIntroCompleted: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TODAY_INTRO_COMPLETED] ?: false
+        }
+
+    suspend fun setTodayIntroCompleted(completed: Boolean) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.TODAY_INTRO_COMPLETED] = completed
         }
     }
 
