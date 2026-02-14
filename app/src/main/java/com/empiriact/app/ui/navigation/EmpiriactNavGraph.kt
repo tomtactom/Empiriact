@@ -53,7 +53,7 @@ fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRep
     val bottomNavItems = listOf(
         BottomNavItem(Route.Today, "Heute", Icons.Default.Today),
         BottomNavItem(Route.Overview, "Übersicht", Icons.Default.Assessment),
-        BottomNavItem(Route.Resources, "Ressourcen", Icons.Default.AutoStories),
+        BottomNavItem(Route.Resources, "Inhalte", Icons.Default.AutoStories),
     )
 
     val showBottomBar = AppStructure.intro.none { meta ->
@@ -128,7 +128,7 @@ private fun NavGraphBuilder.staticGraph(factory: ViewModelFactory, navController
 }
 
 private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navController: NavController) {
-    composable(Route.Resources.route) { ResourcesScreen(factory, navController) }
+    composable(Route.Resources.route) { ResourcesScreen(navController) }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }
     composable(Route.FlowChartExercise.route) { FlowChartExerciseScreen(navController) }
 

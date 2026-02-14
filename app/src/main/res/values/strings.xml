@@ -4,7 +4,7 @@
     <!-- Overview Screen Tabs -->
     <string name="overview_tab_protocol">Protokoll</string>
     <string name="overview_tab_analysis">Analyse</string>
-    <string name="overview_tab_resources">Ressourcen</string>
+    <string name="overview_tab_resources">Inhalte</string>
 
     <!-- Analysis Tab -->
     <string name="analysis_tab_title">Deine Muster</string>

@@ -21,9 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.empiriact.app.ui.common.ViewModelFactory
 import com.empiriact.app.ui.navigation.Route
-import com.empiriact.app.ui.screens.resources.gratitude.GratitudeScreen
 
 private data class ResourceExercise(
     val title: String,
@@ -70,9 +68,9 @@ private val allExercises = listOf(
 )
 
 @Composable
-fun ResourcesScreen(factory: ViewModelFactory, navController: NavController) {
+fun ResourcesScreen(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("Übungen", "Dankbarkeit")
+    val tabs = listOf("Übungen", "Edukation")
 
     Column(modifier = Modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = selectedTabIndex) {
@@ -85,7 +83,41 @@ fun ResourcesScreen(factory: ViewModelFactory, navController: NavController) {
         }
         when (selectedTabIndex) {
             0 -> ExercisesList(navController)
-            1 -> GratitudeScreen(factory)
+            1 -> EducationList()
+        }
+    }
+}
+
+@Composable
+private fun EducationList() {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            Text("Edukation", style = MaterialTheme.typography.headlineMedium)
+            Text(
+                "Hier findest du psychoedukative Inhalte rund um Grübeln, Aufmerksamkeit und hilfreiche Strategien im Alltag.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        item {
+            ResourceCard(
+                title = "Wie Grübeln entsteht",
+                description = "Verstehe die typischen Auslöser und warum sich Grübelschleifen so hartnäckig anfühlen.",
+                onClick = {}
+            )
+        }
+
+        item {
+            ResourceCard(
+                title = "Aufmerksamkeit trainieren",
+                description = "Lerne, wie bewusste Aufmerksamkeitslenkung emotionale Entlastung und mehr Handlungsfähigkeit fördern kann.",
+                onClick = {}
+            )
         }
     }
 }
@@ -99,7 +131,7 @@ private fun ExercisesList(navController: NavController) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("Ressourcen", style = MaterialTheme.typography.headlineMedium)
+            Text("Inhalte", style = MaterialTheme.typography.headlineMedium)
             Text(
                 "Hier findest du eine Sammlung von Übungen, die dir helfen können, mit Grübeln und schwierigen Gefühlen umzugehen.",
                 style = MaterialTheme.typography.bodyMedium
