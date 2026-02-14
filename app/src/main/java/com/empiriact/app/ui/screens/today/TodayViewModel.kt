@@ -15,12 +15,13 @@ import java.time.LocalDate
 
 // Data class to hold the unsaved state for an hour entry.
 data class HourEntryCache(val activities: List<String> = emptyList(), val valence: Int = 0, val inputText: String = "")
+data class HourEntryKey(val date: LocalDate, val hour: Int)
 
 class TodayViewModel(private val repository: ActivityLogRepository) : ViewModel() {
 
     // Cache for unsaved changes. Key is the hour of the day.
-    private val _unsavedChanges = MutableStateFlow<Map<Int, HourEntryCache>>(emptyMap())
-    val unsavedChanges: StateFlow<Map<Int, HourEntryCache>> = _unsavedChanges.asStateFlow()
+    private val _unsavedChanges = MutableStateFlow<Map<HourEntryKey, HourEntryCache>>(emptyMap())
+    val unsavedChanges: StateFlow<Map<HourEntryKey, HourEntryCache>> = _unsavedChanges.asStateFlow()
 
     // Flow for logs of the last 2 days to cover "yesterday" entries shown after midnight.
     val todayLogs: StateFlow<List<ActivityLogEntity>> = repository.getLogsForDay(
@@ -53,9 +54,9 @@ class TodayViewModel(private val repository: ActivityLogRepository) : ViewModel(
     /**
      * Caches the current state of an hour entry.
      */
-    fun cacheHourEntry(hour: Int, cache: HourEntryCache) {
+    fun cacheHourEntry(date: LocalDate, hour: Int, cache: HourEntryCache) {
         val currentCache = _unsavedChanges.value.toMutableMap()
-        currentCache[hour] = cache
+        currentCache[HourEntryKey(date = date, hour = hour)] = cache
         _unsavedChanges.value = currentCache
     }
 
@@ -73,7 +74,7 @@ class TodayViewModel(private val repository: ActivityLogRepository) : ViewModel(
             )
             // Clear the cache for the successfully saved hour.
             val currentCache = _unsavedChanges.value.toMutableMap()
-            currentCache.remove(hour)
+            currentCache.remove(HourEntryKey(date = date, hour = hour))
             _unsavedChanges.value = currentCache
         }
     }
