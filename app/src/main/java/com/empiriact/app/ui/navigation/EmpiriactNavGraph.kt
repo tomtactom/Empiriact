@@ -35,6 +35,7 @@ import com.empiriact.app.ui.screens.resources.ResourcesScreen
 import com.empiriact.app.ui.screens.resources.methods.AttentionSwitchingExercise
 import com.empiriact.app.ui.screens.resources.methods.DistractionSkillExercise
 import com.empiriact.app.ui.screens.resources.methods.FiveFourThreeTwoOneExerciseScreen
+import com.empiriact.app.ui.screens.resources.methods.ModuleOneOneInitialConditionsScreen
 import com.empiriact.app.ui.screens.resources.methods.SelectiveAttentionExercise
 import com.empiriact.app.ui.screens.resources.methods.SharedAttentionExercise
 import com.empiriact.app.ui.screens.resources.methods.SituationalAttentionRefocusingExercise
@@ -129,6 +130,7 @@ private fun NavGraphBuilder.staticGraph(factory: ViewModelFactory, navController
 
 private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navController: NavController) {
     composable(Route.Resources.route) { ResourcesScreen(navController) }
+    composable(Route.ModuleOneOneInitialConditions.route) { ModuleOneOneInitialConditionsScreen(navController) }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }
     composable(Route.FlowChartExercise.route) { FlowChartExerciseScreen(navController) }
 
@@ -204,4 +206,3 @@ private data class BottomNavItem(
     val label: String,
     val icon: ImageVector,
 )
-
