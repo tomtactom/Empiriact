@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -43,9 +45,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.empiriact.app.R
 import com.empiriact.app.ui.common.ContentDescriptions
 import kotlinx.coroutines.launch
 
@@ -122,7 +127,7 @@ fun PsychoeducationActivationFoundationsScreen(navController: NavController) {
                 .padding(padding)
         ) { page ->
             when (page) {
-                0 -> ModulePage(title = "1) Worum es hier geht") {
+                0 -> ModulePage(title = "1) Worum es hier geht", illustrationResId = R.drawable.illustration_module_page_01) {
                     Text(
                         "Damit Veränderung im Alltag leichter starten kann, hilft ein klarer Rahmen: Du übernimmst eine aktive Rolle – die App unterstützt dich dabei wie ein Coach.",
                         style = MaterialTheme.typography.bodyMedium
@@ -138,7 +143,7 @@ fun PsychoeducationActivationFoundationsScreen(navController: NavController) {
                     )
                 }
 
-                1 -> ModulePage(title = "2) Kernidee: Aktiv werden als Lernprozess") {
+                1 -> ModulePage(title = "2) Kernidee: Aktiv werden als Lernprozess", illustrationResId = R.drawable.illustration_module_page_02) {
                     Text(
                         "Ein zentrales Element der werteorientierten Verhaltensaktivierung ist: Du planst kleine Aktivitäten und probierst sie zwischen deinen Check-ins aus.",
                         style = MaterialTheme.typography.bodyMedium
@@ -158,7 +163,7 @@ fun PsychoeducationActivationFoundationsScreen(navController: NavController) {
                     )
                 }
 
-                2 -> ModulePage(title = "3) Was dich in den nächsten Wochen erwartet") {
+                2 -> ModulePage(title = "3) Was dich in den nächsten Wochen erwartet", illustrationResId = R.drawable.illustration_module_page_03) {
                     Text("Du lernst Schritt für Schritt:", style = MaterialTheme.typography.bodyMedium)
                     Bullet("depressive Stimmung und Antriebsverlust besser einzuordnen")
                     Bullet("zu erkennen, was dich stärkt (und was dich eher runterzieht)")
@@ -171,7 +176,7 @@ fun PsychoeducationActivationFoundationsScreen(navController: NavController) {
                     )
                 }
 
-                3 -> ModulePage(title = "Kompakt-Screen (App-Version)") {
+                3 -> ModulePage(title = "Kompakt-Screen (App-Version)", illustrationResId = R.drawable.illustration_module_page_04) {
                     Text(
                         "Du sammelst in den nächsten Wochen Erfahrungen damit, was dir hilft, dich stabiler zu fühlen. Dafür testest du kleine Aktivitäten im Alltag. Nicht alles fühlt sich sofort gut an – und auch das kann dir zeigen, was du brauchst und was besser zu dir passt.",
                         style = MaterialTheme.typography.bodyMedium
@@ -183,7 +188,7 @@ fun PsychoeducationActivationFoundationsScreen(navController: NavController) {
                     )
                 }
 
-                4 -> ModulePage(title = "4) Mini-Übung: „Experiment statt Prüfung“ (2 Minuten)") {
+                4 -> ModulePage(title = "4) Mini-Übung: „Experiment statt Prüfung“ (2 Minuten)", illustrationResId = R.drawable.illustration_module_page_05) {
                     Text(
                         "Wähle für die nächste Woche eine kleine Sache, die du testen möchtest.",
                         style = MaterialTheme.typography.bodyMedium
@@ -208,7 +213,7 @@ fun PsychoeducationActivationFoundationsScreen(navController: NavController) {
                     )
                 }
 
-                5 -> ModulePage(title = "5) Reflexionsfragen für die App") {
+                5 -> ModulePage(title = "5) Reflexionsfragen für die App", illustrationResId = R.drawable.illustration_module_page_06) {
                     OutlinedTextField(
                         value = reflectionStep,
                         onValueChange = { reflectionStep = it },
@@ -242,6 +247,7 @@ fun PsychoeducationActivationFoundationsScreen(navController: NavController) {
 @Composable
 private fun ModulePage(
     title: String,
+    illustrationResId: Int = R.drawable.illustration_module_page_01,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(
@@ -260,12 +266,50 @@ private fun ModulePage(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 content = {
+                    AndroidModuleBanner()
                     Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    androidx.compose.foundation.Image(
+                        painter = painterResource(id = illustrationResId),
+                        contentDescription = "Illustration zu $title",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp)
+                            .clip(RoundedCornerShape(10.dp)),
+                        contentScale = ContentScale.Crop
+                    )
                     content()
                 }
             )
         }
     }
+}
+
+@Composable
+private fun AndroidModuleBanner() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(999.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(text = "🤖", style = MaterialTheme.typography.titleMedium)
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = "Android Lernpfad",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Text(
+                text = "Material Design, kleine Schritte, klare Struktur",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+    }
+    Spacer(modifier = Modifier.height(2.dp))
 }
 
 @Composable
