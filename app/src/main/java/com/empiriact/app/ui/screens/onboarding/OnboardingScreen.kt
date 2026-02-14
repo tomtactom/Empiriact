@@ -76,40 +76,40 @@ fun OnboardingScreen(onFinished: () -> Unit) {
     val pages = remember {
         listOf(
             IntroPage(
-                label = "Schritt 1 · Orientierung",
+                label = "Schritt 1 · Ankommen",
                 icon = Icons.Default.AutoAwesome,
                 title = "Willkommen bei Empiriact",
-                subtitle = "Du lernst, was gerade in dir passiert, ohne dich davon steuern zu lassen. Das ist die Grundlage für ruhige, wirksame Entscheidungen im Alltag.",
+                subtitle = "Du kannst hier in deinem Tempo erkunden, was dir im Alltag guttut. Jeder Check-in unterstützt dich dabei, klarer wahrzunehmen und stimmige Entscheidungen zu treffen.",
                 highlights = listOf(
-                    "Kurze Check-ins statt Überforderung: 30–90 Sekunden reichen für einen guten Start.",
-                    "Verhaltenstherapeutisch fundiert: Wahrnehmen → benennen → handlungsfähig bleiben.",
-                    "Keine Perfektion nötig: kleine Schritte sind wirksamer als seltene große Vorsätze."
+                    "Mikro-Check-ins (30–90 Sekunden) lassen sich leicht in deinen Tag integrieren.",
+                    "Verhaltenstherapeutische Kernkompetenz: Wahrnehmen → benennen → bewusst handeln.",
+                    "Du wählst, was gerade passend ist: ein kleiner Schritt zählt voll."
                 ),
-                microAction = "Nimm dir heute einmal 1 Minute für einen bewussten Atemzug + Körper-Check."
+                microAction = "Wenn du magst: Nimm dir heute 1 Minute für Atem und Körperwahrnehmung."
             ),
             IntroPage(
-                label = "Schritt 2 · In schwierigen Momenten",
+                label = "Schritt 2 · Flexibel bleiben",
                 icon = Icons.Default.PsychologyAlt,
-                title = "Wenn der Kopf laut wird",
-                subtitle = "Empiriact unterstützt dich in Stressmomenten mit klaren, konkreten Übungen, damit aus Grübeln wieder Orientierung wird.",
+                title = "Wenn Gedanken intensiv werden",
+                subtitle = "Empiriact bietet dir kurze, strukturierte Übungen, mit denen du Abstand gewinnst und wieder handlungsfähig wirst.",
                 highlights = listOf(
-                    "Defusion: Gedanken als Gedanken erkennen – nicht als Befehl.",
-                    "Emotionsregulation: Anspannung spürbar senken, bevor du entscheidest.",
-                    "Soforthilfe mit Struktur: Beobachten, erden, nächsten hilfreichen Schritt wählen."
+                    "Kognitive Defusion: Gedanken als mentale Ereignisse einordnen.",
+                    "Emotionsregulation: Erregung gezielt herunterfahren und Orientierung stärken.",
+                    "Situative Selbststeuerung: Beobachten, erden, nächsten hilfreichen Schritt wählen."
                 ),
-                microAction = "Lege innerlich den Satz fest: ‚Ich bemerke gerade den Gedanken, dass …‘"
+                microAction = "Wenn es für dich passt: Nutze den Satz „Ich bemerke den Gedanken, dass …“ als Anker."
             ),
             IntroPage(
-                label = "Schritt 3 · Wertebasiert handeln",
+                label = "Schritt 3 · Werteorientiert handeln",
                 icon = Icons.Default.TrackChanges,
                 title = "Vom Verstehen ins Tun",
-                subtitle = "Du verknüpfst Übungen mit deinen Werten, damit Veränderungen im Alltag stabil und realistisch werden.",
+                subtitle = "Du verbindest Übungen mit deinen persönlichen Werten, damit hilfreiche Gewohnheiten nachhaltig in deinen Alltag wachsen.",
                 highlights = listOf(
-                    "Kleine Commitments: 1 konkreter Schritt pro Tag schlägt vage Vorsätze.",
-                    "Selbstwirksamkeit wächst durch Wiederholung, nicht durch Druck.",
-                    "Du entscheidest das Tempo – die App passt sich deinem Alltag an."
+                    "Werteklärung: Du definierst, was dir wichtig ist und wie es im Alltag sichtbar wird.",
+                    "Konkrete Verhaltensplanung: Ein umsetzbarer Schritt pro Tag schafft Kontinuität.",
+                    "Selbstwirksamkeit entsteht durch wiederholte Erfahrungen in deinem eigenen Tempo."
                 ),
-                microAction = "Wähle heute einen Mini-Schritt, der zu einem deiner Werte passt."
+                microAction = "Wenn du möchtest: Wähle heute einen Mini-Schritt, der zu einem deiner Werte passt."
             )
         )
     }
@@ -171,6 +171,8 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 onClick = {
                     if (pagerState.currentPage < pageCount - 1) {
                         scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                    } else {
+                        onFinished()
                     }
                 }
             ) {
@@ -295,14 +297,14 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Du entscheidest selbst. Die folgenden Optionen erhöhen die Zuverlässigkeit von Erinnerungen und Übungen deutlich.",
+            text = "Du entscheidest selbst, welche Einstellungen du aktivieren möchtest. Sie können Erinnerungen und Übungen im Alltag verlässlicher unterstützen.",
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(20.dp))
 
         PermissionCard(
             title = "Benachrichtigungen erlauben",
-            description = "So können wir dir achtsame, kurze Impulse zur passenden Zeit senden.",
+            description = "Du erhältst kurze Impulse zu den Zeiten, die für dich passend sind.",
             isEnabled = notificationsEnabled,
             enabledText = "Aktiv",
             disabledText = "Nicht aktiv",
@@ -319,7 +321,7 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
 
         PermissionCard(
             title = "Akkuoptimierung deaktivieren",
-            description = "Damit Empiriact im Hintergrund stabil läuft und Erinnerungen nicht ausfallen.",
+            description = "So kann Empiriact Hintergrundfunktionen zuverlässiger ausführen.",
             isEnabled = batteryOptimizationDisabled,
             enabledText = "Deaktiviert",
             disabledText = "Aktiv",
@@ -340,7 +342,7 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsEnabled) {
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Hinweis: Ab Android 13 sind Benachrichtigungen standardmäßig deaktiviert.",
+                text = "Hinweis: Ab Android 13 braucht die App eine aktive Benachrichtigungsfreigabe.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
