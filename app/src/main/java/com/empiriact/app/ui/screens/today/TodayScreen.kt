@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -124,6 +125,18 @@ fun TodayScreen(navController: NavController) {
             }
         }
 
+        item(key = "acute_mode_entry") {
+            AcuteModeEntryCard(
+                onStart = {
+                    navController.navigate(
+                        com.empiriact.app.ui.navigation.Route
+                            .SituationalAttentionRefocusingExercise
+                            .createRoute("today")
+                    )
+                }
+            )
+        }
+
         items(
             items = items,
             key = { item ->
@@ -169,6 +182,42 @@ fun TodayScreen(navController: NavController) {
                         Text("Mehr anzeigen")
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AcuteModeEntryCard(onStart: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+            modifier = Modifier.padding(Dimensions.paddingMedium)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.FlashOn,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer
+                )
+                Text(
+                    text = "Akutmodus: 90 Sekunden aus der Grübelschleife",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = Dimensions.paddingSmall)
+                )
+            }
+            Text(
+                text = "Wenn du gerade festhängst: kurzer Atem- und Aufmerksamkeitswechsel plus nächster konkreter Schritt.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+            Button(onClick = onStart) {
+                Text("Jetzt Akutmodus starten")
             }
         }
     }

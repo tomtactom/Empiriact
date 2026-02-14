@@ -23,10 +23,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -44,20 +46,27 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.empiriact.app.ui.common.ContentDescriptions
 import com.empiriact.app.ui.navigation.Route
+import kotlin.math.roundToInt
 
 private enum class SarSense { SEEING, HEARING, FEELING }
 private sealed class SarScreenState {
+    object PRE_CHECKIN : SarScreenState()
     object INTRO : SarScreenState()
     object SENSE_CHOICE : SarScreenState()
     data class EXERCISE(val sense: SarSense) : SarScreenState()
+    object POST_CHECKIN : SarScreenState()
+    object MICRO_COMMITMENT : SarScreenState()
 
     companion object {
         val Saver: Saver<SarScreenState, String> = Saver(
             save = { state ->
                 when (state) {
                     is EXERCISE -> "EXERCISE:${state.sense.name}"
+                    PRE_CHECKIN -> "PRE_CHECKIN"
                     INTRO -> "INTRO"
                     SENSE_CHOICE -> "SENSE_CHOICE"
+                    POST_CHECKIN -> "POST_CHECKIN"
+                    MICRO_COMMITMENT -> "MICRO_COMMITMENT"
                 }
             },
             restore = { saved ->
@@ -67,8 +76,11 @@ private sealed class SarScreenState {
                         val sense = SarSense.entries.firstOrNull { it.name == senseName }
                         if (sense != null) EXERCISE(sense) else INTRO
                     }
+                    saved == "PRE_CHECKIN" -> PRE_CHECKIN
                     saved == "INTRO" -> INTRO
                     saved == "SENSE_CHOICE" -> SENSE_CHOICE
+                    saved == "POST_CHECKIN" -> POST_CHECKIN
+                    saved == "MICRO_COMMITMENT" -> MICRO_COMMITMENT
                     else -> INTRO
                 }
             }
@@ -82,8 +94,15 @@ fun SituationalAttentionRefocusingExercise(
     navController: NavController,
     from: String
 ) {
-    var screenState: SarScreenState by rememberSaveable(stateSaver = SarScreenState.Saver) { mutableStateOf(SarScreenState.INTRO) }
+    var screenState: SarScreenState by rememberSaveable(stateSaver = SarScreenState.Saver) { mutableStateOf(SarScreenState.PRE_CHECKIN) }
     var completedSenses by rememberSaveable { mutableStateOf(emptySet<SarSense>()) }
+    var preBurden by rememberSaveable { mutableStateOf(6f) }
+    var preAgency by rememberSaveable { mutableStateOf(4f) }
+    var postBurden by rememberSaveable { mutableStateOf(5f) }
+    var postAgency by rememberSaveable { mutableStateOf(5f) }
+    var insight by rememberSaveable { mutableStateOf("") }
+    var ifThenPlan by rememberSaveable { mutableStateOf("") }
+    var nextStep by rememberSaveable { mutableStateOf("") }
 
     fun onSenseComplete(completedSense: SarSense) {
         val newCompletedSenses = completedSenses + completedSense
@@ -91,7 +110,7 @@ fun SituationalAttentionRefocusingExercise(
         val remainingSenses = SarSense.values().toSet() - newCompletedSenses
 
         if (remainingSenses.isEmpty()) {
-            navController.navigate(Route.ExerciseRating.createRoute("situational_attention_refocusing", from))
+            screenState = SarScreenState.POST_CHECKIN
         } else {
             screenState = SarScreenState.SENSE_CHOICE
         }
@@ -114,6 +133,16 @@ fun SituationalAttentionRefocusingExercise(
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             when (val state = screenState) {
+                is SarScreenState.PRE_CHECKIN -> PrePostCheckinScreen(
+                    title = "Kurzer Start-Check-in",
+                    subtitle = "Du bist nicht falsch, wenn du gerade festhängst. Wir schauen nur kurz auf deinen aktuellen Zustand.",
+                    burden = preBurden,
+                    agency = preAgency,
+                    primaryButtonLabel = "Akutmodus starten",
+                    onBurdenChange = { preBurden = it },
+                    onAgencyChange = { preAgency = it },
+                    onContinue = { screenState = SarScreenState.INTRO }
+                )
                 is SarScreenState.INTRO -> SarIntroScreen(
                     onNext = { screenState = SarScreenState.SENSE_CHOICE }
                 )
@@ -149,6 +178,27 @@ fun SituationalAttentionRefocusingExercise(
                         onComplete = { onSenseComplete(SarSense.FEELING) }
                     )
                 }
+                is SarScreenState.POST_CHECKIN -> PrePostCheckinScreen(
+                    title = "Nach der Übung",
+                    subtitle = "Schon kleine Veränderungen zählen. Du trainierst gerade flexible Aufmerksamkeit.",
+                    burden = postBurden,
+                    agency = postAgency,
+                    primaryButtonLabel = "Weiter zum Transfer",
+                    onBurdenChange = { postBurden = it },
+                    onAgencyChange = { postAgency = it },
+                    onContinue = { screenState = SarScreenState.MICRO_COMMITMENT }
+                )
+                is SarScreenState.MICRO_COMMITMENT -> MicroCommitmentScreen(
+                    insight = insight,
+                    ifThenPlan = ifThenPlan,
+                    nextStep = nextStep,
+                    onInsightChange = { insight = it },
+                    onIfThenChange = { ifThenPlan = it },
+                    onNextStepChange = { nextStep = it },
+                    onFinish = {
+                        navController.navigate(Route.ExerciseRating.createRoute("situational_attention_refocusing", from))
+                    }
+                )
             }
         }
     }
@@ -164,13 +214,131 @@ private fun SarIntroScreen(onNext: () -> Unit) {
         Text("Willkommen zur Sinnesreise", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))
         Text(
-            "Diese Übung hilft dir, deine Aufmerksamkeit von belastenden Gedanken wegzulenken und dich im Hier und Jetzt zu verankern. Wähle gleich den Sinn, mit dem du starten möchtest.",
+            "Diese 90-Sekunden-Übung hilft dir, Grübelschleifen zu unterbrechen und wieder handlungsfähig zu werden. Wähle gleich den Sinn, mit dem du starten möchtest.",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(Modifier.height(32.dp))
         Button(onClick = onNext) {
             Text("Starten")
+        }
+    }
+}
+
+@Composable
+private fun PrePostCheckinScreen(
+    title: String,
+    subtitle: String,
+    burden: Float,
+    agency: Float,
+    primaryButtonLabel: String,
+    onBurdenChange: (Float) -> Unit,
+    onAgencyChange: (Float) -> Unit,
+    onContinue: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(title, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(8.dp))
+        Text(subtitle, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(24.dp))
+
+        RatingSlider(
+            label = "Belastung (0-10)",
+            value = burden,
+            onValueChange = onBurdenChange
+        )
+        Spacer(Modifier.height(16.dp))
+        RatingSlider(
+            label = "Handlungsfähigkeit (0-10)",
+            value = agency,
+            onValueChange = onAgencyChange
+        )
+
+        Spacer(Modifier.height(24.dp))
+        Button(onClick = onContinue) {
+            Text(primaryButtonLabel)
+        }
+    }
+}
+
+@Composable
+private fun RatingSlider(
+    label: String,
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text("$label: ${value.roundToInt()}")
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = 0f..10f,
+            steps = 9
+        )
+    }
+}
+
+@Composable
+private fun MicroCommitmentScreen(
+    insight: String,
+    ifThenPlan: String,
+    nextStep: String,
+    onInsightChange: (String) -> Unit,
+    onIfThenChange: (String) -> Unit,
+    onNextStepChange: (String) -> Unit,
+    onFinish: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Transfer in den Alltag", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            "Stark, dass du trotz Belastung gehandelt hast. Abschluss mit drei Mini-Schritten:",
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Text("1) 1 Satz Erkenntnis")
+        Text("2) Wenn-Dann-Plan")
+        Text("3) Nächster Schritt < 2 Minuten")
+
+        OutlinedTextField(
+            value = insight,
+            onValueChange = onInsightChange,
+            label = { Text("1 Satz Erkenntnis") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = ifThenPlan,
+            onValueChange = onIfThenChange,
+            label = { Text("Wenn ich Grübeln bemerke, dann ...") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = nextStep,
+            onValueChange = onNextStepChange,
+            label = { Text("Nächster Schritt in unter 2 Minuten") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(Modifier.weight(1f))
+        Button(
+            onClick = onFinish,
+            enabled = insight.isNotBlank() && ifThenPlan.isNotBlank() && nextStep.isNotBlank(),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Akutmodus abschließen")
         }
     }
 }
