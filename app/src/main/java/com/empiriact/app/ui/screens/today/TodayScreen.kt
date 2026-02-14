@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -446,24 +447,35 @@ private fun HourEntry(
 @Composable
 private fun ValencePicker(selectedValence: Int, onValenceSelected: (Int) -> Unit) {
     val valences = listOf(-2, -1, 0, 1, 2)
-    FlowRow(
+    val isCompactLayout = LocalConfiguration.current.screenWidthDp < 420
+
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
-        verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
     ) {
         valences.forEach { v ->
             val isSelected = selectedValence == v
             FilledTonalButton(
                 onClick = { onValenceSelected(v) },
+                modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.filledTonalButtonColors(
                     containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
                     contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                 )
             ) {
-                Text(valenceLabel(v))
+                Text(if (isCompactLayout) valenceShortLabel(v) else valenceLabel(v))
             }
         }
     }
+}
+
+private fun valenceShortLabel(v: Int): String = when (v) {
+    -2 -> "--"
+    -1 -> "-"
+    0 -> "0"
+    1 -> "+"
+    2 -> "++"
+    else -> "0"
 }
 
 private fun valenceLabel(v: Int): String = when (v) {
