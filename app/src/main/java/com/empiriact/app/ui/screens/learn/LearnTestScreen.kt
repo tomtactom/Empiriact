@@ -41,42 +41,52 @@ data class TestQuestion(
 
 private val testQuestions = listOf(
     TestQuestion(
-        "Was ist der erste Schritt zur persönlichen Entwicklung?",
+        "Welche Aussage trifft Rumination am besten?",
         listOf(
-            "Sich selbst kennenlernen",
-            "Viel Geld ausgeben",
-            "Schnelle Ergebnisse erwarten",
-            "Andere kopieren"
-        ),
-        0
-    ),
-    TestQuestion(
-        "Welche Methode ist am effektivsten für langfristige Veränderungen?",
-        listOf(
-            "Radikale Veränderungen auf einmal",
-            "Kleine, konsistente Schritte",
-            "Nur theoretisches Wissen",
-            "Keine, es ist unmöglich"
+            "Konkretes, zeitlich begrenztes Problemlösen",
+            "Wiederholtes negatives Kreisen ohne klaren Handlungsschritt",
+            "Entspannungstechnik zur Emotionsregulation",
+            "Neutrales Erinnern ohne Belastung"
         ),
         1
     ),
     TestQuestion(
-        "Wie oft solltest du deine Fortschritte überprüfen?",
+        "Worin liegt der zentrale therapeutische Fokus in Modul 1?",
         listOf(
-            "Niemals",
-            "Einmal im Jahr",
-            "Regelmäßig (wöchentlich oder monatlich)",
-            "Nur wenn du Probleme hast"
+            "Nur positive Gedanken denken",
+            "Denkinhalte komplett vermeiden",
+            "Das Wie des Denkens (Denkstil) verändern",
+            "Ausschließlich Schlaf verbessern"
         ),
         2
     ),
     TestQuestion(
-        "Was ist ein wichtiger Faktor für Erfolg?",
+        "Welche Funktion hat die 3-Fragen-Daumenregel?",
         listOf(
-            "Glück allein",
-            "Konsistenz und Geduld",
-            "Nur natürliche Talente",
-            "Teure Programme"
+            "Diagnosen ersetzen",
+            "Akut erkennen, ob hilfreiches Denken oder Grübeln vorliegt",
+            "Nur Therapieaufgaben planen",
+            "Gefühle unterdrücken"
+        ),
+        1
+    ),
+    TestQuestion(
+        "Wozu dient die Funktionsanalyse (AB 4-6) primär?",
+        listOf(
+            "Ausschließlich Rückschau ohne Konsequenzen",
+            "Analyse von Auslösern, Reaktionen, Konsequenzen und Aufrechterhaltung",
+            "Sofortige Konfrontation ohne Verständnis der Muster",
+            "Vergleich mit anderen Personen"
+        ),
+        1
+    ),
+    TestQuestion(
+        "Was wird mit AB 8 (Therapietracker) unterstützt?",
+        listOf(
+            "Nur tägliche To-do-Listen",
+            "Verlaufsevaluation von Leidensdruck, Häufigkeit, Dauer, Triggern und Skills",
+            "Ausschließlich Medikamentenplanung",
+            "Einmalige Abschlussbewertung"
         ),
         1
     )
@@ -93,7 +103,7 @@ fun LearnTestScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Testmodul") },
+                title = { Text("Wissenscheck: Modul 1") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -239,7 +249,7 @@ private fun TestResultsScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Testabschluss",
+            text = "Wissenscheck abgeschlossen",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
