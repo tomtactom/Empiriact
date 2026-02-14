@@ -32,28 +32,12 @@ private data class ResourceSection(
     val exercises: List<ResourceExercise>
 )
 
-private val psychoeducationalSections = listOf(
+private val moduleSections: List<ResourceSection> = emptyList()
+
+private val exerciseSections = listOf(
     ResourceSection(
-        title = "Phase 1 · Verstehen & Orientierung",
-        description = "Klare, kurze Einstiegsinhalte: Du verstehst zuerst das Warum, bevor du ins Training gehst.",
-        exercises = listOf(
-            ResourceExercise(
-                title = "Modul 1.1 · Gute Ausgangsbedingungen",
-                learningGoal = "Rollen, Erwartungen und deinen eigenen Weg klären.",
-                whyItMatters = "Ein klarer Start stärkt Selbstwirksamkeit und unterstützt autonome Entscheidungen (ASIB).",
-                route = Route.ModuleOneOneInitialConditions
-            ),
-            ResourceExercise(
-                title = "Modul 1.2 · Aktivitäten & Stimmung beobachten",
-                learningGoal = "Belastung und Entlastung im Alltag systematisch erkennen.",
-                whyItMatters = "Beobachtung macht Muster sichtbar und schafft eine verhaltenstherapeutische Arbeitsgrundlage.",
-                route = Route.ModuleOneTwoActivityMoodMonitoring
-            )
-        )
-    ),
-    ResourceSection(
-        title = "Phase 2 · Stabilisieren im Moment",
-        description = "Kurze Übungen für hohe innere Anspannung: Aufmerksamkeit gezielt nach außen lenken und beruhigen.",
+        title = "Stabilisieren im Moment",
+        description = "Kurze verhaltenstherapeutische Übungen für hohe innere Anspannung.",
         exercises = listOf(
             ResourceExercise(
                 title = "Refokussierung nach außen",
@@ -76,7 +60,7 @@ private val psychoeducationalSections = listOf(
         )
     ),
     ResourceSection(
-        title = "Phase 3 · Aufmerksamkeit flexibel trainieren",
+        title = "Aufmerksamkeit flexibel trainieren",
         description = "Aufmerksamkeitskontrolle schrittweise erweitern: fokussieren, wechseln und weiten.",
         exercises = listOf(
             ResourceExercise(
@@ -100,7 +84,7 @@ private val psychoeducationalSections = listOf(
         )
     ),
     ResourceSection(
-        title = "Phase 4 · Transfer in den Alltag",
+        title = "Transfer in den Alltag",
         description = "Kompetenzen festigen und in persönliche, motivierende Aktivitäten übertragen.",
         exercises = listOf(
             ResourceExercise(
@@ -122,17 +106,45 @@ fun ResourcesScreen(navController: NavController) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            Text("Module", style = MaterialTheme.typography.headlineMedium)
+            Text("Inhalte", style = MaterialTheme.typography.headlineMedium)
             Text(
-                "Wähle den nächsten sinnvollen Schritt. Die Reihenfolge ist psychoedukativ aufgebaut: verstehen, stabilisieren, trainieren, übertragen.",
+                "Hier findest du alle psychoedukativen Inhalte strukturiert in Module und Übungen.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
 
-        psychoeducationalSections.forEach { section ->
-            item {
-                SectionHeader(title = section.title, description = section.description)
+        item {
+            Text("Module", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+            if (moduleSections.isEmpty()) {
+                Text(
+                    "Aktuell sind noch keine Module verfügbar. Neue Module erscheinen hier, sobald sie erstellt wurden.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
+        }
+
+        moduleSections.forEach { section ->
+            item { SectionHeader(title = section.title, description = section.description) }
+            items(section.exercises) { exercise ->
+                ResourceCard(
+                    title = exercise.title,
+                    learningGoal = exercise.learningGoal,
+                    whyItMatters = exercise.whyItMatters,
+                    onClick = { navController.navigate(exercise.route.route) }
+                )
+            }
+        }
+
+        item {
+            Text("Übungen", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+            Text(
+                "Alle aktuell verfügbaren Übungen und Ressourcen mit verhaltenstherapeutischem Fokus.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        exerciseSections.forEach { section ->
+            item { SectionHeader(title = section.title, description = section.description) }
 
             items(section.exercises) { exercise ->
                 ResourceCard(

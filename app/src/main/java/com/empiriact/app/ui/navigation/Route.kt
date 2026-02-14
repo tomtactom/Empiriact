@@ -52,9 +52,6 @@ sealed class Route(val route: String) {
         fun createRoute(from: String) = "distraction_skill_exercise/$from"
     }
 
-    object ModuleOneOneInitialConditions : Route("module_1_1_initial_conditions")
-    object ModuleOneTwoActivityMoodMonitoring : Route("module_1_2_activity_mood_monitoring")
-
     companion object {
         fun fromExerciseId(exerciseId: String, from: String = "overview"): String? {
             return when (exerciseId) {
