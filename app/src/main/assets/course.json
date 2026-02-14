@@ -155,6 +155,101 @@
           }
         }
       ]
+    },
+    {
+      "id": "module4_aktivitaeten_stimmung_beobachten",
+      "title": "Modul 4: Aktivitäten und Stimmung beobachten",
+      "description": "Du lernst eine alltagstaugliche Aktivitäts- und Stimmungsbeobachtung, verstehst typische Stolpersteine und leitest daraus dein persönliches AVK-Störungsmodell ab.",
+      "lessons": [
+        {
+          "id": "m4_l1",
+          "title": "Warum wir zuerst beobachten",
+          "content": [
+            {
+              "coachMessage": "Zu Beginn der Therapie machen wir gemeinsam ein klares Bild deiner aktuellen Lebenssituation und deines Aktivitätsniveaus. Dafür beobachtest du täglich, was du tust und wie du dich dabei fühlst."
+            },
+            {
+              "coachMessage": "Diese Beobachtung ist die Grundlage für Verhaltensaktivierung: Wir arbeiten nicht mit Vermutungen, sondern mit deinen echten Alltagserfahrungen."
+            },
+            {
+              "coachMessage": "Wichtig: Das Ziel ist nicht, dich zu bewerten. Das Ziel ist, Muster zu erkennen, die wir später gezielt verändern können."
+            }
+          ],
+          "task": {
+            "description": "Lege heute mindestens drei Aktivitäts- und Stimmungseinträge im Heute-Bildschirm an.",
+            "targetScreen": "today"
+          }
+        },
+        {
+          "id": "m4_l2",
+          "title": "So protokollierst du im App-Alltag",
+          "content": [
+            {
+              "coachMessage": "Wenn möglich, dokumentiere stündlich. So entstehen die präzisesten Informationen für die nächsten Therapieschritte. Wenn das gerade nicht geht, nutze größere Zeitblöcke."
+            },
+            {
+              "coachMessage": "Du musst nicht jedes Detail notieren. Wenn in einer Stunde viel passiert, reicht eine sinnvolle Überschrift wie „Arbeit: Kundenkontakt“ oder die wichtigste Aktivität dieser Stunde."
+            },
+            {
+              "coachMessage": "Für die Stimmung nutze die kurze Skala: -- = sehr schlecht, - = schlecht, 0 = neutral, + = gut, ++ = sehr gut."
+            },
+            {
+              "coachMessage": "Praktikabel ist entscheidend: Starte mit der genaueren Erfassung und passe sie im Verlauf auf deinen Alltag an, z. B. mit Smartphone-Notizen oder Kalender-Erinnerungen."
+            }
+          ],
+          "task": {
+            "description": "Aktiviere eine Erinnerung und trage für den Rest des Tages zeitnah Aktivität plus Stimmung ein.",
+            "targetScreen": "settings"
+          }
+        },
+        {
+          "id": "m4_l3",
+          "title": "Typische Schwierigkeiten und Lösungen",
+          "content": [
+            {
+              "coachMessage": "Zu grobe Einträge machen Zusammenhänge unsichtbar. Ein pauschaler Eintrag wie Arbeit mit Stimmung minus über viele Stunden ist meist zu ungenau, weil sich Stimmung innerhalb des Tages verändert."
+            },
+            {
+              "coachMessage": "Trage deshalb markante Teilmomente ein, z. B. Besprechung, Kundentelefonat oder Mittagspause. Genau diese Unterschiede liefern Hinweise auf hilfreiche oder belastende Aktivitätsanteile."
+            },
+            {
+              "coachMessage": "Retrospektive Einträge am Abend oder nach mehreren Tagen sind fehleranfälliger. Je zeitnäher du dokumentierst, desto genauer werden subtile Stimmungsschwankungen sichtbar."
+            },
+            {
+              "coachMessage": "Auch Routinen oder vermeintlich „wenig sinnvolle“ Phasen wie langes Scrollen oder TV sind wichtig. Gerade diese Abschnitte helfen, konkrete Ansatzpunkte für Veränderung zu finden."
+            }
+          ],
+          "task": {
+            "description": "Ergänze heute bewusst auch Routine- oder Vermeidungsphasen in deinem Protokoll, ohne sie zu bewerten.",
+            "targetScreen": "today"
+          }
+        },
+        {
+          "id": "m4_l4",
+          "title": "Von Beobachtung zu deinem AVK-Modell",
+          "content": [
+            {
+              "coachMessage": "Aus deinen Einträgen entwickeln wir dein individuelles Störungsmodell auf Basis von AVK: Auslöser, Verhalten, Konsequenz."
+            },
+            {
+              "coachMessage": "A (Auslöser): Welche Situation, welcher Gedanke oder welcher Körperzustand ging der Veränderung voraus?"
+            },
+            {
+              "coachMessage": "V (Verhalten): Was hast du dann konkret getan, z. B. Rückzug, Liegenbleiben, Grübeln, Aufschieben oder Kontakt aufnehmen?"
+            },
+            {
+              "coachMessage": "K (Konsequenz): Was war kurzfristig entlastend, und welche langfristigen Folgen hatte es für Stimmung, Aktivität und Werteorientierung?"
+            },
+            {
+              "coachMessage": "So verbinden wir klassische Depressionsbehandlung mit werteorientierter Verhaltensaktivierung: nicht nur „bessere Stimmung“, sondern schrittweise mehr Leben in Richtung deiner persönlichen Werte."
+            }
+          ],
+          "task": {
+            "description": "Erstelle auf Basis eines heutigen Eintrags ein kurzes AVK-Schema in der Reflexion (A, V, K je 1-2 Sätze).",
+            "targetScreen": "reflect"
+          }
+        }
+      ]
     }
   ]
 }
