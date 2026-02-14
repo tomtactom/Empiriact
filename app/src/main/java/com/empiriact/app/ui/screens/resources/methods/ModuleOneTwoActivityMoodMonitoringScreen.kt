@@ -1,17 +1,20 @@
 package com.empiriact.app.ui.screens.resources.methods
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
@@ -19,10 +22,12 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.Swipe
 import androidx.compose.material.icons.outlined.Timeline
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,62 +45,70 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Modul 1.2 · Aktivität und Stimmung beobachten",
-            style = MaterialTheme.typography.headlineSmall
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Outlined.Swipe, contentDescription = null)
+        item {
             Text(
-                text = "Wische nach links oder rechts, um die Seiten zu wechseln.",
-                style = MaterialTheme.typography.bodyMedium
+                text = "Modul 1.2 · Aktivität und Stimmung beobachten",
+                style = MaterialTheme.typography.headlineSmall
             )
         }
 
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.weight(1f)
-        ) { pageIndex ->
-            val page = pages[pageIndex]
-            Card(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    item {
-                        Text(
-                            text = "Schritt ${pageIndex + 1} von ${pages.size}: ${page.title}",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    item { Text(page.mainText, style = MaterialTheme.typography.bodyLarge) }
-                    items(page.keyPoints) { TrackingHint(it) }
-                    item {
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("Übung", style = MaterialTheme.typography.titleSmall)
-                                Text(page.exercisePrompt, style = MaterialTheme.typography.bodyMedium)
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Outlined.Swipe, contentDescription = null)
+                Text(
+                    text = "Wische nach links oder rechts, um die Seiten zu wechseln.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+        item {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 320.dp, max = 420.dp)
+            ) { pageIndex ->
+                val page = pages[pageIndex]
+                Card(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        item {
+                            Text(
+                                text = "Schritt ${pageIndex + 1} von ${pages.size}: ${page.title}",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        item { Text(page.mainText, style = MaterialTheme.typography.bodyLarge) }
+                        items(page.keyPoints) { TrackingHint(it) }
+                        item {
+                            Card(modifier = Modifier.fillMaxWidth()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text("Übung", style = MaterialTheme.typography.titleSmall)
+                                    Text(page.exercisePrompt, style = MaterialTheme.typography.bodyMedium)
+                                }
                             }
                         }
                     }
@@ -103,84 +116,119 @@ fun ModuleOneTwoActivityMoodMonitoringScreen(navController: NavController) {
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage((pagerState.currentPage - 1).coerceAtLeast(0))
-                    }
-                },
-                enabled = pagerState.currentPage > 0,
-                modifier = Modifier.weight(1f)
-            ) { Text("Zurück") }
-
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage((pagerState.currentPage + 1).coerceAtMost(pages.lastIndex))
-                    }
-                },
-                enabled = pagerState.currentPage < pages.lastIndex,
-                modifier = Modifier.weight(1f)
-            ) { Text("Weiter") }
-        }
-
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
+        item {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Tracking in 3 Schritten", style = MaterialTheme.typography.titleMedium)
-                TrackingStep(
-                    icon = Icons.Outlined.Timeline,
-                    title = "1) Aktivität benennen",
-                    description = "Kurzer Eintrag: Was mache ich gerade?"
-                )
-                TrackingStep(
-                    icon = Icons.Outlined.BarChart,
-                    title = "2) Stimmung markieren",
-                    description = "Nutze die Skala von -- bis ++."
-                )
-                TrackingStep(
-                    icon = Icons.Outlined.CheckCircle,
-                    title = "3) Muster erkennen",
-                    description = "Lies nach einigen Einträgen wiederkehrende Zusammenhänge ab."
-                )
-            }
-        }
-
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(Icons.Outlined.Psychology, contentDescription = null)
-                    Text("Stimmungsskala", style = MaterialTheme.typography.titleMedium)
+                pages.indices.forEach { index ->
+                    val selected = index == pagerState.currentPage
+                    AssistChip(
+                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                        label = { Text(if (selected) "Seite ${index + 1}" else "${index + 1}") }
+                    )
                 }
-                MoodBar(label = "++", widthFactor = 1.0f, color = Color(0xFF2E7D32), meaning = "sehr angenehm")
-                MoodBar(label = "+", widthFactor = 0.8f, color = Color(0xFF66BB6A), meaning = "angenehm")
-                MoodBar(label = "0", widthFactor = 0.6f, color = Color(0xFFFFCA28), meaning = "ausgeglichen")
-                MoodBar(label = "-", widthFactor = 0.8f, color = Color(0xFFFFA726), meaning = "eher niedrig")
-                MoodBar(label = "--", widthFactor = 1.0f, color = Color(0xFFE53935), meaning = "niedrig")
             }
         }
 
-        OutlinedButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Zurück zu Inhalte")
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage((pagerState.currentPage - 1).coerceAtLeast(0))
+                        }
+                    },
+                    enabled = pagerState.currentPage > 0,
+                    modifier = Modifier.weight(1f)
+                ) { Text("Zurück") }
+
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage((pagerState.currentPage + 1).coerceAtMost(pages.lastIndex))
+                        }
+                    },
+                    enabled = pagerState.currentPage < pages.lastIndex,
+                    modifier = Modifier.weight(1f)
+                ) { Text("Weiter") }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text("Tracking in 3 Schritten", style = MaterialTheme.typography.titleMedium)
+                    TrackingStep(
+                        icon = Icons.Outlined.Timeline,
+                        title = "1) Aktivität benennen",
+                        description = "Kurzer Eintrag: Was mache ich gerade?"
+                    )
+                    TrackingStep(
+                        icon = Icons.Outlined.BarChart,
+                        title = "2) Stimmung markieren",
+                        description = "Nutze die Skala von -- bis ++."
+                    )
+                    TrackingStep(
+                        icon = Icons.Outlined.CheckCircle,
+                        title = "3) Muster erkennen",
+                        description = "Lies nach einigen Einträgen wiederkehrende Zusammenhänge ab."
+                    )
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Outlined.Psychology, contentDescription = null)
+                        Text("Stimmungsskala", style = MaterialTheme.typography.titleMedium)
+                    }
+                    MoodBar(label = "++", widthFactor = 1.0f, color = Color(0xFF2E7D32), meaning = "sehr angenehm")
+                    MoodBar(label = "+", widthFactor = 0.8f, color = Color(0xFF66BB6A), meaning = "angenehm")
+                    MoodBar(label = "0", widthFactor = 0.6f, color = Color(0xFFFFCA28), meaning = "ausgeglichen")
+                    MoodBar(label = "-", widthFactor = 0.8f, color = Color(0xFFFFA726), meaning = "eher niedrig")
+                    MoodBar(label = "--", widthFactor = 1.0f, color = Color(0xFFE53935), meaning = "niedrig")
+                }
+            }
+        }
+
+        item {
+            Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+                Text(
+                    text = "Hinweis: Tracke wertfrei und kurz – es geht um Orientierung, nicht um Perfektion.",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+        item {
+            OutlinedButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Zurück zu Inhalten")
+            }
         }
     }
 }
