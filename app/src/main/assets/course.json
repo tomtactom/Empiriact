@@ -1,5 +1,7 @@
-
 {
+  "id": "hauptkurs_verhaltensaktivierung",
+  "title": "Werteorientierte Verhaltensaktivierung",
+  "description": "Modulare Lernreise zur Stabilisierung bei depressiver Stimmung mit alltagsnahen Übungen.",
   "modules": [
     {
       "id": "module1",
@@ -10,9 +12,15 @@
           "id": "m1_l1",
           "title": "Willkommen & Einführung",
           "content": [
-            { "coachMessage": "Hallo! Ich bin Leo, dein persönlicher Coach. Ich freue mich riesig, dich auf dieser Reise zu begleiten! In den nächsten Wochen werden wir gemeinsam daran arbeiten, dass du dich wieder stabiler und besser fühlst." },
-            { "coachMessage": "Das Ziel ist, dass du lernst, wie du besser mit depressiver Stimmung und Antriebslosigkeit umgehen kannst. Wir probieren Dinge aus und finden heraus, was dir persönlich hilft." },
-            { "coachMessage": "Es geht darum, deine persönlichen Werte zu entdecken und diese durch Aktivitäten wieder mehr in deinen Alltag zu bringen. Keine Sorge, du bist nicht allein – ich bin an deiner Seite! Wir machen das Schritt für Schritt." }
+            {
+              "coachMessage": "Hallo! Ich bin Leo, dein persönlicher Coach. Ich freue mich, dich auf dieser Reise zu begleiten. In den nächsten Wochen arbeiten wir gemeinsam daran, dass du dich stabiler und besser fühlst."
+            },
+            {
+              "coachMessage": "Das Ziel ist, dass du lernst, wie du besser mit depressiver Stimmung und Antriebslosigkeit umgehen kannst. Wir probieren Dinge aus und finden heraus, was dir persönlich hilft."
+            },
+            {
+              "coachMessage": "Es geht darum, deine persönlichen Werte zu entdecken und durch kleine Aktivitäten wieder mehr in deinen Alltag zu bringen. Wir machen das Schritt für Schritt."
+            }
           ],
           "task": null
         },
@@ -20,12 +28,18 @@
           "id": "m1_l2",
           "title": "Aktivitäten & Stimmung beobachten",
           "content": [
-            { "coachMessage": "Lass uns zuerst ein Bild von deiner aktuellen Situation machen. Der erste Schritt ist, deine täglichen Aktivitäten und deine Stimmung dabei zu beobachten. Das hilft uns, Muster zu erkennen." },
-            { "coachMessage": "Ich möchte dich bitten, ab jetzt stündlich einzutragen, was du machst und wie du dich dabei fühlst. Das klingt vielleicht nach viel, aber es ist super wertvoll, um Zusammenhänge zu verstehen." },
-            { "coachMessage": "Wenn du in einer Stunde mehrere Dinge tust, trag einfach die Hauptaktivität ein oder die, die für dich am wichtigsten war. Für die Stimmung nutzen wir eine einfache Skala von -- (sehr schlecht) bis ++ (sehr gut)." }
+            {
+              "coachMessage": "Lass uns zuerst ein Bild deiner aktuellen Situation machen. Der erste Schritt ist, deine täglichen Aktivitäten und deine Stimmung dabei zu beobachten."
+            },
+            {
+              "coachMessage": "Bitte trage möglichst regelmäßig ein, was du machst und wie du dich dabei fühlst. So erkennen wir Muster, die im Alltag oft unsichtbar bleiben."
+            },
+            {
+              "coachMessage": "Wenn in einer Stunde mehrere Dinge passieren, notiere einfach die Hauptaktivität oder die für dich wichtigste Situation."
+            }
           ],
           "task": {
-            "description": "Gehe zum 'Heute'-Bildschirm und beginne mit der stündlichen Protokollierung deiner Aktivitäten und deiner Stimmung.",
+            "description": "Gehe zum Heute-Bildschirm und beginne mit der Protokollierung deiner Aktivitäten und deiner Stimmung.",
             "targetScreen": "today"
           }
         },
@@ -33,19 +47,114 @@
           "id": "m1_l3",
           "title": "Dein individuelles Störungsmodell (AVK)",
           "content": [
-            { "coachMessage": "Super, du hast schon mit der Beobachtung begonnen! Jetzt schauen wir uns an, wie Depressionen entstehen und was sie aufrechterhält. Wir benutzen dafür das AVK-Modell: Auslöser, Verhalten, Konsequenz." },
-            { "coachMessage": "Denk mal darüber nach: Was waren die ursprünglichen Auslöser für deine depressive Stimmung? Und welche kleinen Dinge im Alltag lösen sie heute aus?" },
-            { "coachMessage": "Dein Verhalten als Reaktion darauf (z.B. Rückzug, Grübeln) ist ein verständlicher Versuch, mit der Situation umzugehen. Es ist kein persönliches Versagen! Lass uns gemeinsam verstehen, welche kurzfristigen und langfristigen Konsequenzen dieses Verhalten hat." }
+            {
+              "coachMessage": "Jetzt schauen wir an, wie Depressionen entstehen und aufrechterhalten werden. Dafür nutzen wir das AVK-Modell: Auslöser, Verhalten, Konsequenz."
+            },
+            {
+              "coachMessage": "Überlege: Was waren ursprüngliche Auslöser für deine depressive Stimmung? Und welche kleinen Dinge im Alltag triggern sie heute?"
+            },
+            {
+              "coachMessage": "Dein Verhalten als Reaktion darauf, zum Beispiel Rückzug oder Grübeln, ist ein verständlicher Bewältigungsversuch. Es geht nicht um Schuld, sondern um Verstehen und Verändern."
+            }
           ],
           "task": null
         }
       ]
     },
     {
-        "id": "module2",
-        "title": "Modul 2: Aktivitätsbeobachtung und Werteklärung",
-        "description": "Wir werten deine Beobachtungen aus, entdecken deine persönlichen Werte und finden passende, werteorientierte Aktivitäten.",
-        "lessons": []
+      "id": "module2",
+      "title": "Modul 2: Aktivitätsbeobachtung und Werteklärung",
+      "description": "Wir werten deine Beobachtungen aus, entdecken deine persönlichen Werte und finden passende, werteorientierte Aktivitäten.",
+      "lessons": []
+    },
+    {
+      "id": "module3_edu_ba_avk",
+      "title": "Modul 3: Edukation Verhaltensaktivierung & AVK",
+      "description": "Du lernst die Grundlagen der Verhaltensaktivierung, erhältst verständliche Informationen zu Depression und entwickelst ein individuelles AVK-Störungsmodell.",
+      "lessons": [
+        {
+          "id": "m3_l1",
+          "title": "Gute Ausgangsbedingungen schaffen",
+          "content": [
+            {
+              "coachMessage": "Zu Beginn klären wir die Rahmenbedingungen: Verhaltensaktivierung lebt davon, dass du selbst aktiv wirst und ich dich als Coach unterstütze."
+            },
+            {
+              "coachMessage": "Zu deiner aktiven Rolle gehören die Planung und Durchführung kleiner Übungen zwischen den wöchentlichen Sitzungen."
+            },
+            {
+              "coachMessage": "Wichtig: Das ist ein gemeinsamer Lernprozess. Wenn etwas nicht wie gewünscht klappt, ist das kein Scheitern, sondern eine wertvolle Information."
+            }
+          ],
+          "task": {
+            "description": "Notiere im Reflektieren-Bereich, was dir hilft, eine aktive Rolle in der Therapie zu übernehmen.",
+            "targetScreen": "reflect"
+          }
+        },
+        {
+          "id": "m3_l2",
+          "title": "Therapieziel und Wochenausblick",
+          "content": [
+            {
+              "coachMessage": "In den kommenden Wochen lernst du, wie du besser mit depressiver Stimmung, Antriebsverlust und alltäglichen Schwierigkeiten umgehen kannst."
+            },
+            {
+              "coachMessage": "Das Ziel ist, gemeinsam in den Sitzungen und auch zuhause auszuprobieren, was dir hilft, dich dauerhaft stabiler zu fühlen."
+            },
+            {
+              "coachMessage": "Die wirksamen Schritte sind individuell. Deshalb finden wir heraus, was dir persönlich wichtig ist und wie du das wieder mehr leben kannst."
+            }
+          ],
+          "task": {
+            "description": "Wähle einen persönlichen Wert auf dem Werte-Bildschirm, der in den nächsten 7 Tagen im Fokus stehen soll.",
+            "targetScreen": "values"
+          }
+        },
+        {
+          "id": "m3_l3",
+          "title": "Depression verstehen: Aktivität, Rückzug und Stimmung",
+          "content": [
+            {
+              "coachMessage": "Bei Depression geraten viele Menschen in einen Kreislauf: weniger Aktivität, mehr Rückzug, weniger positive Erfahrungen, noch schlechtere Stimmung."
+            },
+            {
+              "coachMessage": "Verhaltensaktivierung setzt hier an: Mit kleinen, machbaren Aktivitäten wird der Alltag schrittweise wieder aufgebaut."
+            },
+            {
+              "coachMessage": "Es geht nicht darum, sofort Spaß zu empfinden. Entscheidend ist, Erfahrungen zu sammeln, die langfristig wieder Stabilität und Selbstwirksamkeit fördern."
+            }
+          ],
+          "task": {
+            "description": "Plane eine kleine, machbare Aktivität für morgen im Planner.",
+            "targetScreen": "planner"
+          }
+        },
+        {
+          "id": "m3_l4",
+          "title": "Individuelles AVK-Störungsmodell entwickeln",
+          "content": [
+            {
+              "coachMessage": "Jetzt übertragen wir deine Erfahrungen in ein persönliches AVK-Modell."
+            },
+            {
+              "coachMessage": "A wie Auslöser: Welche Situationen, Gedanken oder körperlichen Zustände starten die depressive Spirale bei dir?"
+            },
+            {
+              "coachMessage": "V wie Verhalten: Wie reagierst du dann typischerweise? Zum Beispiel Rückzug, Vermeidung, langes Liegen oder Grübeln."
+            },
+            {
+              "coachMessage": "K wie Konsequenz: Was bringt dir dieses Verhalten kurzfristig und welche langfristigen Kosten entstehen dadurch?"
+            },
+            {
+              "coachMessage": "Auf dieser Basis vereinbaren wir am Ende jeder Einheit eine kleine Übung bis zur nächsten Woche: Nicht Perfektion zählt, sondern Lernerfahrung."
+            }
+          ],
+          "task": {
+            "description": "Erstelle einen AVK-Eintrag mit Auslöser, Verhalten und Konsequenz im Heute-Bildschirm oder in deiner Reflexion.",
+            "targetScreen": "today"
+          }
+        }
+      ]
     }
   ]
 }
