@@ -60,14 +60,14 @@ sealed class Route(val route: String) {
         fun fromExerciseId(exerciseId: String, from: String = "overview"): String? {
             return when (exerciseId) {
                 "rumination_exercise" -> RuminationExercise.route
-                "five_four_three_two_one" -> FiveFourThreeTwoOneExercise.createRoute(from)
-                "flow_chart_exercise" -> FlowChartExercise.route
-                "values_compass_exercise" -> ValuesCompassExercise.route
-                "situational_attention_refocusing_exercise" -> SituationalAttentionRefocusingExercise.createRoute(from)
-                "selective_attention_exercise" -> SelectiveAttentionExercise.createRoute(from)
-                "attention_switching_exercise" -> AttentionSwitchingExercise.createRoute(from)
-                "shared_attention_exercise" -> SharedAttentionExercise.createRoute(from)
-                "distraction_skill_exercise" -> DistractionSkillExercise.createRoute(from)
+                "five_four_three_two_one", "five_four_three_two_one_exercise" -> FiveFourThreeTwoOneExercise.createRoute(from)
+                "flow_chart", "flow_chart_exercise" -> FlowChartExercise.route
+                "values_compass", "values_compass_exercise" -> ValuesCompassExercise.route
+                "situational_attention_refocusing", "situational_attention_refocusing_exercise" -> SituationalAttentionRefocusingExercise.createRoute(from)
+                "selective_attention", "selective_attention_exercise" -> SelectiveAttentionExercise.createRoute(from)
+                "attention_switching", "attention_switching_exercise" -> AttentionSwitchingExercise.createRoute(from)
+                "shared_attention", "shared_attention_exercise" -> SharedAttentionExercise.createRoute(from)
+                "distraction_skill", "distraction_skill_exercise" -> DistractionSkillExercise.createRoute(from)
                 else -> null
             }
         }

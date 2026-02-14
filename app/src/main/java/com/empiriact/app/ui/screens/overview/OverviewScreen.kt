@@ -28,9 +28,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.empiriact.app.R
 import com.empiriact.app.data.db.ActivityLogEntity
+import com.empiriact.app.ui.common.getExerciseDisplayName
 import com.empiriact.app.ui.common.UiConstants
 import com.empiriact.app.ui.common.ViewModelFactory
-import com.empiriact.app.ui.navigation.Route
+import com.empiriact.app.ui.common.getExerciseRoute
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -198,7 +199,7 @@ private fun ExerciseRatingRow(exercise: ExerciseWithRating, navController: NavCo
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                Route.fromExerciseId(exercise.exerciseId)?.let { route ->
+                getExerciseRoute(exercise.exerciseId)?.let { route ->
                     navController.navigate(route)
                 }
             },
@@ -213,7 +214,7 @@ private fun ExerciseRatingRow(exercise: ExerciseWithRating, navController: NavCo
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = getExerciseName(exercise.exerciseId),
+                    text = getExerciseDisplayName(exercise.exerciseId),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -251,15 +252,6 @@ private fun RatingBar(rating: Double, maxRating: Int = 5) {
                     )
             )
         }
-    }
-}
-
-@Composable
-private fun getExerciseName(exerciseId: String): String {
-    return when (exerciseId) {
-        "rumination_exercise" -> stringResource(R.string.exercise_rumination)
-        "five_four_three_two_one" -> stringResource(R.string.exercise_five_four_three_two_one)
-        else -> exerciseId
     }
 }
 
