@@ -1,0 +1,68 @@
+{
+  "courseId": "gruebeln",
+  "title": "Modulreihe Grübeln",
+  "description": "Strukturierte Grundlage zur Reduktion von Grübeln. Inhalte und interaktive Übungen werden sukzessive ergänzt.",
+  "status": "foundation",
+  "modules": [
+    {
+      "id": "g1",
+      "title": "Verstehen, was Grübeln ist",
+      "description": "Psychoedukation und erste Einordnung.",
+      "lessons": [
+        { "id": "g1_l1", "title": "Einstieg & Standortbestimmung", "content": [], "interactiveExercise": null },
+        { "id": "g1_l2", "title": "Grübeln vs. Problemlösen", "content": [], "interactiveExercise": null },
+        { "id": "g1_l3", "title": "Kosten-Nutzen-Bilanz", "content": [], "interactiveExercise": null }
+      ]
+    },
+    {
+      "id": "g2",
+      "title": "Muster erkennen",
+      "description": "Trigger, Themen und Frühwarnzeichen erkennen.",
+      "lessons": [
+        { "id": "g2_l1", "title": "Persönliche Grübel-Auslöser", "content": [], "interactiveExercise": null },
+        { "id": "g2_l2", "title": "Denkspiralen kartieren", "content": [], "interactiveExercise": null },
+        { "id": "g2_l3", "title": "Frühwarnzeichen erfassen", "content": [], "interactiveExercise": null }
+      ]
+    },
+    {
+      "id": "g3",
+      "title": "Grübeln unterbrechen",
+      "description": "Akute Unterbrechungsstrategien trainieren.",
+      "lessons": [
+        { "id": "g3_l1", "title": "Aufmerksamkeitswechsel in 90 Sekunden", "content": [], "interactiveExercise": null },
+        { "id": "g3_l2", "title": "Grübel-Stopp und Re-Fokussierung", "content": [], "interactiveExercise": null },
+        { "id": "g3_l3", "title": "Körperbasierte Deeskalation", "content": [], "interactiveExercise": null }
+      ]
+    },
+    {
+      "id": "g4",
+      "title": "Konstruktiv mit Gedanken umgehen",
+      "description": "Kognitive Distanz und hilfreiche Perspektiven.",
+      "lessons": [
+        { "id": "g4_l1", "title": "Gedanken als Ereignisse beobachten", "content": [], "interactiveExercise": null },
+        { "id": "g4_l2", "title": "Grübelgedanken entkräften", "content": [], "interactiveExercise": null },
+        { "id": "g4_l3", "title": "Von 'Warum?' zu 'Was jetzt?'", "content": [], "interactiveExercise": null }
+      ]
+    },
+    {
+      "id": "g5",
+      "title": "Werteorientiertes Handeln trotz Grübeln",
+      "description": "Handlungsfähigkeit trotz innerer Unruhe stärken.",
+      "lessons": [
+        { "id": "g5_l1", "title": "Wertekompass bei Gedankenkreisen", "content": [], "interactiveExercise": null },
+        { "id": "g5_l2", "title": "Mini-Schritte statt Aufschub", "content": [], "interactiveExercise": null },
+        { "id": "g5_l3", "title": "Schutzfaktoren im Alltag", "content": [], "interactiveExercise": null }
+      ]
+    },
+    {
+      "id": "g6",
+      "title": "Stabilisieren & Rückfallprophylaxe",
+      "description": "Langfristige Sicherung und persönlicher Notfallplan.",
+      "lessons": [
+        { "id": "g6_l1", "title": "Persönliche Risikosituationen", "content": [], "interactiveExercise": null },
+        { "id": "g6_l2", "title": "Notfallkarte bei Grübelspitzen", "content": [], "interactiveExercise": null },
+        { "id": "g6_l3", "title": "4-Wochen-Erhaltungsplan", "content": [], "interactiveExercise": null }
+      ]
+    }
+  ]
+}
