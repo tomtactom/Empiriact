@@ -16,12 +16,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.empiriact.app.data.model.Course
+import com.empiriact.app.data.model.Module
 import com.empiriact.app.ui.navigation.Route
+import kotlinx.serialization.json.Json
 
 private data class ResourceExercise(
     val title: String,
@@ -90,6 +95,11 @@ fun ResourcesScreen(navController: NavController) {
 
 @Composable
 private fun EducationList() {
+    val context = LocalContext.current
+    val modules by produceState(initialValue = emptyList<Module>(), context) {
+        value = loadEducationModules(context)
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -104,22 +114,43 @@ private fun EducationList() {
             )
         }
 
-        item {
-            ResourceCard(
-                title = "Wie Grübeln entsteht",
-                description = "Verstehe die typischen Auslöser und warum sich Grübelschleifen so hartnäckig anfühlen.",
-                onClick = {}
-            )
-        }
-
-        item {
-            ResourceCard(
-                title = "Aufmerksamkeit trainieren",
-                description = "Lerne, wie bewusste Aufmerksamkeitslenkung emotionale Entlastung und mehr Handlungsfähigkeit fördern kann.",
-                onClick = {}
-            )
+        if (modules.isEmpty()) {
+            item {
+                Text(
+                    "Aktuell sind keine Module verfügbar.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        } else {
+            items(modules) { module ->
+                ResourceCard(
+                    title = module.title,
+                    description = module.description,
+                    onClick = {}
+                )
+            }
         }
     }
+}
+
+private fun loadEducationModules(context: android.content.Context): List<Module> {
+    val json = Json { ignoreUnknownKeys = true }
+    val candidateFiles = listOf("courses/gruebeln_foundation.json", "course.json")
+
+    for (file in candidateFiles) {
+        val modules = runCatching {
+            context.assets.open(file).bufferedReader().use { reader ->
+                val course = json.decodeFromString<Course>(reader.readText())
+                course.modules
+            }
+        }.getOrNull()
+
+        if (!modules.isNullOrEmpty()) {
+            return modules
+        }
+    }
+
+    return emptyList()
 }
 
 @Composable
