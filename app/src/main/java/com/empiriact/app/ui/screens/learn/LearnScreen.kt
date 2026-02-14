@@ -28,23 +28,23 @@ data class LearningModule(val title: String, val description: String, val route:
 
 private val modules = listOf(
     LearningModule(
-        "Grundlagen",
-        "Lerne die Grundkonzepte und fundamentalen Prinzipien",
+        "Modul 1: Wissenswertes über repetitives negatives Denken",
+        "Vollständig ausgearbeitetes Grundlagenmodul zu RND, Rumination, Funktionsanalyse und Problemdefinition.",
         Route.LearnBasics
     ),
     LearningModule(
-        "Fortgeschrittene Techniken",
-        "Vertiefe dein Wissen mit fortgeschrittenen Methoden",
+        "Modul 2 (in Vorbereitung)",
+        "Vertiefung folgt in einem späteren Ausbau.",
         Route.LearnAdvanced
     ),
     LearningModule(
-        "Praktische Übungen",
-        "Stelle dein Wissen in praktischen Aufgaben unter Beweis",
+        "Modul 1: Arbeitsblätter & Ressourcen-Übungen",
+        "Alle AB 1-8 plus integrierte Skills-Übungen für den direkten Transfer.",
         Route.LearnPractice
     ),
     LearningModule(
-        "Testmodul",
-        "Überprüfe dein Wissen mit interaktiven Tests",
+        "Wissenscheck",
+        "Überprüfe dein Wissen zu RND und Grübeln.",
         Route.LearnTest
     )
 )
