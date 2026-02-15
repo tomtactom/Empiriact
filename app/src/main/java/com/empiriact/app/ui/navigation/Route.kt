@@ -54,6 +54,13 @@ sealed class Route(val route: String) {
 
     object PsychoeducationActivationFoundations : Route("psychoeducation_activation_foundations")
 
+    // Psychoedukation Module
+    object PsychoeducationModules : Route("psychoeducation_modules")
+    object PsychoeducationScreen : Route("psychoeducation")
+    object InteractiveExercisesScreen : Route("interactive_exercises")
+    object ResourceBrowserScreen : Route("resource_browser")
+    object LearningPathScreen : Route("learning_path")
+
     companion object {
         fun fromExerciseId(exerciseId: String, from: String = "overview"): String? {
             return when (exerciseId) {

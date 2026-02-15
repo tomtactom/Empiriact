@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -43,6 +44,11 @@ import com.empiriact.app.ui.screens.resources.methods.ValuesCompassExercise
 import com.empiriact.app.ui.screens.settings.SettingsScreen
 import com.empiriact.app.ui.screens.today.FlowChartExerciseScreen
 import com.empiriact.app.ui.screens.today.TodayScreen
+import com.empiriact.app.ui.screens.modules.PsychoeducationModulesScreen
+import com.empiriact.app.ui.screens.resources.PsychoeducationScreen
+import com.empiriact.app.ui.screens.resources.InteractiveExercisesScreen
+import com.empiriact.app.ui.screens.resources.ResourceBrowserScreen
+import com.empiriact.app.ui.screens.resources.LearningPathScreen
 
 @Composable
 fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRepository) {
@@ -54,6 +60,7 @@ fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRep
     val bottomNavItems = listOf(
         BottomNavItem(Route.Today, "Heute", Icons.Default.Today),
         BottomNavItem(Route.Overview, "Übersicht", Icons.Default.Assessment),
+        BottomNavItem(Route.PsychoeducationModules, "Module", Icons.Default.School),
         BottomNavItem(Route.Resources, "Inhalte", Icons.Default.AutoStories),
     )
 
@@ -129,6 +136,13 @@ private fun NavGraphBuilder.staticGraph(factory: ViewModelFactory, navController
 }
 
 private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navController: NavController) {
+    // Psychoedukation Modules
+    composable(Route.PsychoeducationModules.route) { PsychoeducationModulesScreen(navController) }
+    composable(Route.PsychoeducationScreen.route) { PsychoeducationScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.InteractiveExercisesScreen.route) { InteractiveExercisesScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.ResourceBrowserScreen.route) { ResourceBrowserScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.LearningPathScreen.route) { LearningPathScreen(onBack = { navController.popBackStack() }) }
+
     composable(Route.Resources.route) { ResourcesScreen(navController) }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }
     composable(Route.FlowChartExercise.route) { FlowChartExerciseScreen(navController) }
