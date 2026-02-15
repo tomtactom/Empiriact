@@ -1,6 +1,9 @@
 package com.empiriact.app
 
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -8,6 +11,8 @@ import org.junit.runner.RunWith
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // placeholder
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        assertEquals("com.empiriact.app", appContext.packageName)
+        assertTrue(appContext.packageName.contains("empiriact"))
     }
 }
