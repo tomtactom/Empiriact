@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -1247,6 +1246,7 @@ private fun RatingScreen(
                 ) {
                     ModuleRating.values().forEach { rating ->
                         RatingButtonImproved(
+                            modifier = Modifier.weight(1f),
                             rating = rating,
                             isSelected = selectedRating == rating,
                             moduleColor = module.color,
@@ -1390,14 +1390,14 @@ private fun StatItem(
 
 @Composable
 private fun RatingButtonImproved(
+    modifier: Modifier = Modifier,
     rating: ModuleRating,
     isSelected: Boolean,
     moduleColor: Color,
     onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .weight(1f)
+        modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(
                 color = if (isSelected) moduleColor.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
