@@ -1,6 +1,7 @@
 package com.empiriact.app
 
 import android.app.Application
+import com.empiriact.app.data.AppGraph
 import com.empiriact.app.data.db.EmpiriactDatabase
 import com.empiriact.app.data.repo.ActivityLogRepository
 import com.empiriact.app.data.CheckinRepository
@@ -11,6 +12,11 @@ import com.empiriact.app.services.JsonExportService
 import com.empiriact.app.ui.common.ViewModelFactory
 
 class EmpiriactApplication : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        AppGraph.provide(applicationContext)
+    }
 
     private val database by lazy { EmpiriactDatabase.getDatabase(this) }
 

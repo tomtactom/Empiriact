@@ -9,7 +9,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.empiriact.app.MainActivity
 import com.empiriact.app.R
-import com.empiriact.app.data.AppGraph
+import com.empiriact.app.data.SettingsRepository
 import kotlinx.coroutines.flow.first
 
 class HourlyPromptWorker(
@@ -18,7 +18,7 @@ class HourlyPromptWorker(
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
-        val enabled = AppGraph.settings.hourlyPromptsEnabled.first()
+        val enabled = SettingsRepository(applicationContext).hourlyPromptsEnabled.first()
         if (enabled) {
             NotificationChannels.ensure(applicationContext)
             showNotification()
