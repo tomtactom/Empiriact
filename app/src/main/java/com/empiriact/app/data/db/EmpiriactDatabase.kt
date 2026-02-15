@@ -1,13 +1,13 @@
 package com.empiriact.app.data.db
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.empiriact.app.BuildConfig
 import com.empiriact.app.data.Routine
 import com.empiriact.app.data.Resource
 import com.empiriact.app.data.Evaluation
@@ -73,7 +73,8 @@ abstract class EmpiriactDatabase : RoomDatabase() {
                 )
                     .addMigrations(MIGRATION_8_9, MIGRATION_9_10)
                     .apply {
-                        if (BuildConfig.DEBUG) {
+                        val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                        if (isDebuggable) {
                             fallbackToDestructiveMigration(dropAllTables = true)
                         }
                     }
