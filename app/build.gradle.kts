@@ -102,6 +102,7 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
 
     testImplementation(libs.test.junit)
+    testImplementation(libs.room.testing)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     testImplementation("androidx.test:core:1.6.1")
