@@ -5,8 +5,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import java.time.Duration
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZonedDateTime
 
 object HourlyPromptScheduler {
 
@@ -23,8 +22,7 @@ object HourlyPromptScheduler {
     }
 
     fun computeDelayUntilNextPrompt(
-        now: LocalDateTime = LocalDateTime.now(),
-        zoneId: ZoneId = ZoneId.systemDefault()
+        now: ZonedDateTime = ZonedDateTime.now()
     ): Duration {
         val targetMinute = 55 // Reminder at the end of the hour
         val next = when {
