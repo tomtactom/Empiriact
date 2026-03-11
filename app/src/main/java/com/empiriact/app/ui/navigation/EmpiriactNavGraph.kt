@@ -147,7 +147,11 @@ private fun NavGraphBuilder.staticGraph(factory: ViewModelFactory, navController
 }
 
 private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navController: NavController) {
-    // Psychoedukation Screen
+    addModuleRoutes(navController)
+    addExerciseRoutes(factory, navController)
+}
+
+private fun NavGraphBuilder.addModuleRoutes(navController: NavController) {
     composable(Route.PsychoeducationScreen.route) { PsychoeducationScreen(onBack = { navController.popBackStack() }) }
     composable(Route.InteractiveExercisesScreen.route) { InteractiveExercisesScreen(onBack = { navController.popBackStack() }) }
     composable(Route.ResourceBrowserScreen.route) { ResourceBrowserScreen(onBack = { navController.popBackStack() }) }
@@ -160,14 +164,18 @@ private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navControlle
     composable(Route.ContentModule.route) { ContentModuleScreen(onBack = { navController.popBackStack() }) }
     composable(Route.ThreadModule.route) { ThreadModuleScreen(onBack = { navController.popBackStack() }) }
     composable(Route.ThumbRuleModule.route) { ThumbRuleModuleScreen(onBack = { navController.popBackStack() }) }
-
     composable(Route.Resources.route) { ResourcesScreen(navController) }
+}
+
+private fun NavGraphBuilder.addExerciseRoutes(factory: ViewModelFactory, navController: NavController) {
     composable(Route.RuminationExercise.route) {
         RuminationExerciseScreen(onFinish = { navController.popBackStack() })
     }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }
     composable(Route.FlowChartExercise.route) { FlowChartExerciseScreen(navController) }
-    composable(Route.PsychoeducationActivationFoundations.route) { PsychoeducationActivationFoundationsScreen(navController) }
+    composable(Route.PsychoeducationActivationFoundations.route) {
+        PsychoeducationActivationFoundationsScreen(navController)
+    }
 
     composable(
         route = Route.SituationalAttentionRefocusingExercise.route,
@@ -220,9 +228,9 @@ private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navControlle
     ) { backStackEntry ->
         val exerciseId = backStackEntry.arguments?.getString("exerciseId")
         val from = backStackEntry.arguments?.getString("from")
-        if (exerciseId != null && from != null) {
-            ExerciseRatingScreen(navController, exerciseId, from, factory)
-        }
+        if (exerciseId == null || from == null) return@composable
+
+        ExerciseRatingScreen(navController, exerciseId, from, factory)
     }
 }
 
