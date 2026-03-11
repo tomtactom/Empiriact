@@ -39,7 +39,8 @@ class EmpiriactApplication : Application() {
             exerciseRatingDao = database.exerciseRatingDao(),
             gratitudeRepository = gratitudeRepository,
             jsonExportService = jsonExportService,
-            settingsRepository = settingsRepository
+            settingsRepository = settingsRepository,
+            passiveMarkerRepository = passiveMarkerRepository
         )
     }
 }

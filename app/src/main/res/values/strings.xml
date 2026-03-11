@@ -17,6 +17,10 @@
     <!-- Protocol Tab -->
     <string name="protocol_tab_title">Tagesprotokoll</string>
     <string name="protocol_tab_empty">Für heute wurden noch keine Einträge gespeichert.</string>
+    <string name="protocol_column_time">Zeit</string>
+    <string name="protocol_column_activity">Aktivität</string>
+    <string name="protocol_column_mood">Stimmung</string>
+    <string name="protocol_column_steps">Schritte</string>
 
     <!-- Resources Tab -->
     <string name="resources_tab_title">Ressourcen-Bewertungen</string>

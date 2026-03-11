@@ -30,7 +30,8 @@ object UiConstants {
     val NEGATIVE_CHANGE_COLOR = Color(0xFFC62828)
 
     // Row Weights
-    const val PROTOCOL_ROW_TIME_WEIGHT = 0.2f
-    const val PROTOCOL_ROW_ACTIVITY_WEIGHT = 0.6f
-    const val PROTOCOL_ROW_VALENCE_WEIGHT = 0.2f
+    const val PROTOCOL_ROW_TIME_WEIGHT = 0.18f
+    const val PROTOCOL_ROW_ACTIVITY_WEIGHT = 0.46f
+    const val PROTOCOL_ROW_VALENCE_WEIGHT = 0.16f
+    const val PROTOCOL_ROW_STEPS_WEIGHT = 0.20f
 }
