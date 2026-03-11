@@ -44,7 +44,16 @@ class StepTrackingService(
         val previousTotalSteps = settingsRepository.getPassiveStepsLastCounterTotal()
         val previousHour = settingsRepository.getPassiveStepsLastCounterHour()
 
-        if (previousTotalSteps != null && previousHour != null && currentHour.isAfter(previousHour)) {
+        if (previousTotalSteps == null || previousHour == null) {
+            settingsRepository.setPassiveStepsLastSnapshot(
+                totalSteps = currentTotalSteps,
+                hour = currentHour
+            )
+            settingsRepository.setPassiveStepsBaselineHourPending(true)
+            return true
+        }
+
+        if (currentHour.isAfter(previousHour)) {
             val delta = (currentTotalSteps - previousTotalSteps)
                 .coerceAtLeast(0)
                 .coerceAtMost(Int.MAX_VALUE.toLong())
@@ -56,6 +65,7 @@ class StepTrackingService(
                 .toInt()
 
             if (missingHours > 0) {
+                settingsRepository.setPassiveStepsBaselineHourPending(false)
                 val baseDistribution = delta / missingHours
                 val remainder = delta % missingHours
 
