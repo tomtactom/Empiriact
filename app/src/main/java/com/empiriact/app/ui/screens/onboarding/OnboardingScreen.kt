@@ -1,8 +1,11 @@
 package com.empiriact.app.ui.screens.onboarding
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -40,8 +43,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -57,6 +62,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.content.ContextCompat
 import com.empiriact.app.data.SettingsRepository
 import kotlinx.coroutines.launch
 
@@ -216,6 +222,7 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
     val batteryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         viewModel.onResume()
     }
+    var showNotificationSettingsHint by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
         Text("Berechtigungen und Datennutzung", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -227,11 +234,28 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
             title = "Benachrichtigungen",
             description = "Erinnerungen unterstützen dich bei geplanten Schritten der Behavioral Activation.",
             statusText = if (uiState.setupItems.notifications.enabled) "Aktiv" else "Offen",
-            actionText = "Freigabe öffnen"
+            actionText = "Freigabe öffnen",
+            helperText = if (showNotificationSettingsHint) "Wenn der Dialog nicht erscheint, öffne bitte die Einstellungen." else null
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                when {
+                    isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS) -> {
+                        showNotificationSettingsHint = false
+                        viewModel.onResume()
+                    }
+
+                    isNotificationPermissionPermanentlyDenied(context) -> {
+                        showNotificationSettingsHint = true
+                        openNotificationSettings(context)
+                    }
+
+                    else -> {
+                        showNotificationSettingsHint = false
+                        notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
             } else {
+                showNotificationSettingsHint = false
                 openNotificationSettings(context)
             }
         }
@@ -278,6 +302,7 @@ private fun PermissionCard(
     description: String,
     statusText: String,
     actionText: String,
+    helperText: String? = null,
     onAction: () -> Unit
 ) {
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
@@ -289,9 +314,29 @@ private fun PermissionCard(
                 style = MaterialTheme.typography.labelLarge,
                 color = if (statusText == "Aktiv") MaterialTheme.colorScheme.primary else Color(0xFFB45309)
             )
+            helperText?.let {
+                Text(text = it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             OutlinedButton(onClick = onAction, modifier = Modifier.fillMaxWidth()) { Text(actionText) }
         }
     }
+}
+
+private fun isPermissionGranted(context: Context, permission: String): Boolean =
+    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+
+private fun isNotificationPermissionPermanentlyDenied(context: Context): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
+    if (isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)) return false
+
+    val activity = context.findActivity() ?: return false
+    return !activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 @Composable
