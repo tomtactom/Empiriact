@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -31,6 +32,8 @@ class SettingsRepository(context: Context) {
         val BA_INPUT_MODE = stringPreferencesKey("ba_input_mode")
         val BA_BASELINE_START = stringPreferencesKey("ba_baseline_start")
         val BA_BASELINE_DAYS = intPreferencesKey("ba_baseline_days")
+        val BA_ACTIVITY_CRITERIA_ACKNOWLEDGED = booleanPreferencesKey("ba_activity_criteria_acknowledged")
+        val BA_ACTIVITY_PREFERENCE_TAGS = stringSetPreferencesKey("ba_activity_preference_tags")
     }
 
     enum class ThemeMode {
@@ -146,6 +149,28 @@ class SettingsRepository(context: Context) {
     suspend fun setBaBaselineDays(days: Int) {
         dataStore.edit { settings ->
             settings[PreferencesKeys.BA_BASELINE_DAYS] = days
+        }
+    }
+
+    val baActivityCriteriaAcknowledged: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.BA_ACTIVITY_CRITERIA_ACKNOWLEDGED] ?: false
+        }
+
+    suspend fun setBaActivityCriteriaAcknowledged(acknowledged: Boolean) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.BA_ACTIVITY_CRITERIA_ACKNOWLEDGED] = acknowledged
+        }
+    }
+
+    val baActivityPreferenceTags: Flow<Set<String>> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.BA_ACTIVITY_PREFERENCE_TAGS] ?: emptySet()
+        }
+
+    suspend fun setBaActivityPreferenceTags(tags: Set<String>) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.BA_ACTIVITY_PREFERENCE_TAGS] = tags
         }
     }
 

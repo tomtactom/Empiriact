@@ -3,6 +3,8 @@ package com.empiriact.app.ui.screens.settings
 import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,8 +40,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.empiriact.app.EmpiriactApplication
 import com.empiriact.app.data.SettingsRepository
+import com.empiriact.app.ui.theme.Dimensions
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen() {
     val context = LocalContext.current
@@ -62,6 +66,12 @@ fun SettingsScreen() {
     val statusMessage by settingsViewModel.statusMessage.collectAsState()
     val baselineEnabled by settingsViewModel.baselineEnabled.collectAsState()
     val baselineDays by settingsViewModel.baBaselineDays.collectAsState()
+    val baCriteriaAcknowledged by settingsViewModel.baActivityCriteriaAcknowledged.collectAsState()
+    val baPreferenceTags by settingsViewModel.baActivityPreferenceTags.collectAsState()
+
+    val optionalBaTags = remember {
+        listOf("Kleiner Schritt", "Eigeninitiative", "Routine", "Aktive Handlung")
+    }
 
     var isThemeMenuExpanded by remember { mutableStateOf(false) }
 
@@ -147,6 +157,46 @@ fun SettingsScreen() {
         }
 
         Text("Verhaltensaktivierung", style = MaterialTheme.typography.headlineSmall)
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("BA-Klärung: Was zählt hier als Aktivität?")
+            Text(
+                text = "Als Aktivität zählt alles, was du bewusst tust: auch kleine Schritte, kurze Routinen und Anfänge. Wichtig ist Eigeninitiative statt Perfektion. Bitte ohne Selbstabwertung dokumentieren.",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Leitlinien verstanden")
+                Switch(
+                    checked = baCriteriaAcknowledged,
+                    onCheckedChange = settingsViewModel::setBaActivityCriteriaAcknowledged
+                )
+            }
+            Text(
+                text = "Optionale Präferenz-Tags (freiwillig)",
+                style = MaterialTheme.typography.labelMedium
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                optionalBaTags.forEach { tag ->
+                    FilterChip(
+                        selected = baPreferenceTags.contains(tag),
+                        onClick = { settingsViewModel.toggleBaActivityPreferenceTag(tag) },
+                        label = { Text(tag) }
+                    )
+                }
+            }
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
