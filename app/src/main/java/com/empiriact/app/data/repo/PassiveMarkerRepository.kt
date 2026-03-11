@@ -18,6 +18,7 @@ class PassiveMarkerRepository(
         date: LocalDate,
         hour: Int,
         stepCount: Int? = null,
+        isEstimated: Boolean? = null,
         sleepDurationMinutesPreviousNight: Int? = null,
         screenTimeMinutesInHour: Int? = null
     ) {
@@ -29,6 +30,7 @@ class PassiveMarkerRepository(
                 localDate = dateInt,
                 hour = hour,
                 stepCount = stepCount ?: existing?.stepCount,
+                isEstimated = isEstimated ?: existing?.isEstimated ?: false,
                 sleepDurationMinutesPreviousNight = sleepDurationMinutesPreviousNight
                     ?: existing?.sleepDurationMinutesPreviousNight,
                 screenTimeMinutesInHour = screenTimeMinutesInHour ?: existing?.screenTimeMinutesInHour,

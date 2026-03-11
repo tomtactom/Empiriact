@@ -37,6 +37,7 @@ class PassiveMarkerService(
                     checkinKey = checkin.key,
                     readings = buildReadingsForCheckin(
                         stepCount = passiveHour?.stepCount,
+                        isEstimated = passiveHour?.isEstimated == true,
                         sleepDurationMinutesPreviousNight = passiveHour?.sleepDurationMinutesPreviousNight,
                         screenTimeMinutesInHour = passiveHour?.screenTimeMinutesInHour,
                         includeSteps = stepsEnabled,
@@ -101,6 +102,7 @@ class PassiveMarkerService(
 
     private fun buildReadingsForCheckin(
         stepCount: Int?,
+        isEstimated: Boolean,
         sleepDurationMinutesPreviousNight: Int?,
         screenTimeMinutesInHour: Int?,
         includeSteps: Boolean,
@@ -113,7 +115,8 @@ class PassiveMarkerService(
             readings += PassiveMarkerReading(
                 source = PassiveMarkerSource.STEPS,
                 label = "Schrittzahl (pro Stunde, lokal)",
-                valueText = "$stepCount Schritte"
+                valueText = "$stepCount Schritte",
+                isEstimated = isEstimated
             )
         }
 
@@ -157,7 +160,8 @@ enum class PassiveMarkerSource {
 data class PassiveMarkerReading(
     val source: PassiveMarkerSource,
     val label: String,
-    val valueText: String
+    val valueText: String,
+    val isEstimated: Boolean = false
 )
 
 data class PassiveMarkerContext(

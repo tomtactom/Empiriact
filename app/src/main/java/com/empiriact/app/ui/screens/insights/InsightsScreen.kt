@@ -101,7 +101,7 @@ fun InsightsScreen(@Suppress("UNUSED_PARAMETER") factory: ViewModelProvider.Fact
                         if (contextItem != null && contextItem.readings.isNotEmpty()) {
                             PassiveContextCard(
                                 explanation = contextItem.explanation,
-                                lines = contextItem.readings.map { "• ${it.label}: ${it.valueText}" }
+                                lines = contextItem.readings.map { formatPassiveReadingLine(it.label, it.valueText, it.isEstimated) }
                             )
                         }
                     }
@@ -169,6 +169,12 @@ private fun PassiveVsActiveSection(points: List<com.empiriact.app.services.Passi
             }
         }
     }
+}
+
+
+internal fun formatPassiveReadingLine(label: String, valueText: String, isEstimated: Boolean): String {
+    val quality = if (isEstimated) " (geschätzt)" else ""
+    return "• $label: $valueText$quality"
 }
 
 @Composable

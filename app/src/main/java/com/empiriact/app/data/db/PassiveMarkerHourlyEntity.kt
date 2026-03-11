@@ -14,6 +14,7 @@ data class PassiveMarkerHourlyEntity(
     val localDate: Int,
     val hour: Int,
     val stepCount: Int? = null,
+    val isEstimated: Boolean = false,
     val sleepDurationMinutesPreviousNight: Int? = null,
     val screenTimeMinutesInHour: Int? = null,
     val updatedAtEpochMs: Long
