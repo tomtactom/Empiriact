@@ -15,6 +15,9 @@ interface PassiveMarkerDao {
     @Query("SELECT * FROM passive_marker_hourly WHERE localDate >= :startDate AND localDate < :endDate ORDER BY localDate ASC, hour ASC")
     fun observeRange(startDate: Int, endDate: Int): Flow<List<PassiveMarkerHourlyEntity>>
 
+    @Query("SELECT * FROM passive_marker_hourly WHERE localDate = :localDate AND hour = :hour LIMIT 1")
+    suspend fun getByDateHour(localDate: Int, hour: Int): PassiveMarkerHourlyEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entity: PassiveMarkerHourlyEntity)
 }
