@@ -21,6 +21,9 @@
     <string name="protocol_column_activity">Aktivität</string>
     <string name="protocol_column_mood">Stimmung</string>
     <string name="protocol_column_steps">Schritte</string>
+    <string name="protocol_steps_not_recorded">nicht aufgezeichnet</string>
+    <string name="protocol_steps_tracking_disabled">Tracking aus</string>
+    <string name="protocol_steps_permission_missing">Berechtigung fehlt</string>
 
     <!-- Resources Tab -->
     <string name="resources_tab_title">Ressourcen-Bewertungen</string>

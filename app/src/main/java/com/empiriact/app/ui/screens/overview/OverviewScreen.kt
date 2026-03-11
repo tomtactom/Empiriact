@@ -395,7 +395,7 @@ private fun ProtocolColumnHeaderRow() {
 @Composable
 private fun ProtocolRow(row: ProtocolLogUiModel) {
     val log = row.activityLog
-    val stepCountText = row.stepCount?.toString() ?: "–"
+    val stepCountText = protocolStepDisplayText(row.stepDisplayState)
 
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -422,6 +422,26 @@ private fun ProtocolRow(row: ProtocolLogUiModel) {
     }
 }
 
+
+
+@Composable
+private fun protocolStepDisplayText(stepDisplayState: StepDisplayState): String {
+    return when (stepDisplayState) {
+        is StepDisplayState.Recorded -> stepDisplayState.count.toString()
+        else -> stringResource(requireNotNull(protocolStepTextRes(stepDisplayState)))
+    }
+}
+
+internal fun protocolStepTextRes(stepDisplayState: StepDisplayState): Int? =
+    when (stepDisplayState) {
+        is StepDisplayState.Recorded -> null
+        is StepDisplayState.NotRecorded -> when (stepDisplayState.reason) {
+            StepDisplayState.NotRecorded.Reason.PERMISSION_MISSING -> R.string.protocol_steps_permission_missing
+            StepDisplayState.NotRecorded.Reason.BASELINE_PENDING,
+            StepDisplayState.NotRecorded.Reason.UNKNOWN -> R.string.protocol_steps_not_recorded
+        }
+        StepDisplayState.Disabled -> R.string.protocol_steps_tracking_disabled
+    }
 
 @Composable
 private fun AnalysisSection(title: String, analyses: List<ActivityAnalysis>, emptyMessage: String, icon: ImageVector, iconTint: Color) {

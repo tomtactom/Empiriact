@@ -31,7 +31,7 @@ class ViewModelFactory(
         }
         if (modelClass.isAssignableFrom(OverviewViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return OverviewViewModel(activityLogRepository, exerciseRepository, passiveMarkerRepository) as T
+            return OverviewViewModel(activityLogRepository, exerciseRepository, passiveMarkerRepository, settingsRepository) as T
         }
         if (modelClass.isAssignableFrom(GratitudeViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

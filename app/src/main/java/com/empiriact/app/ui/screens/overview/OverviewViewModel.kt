@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.empiriact.app.data.ExerciseRepository
+import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.db.ActivityLogEntity
 import com.empiriact.app.data.repo.ActivityLogRepository
 import com.empiriact.app.data.repo.PassiveMarkerRepository
@@ -19,13 +20,27 @@ data class ActivityFrequency(val activity: String, val count: Int)
 data class ValenceTrend(val date: LocalDate, val averageValence: Double)
 data class ProtocolLogUiModel(
     val activityLog: ActivityLogEntity,
-    val stepCount: Int?
+    val stepDisplayState: StepDisplayState
 )
+
+sealed interface StepDisplayState {
+    data class Recorded(val count: Int) : StepDisplayState
+    data class NotRecorded(val reason: Reason = Reason.UNKNOWN) : StepDisplayState {
+        enum class Reason {
+            UNKNOWN,
+            PERMISSION_MISSING,
+            BASELINE_PENDING
+        }
+    }
+
+    data object Disabled : StepDisplayState
+}
 
 class OverviewViewModel(
     private val activityLogRepository: ActivityLogRepository,
     private val exerciseRepository: ExerciseRepository,
-    private val passiveMarkerRepository: PassiveMarkerRepository
+    private val passiveMarkerRepository: PassiveMarkerRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val SIGNIFICANCE_THRESHOLD = 3
@@ -58,13 +73,21 @@ class OverviewViewModel(
         passiveMarkerRepository.observeRange(
             startDate = protocolStartDate,
             endDateExclusive = protocolEndDateExclusive
-        )
-    ) { logs, passiveMarkers ->
+        ),
+        settingsRepository.passiveStepsEnabled,
+        settingsRepository.passiveStepsLastReadError,
+        settingsRepository.passiveStepsBaselineHourPending
+    ) { logs, passiveMarkers, passiveStepsEnabled, lastReadError, baselineHourPending ->
         val markerByDateAndHour = passiveMarkers.associateBy { it.localDate to it.hour }
         logs.map { log ->
             ProtocolLogUiModel(
                 activityLog = log,
-                stepCount = markerByDateAndHour[log.localDate to log.hour]?.stepCount
+                stepDisplayState = resolveStepDisplayState(
+                    stepCount = markerByDateAndHour[log.localDate to log.hour]?.stepCount,
+                    passiveStepsEnabled = passiveStepsEnabled,
+                    lastReadErrorReason = lastReadError?.reason,
+                    baselineHourPending = baselineHourPending
+                )
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -97,4 +120,25 @@ class OverviewViewModel(
             .sortedBy { it.date }
     }.map { list -> Log.d("OverviewVM", "ValenceTrends loaded: ${list.size} items"); list }
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+}
+
+internal fun resolveStepDisplayState(
+    stepCount: Int?,
+    passiveStepsEnabled: Boolean,
+    lastReadErrorReason: SettingsRepository.PassiveStepsReadErrorReason?,
+    baselineHourPending: Boolean
+): StepDisplayState {
+    if (stepCount != null) {
+        return StepDisplayState.Recorded(stepCount)
+    }
+    if (!passiveStepsEnabled) {
+        return StepDisplayState.Disabled
+    }
+    if (baselineHourPending) {
+        return StepDisplayState.NotRecorded(StepDisplayState.NotRecorded.Reason.BASELINE_PENDING)
+    }
+    if (lastReadErrorReason == SettingsRepository.PassiveStepsReadErrorReason.PERMISSION_MISSING) {
+        return StepDisplayState.NotRecorded(StepDisplayState.NotRecorded.Reason.PERMISSION_MISSING)
+    }
+    return StepDisplayState.NotRecorded()
 }
