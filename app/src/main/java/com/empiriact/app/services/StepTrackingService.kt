@@ -38,6 +38,12 @@ class StepTrackingService(
             return false
         }
 
+        if (!stepCounterSource.isSensorAvailable()) {
+            settingsRepository.setPassiveStepsEnabled(false)
+            settingsRepository.clearPassiveStepsTrackingState()
+            return false
+        }
+
         val currentTotalSteps = stepCounterSource.readCurrentTotalSteps() ?: return false
         val currentHour = now.withMinute(0).withSecond(0).withNano(0)
 
@@ -102,6 +108,8 @@ class StepTrackingService(
 interface StepCounterSource {
     suspend fun readCurrentTotalSteps(): Long?
 
+    fun isSensorAvailable(): Boolean = true
+
     fun hasRequiredPermission(): Boolean = true
 }
 
@@ -118,6 +126,11 @@ class SensorStepCounterSource(
             context,
             Manifest.permission.ACTIVITY_RECOGNITION
         ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun isSensorAvailable(): Boolean {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+        return sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null
     }
 
     override suspend fun readCurrentTotalSteps(): Long? {
