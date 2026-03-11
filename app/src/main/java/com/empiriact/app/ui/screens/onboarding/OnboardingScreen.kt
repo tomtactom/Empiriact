@@ -64,7 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import com.empiriact.app.data.SettingsRepository
-import com.empiriact.app.util.ActivityRecognitionPermissionUtils
+import com.empiriact.app.util.ActivityRecognitionOnboardingHelper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -345,14 +345,15 @@ private fun SystemPermissionsPage(context: Context, onContinue: () -> Unit) {
     var notificationsEnabled by remember { mutableStateOf(areNotificationsEnabled(context)) }
     var batteryOptimizationDisabled by remember { mutableStateOf(isIgnoringBatteryOptimizations(context)) }
     var activityRecognitionEnabled by remember {
-        mutableStateOf(ActivityRecognitionPermissionUtils.hasPermission(context))
+        mutableStateOf(ActivityRecognitionOnboardingHelper.hasPermission(context))
     }
     var notificationsDeferred by remember { mutableStateOf(false) }
     var batteryDeferred by remember { mutableStateOf(false) }
     var activityDeferred by remember { mutableStateOf(false) }
     var donationDeferred by remember { mutableStateOf(false) }
+    var donationChoiceMade by remember { mutableStateOf(false) }
 
-    val activityRecognitionRequired = ActivityRecognitionPermissionUtils.isPermissionRequired()
+    val activityRecognitionRequired = ActivityRecognitionOnboardingHelper.isPermissionRequired()
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -364,7 +365,12 @@ private fun SystemPermissionsPage(context: Context, onContinue: () -> Unit) {
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         activityRecognitionEnabled =
-            granted || ActivityRecognitionPermissionUtils.hasPermission(context)
+            granted || ActivityRecognitionOnboardingHelper.hasPermission(context)
+        if (!activityRecognitionEnabled) {
+            scope.launch {
+                ActivityRecognitionOnboardingHelper.onPermissionDenied(settingsRepository)
+            }
+        }
     }
 
     val batteryOptimizationLauncher = rememberLauncherForActivityResult(
@@ -378,7 +384,7 @@ private fun SystemPermissionsPage(context: Context, onContinue: () -> Unit) {
             if (event == Lifecycle.Event.ON_RESUME) {
                 notificationsEnabled = areNotificationsEnabled(context)
                 batteryOptimizationDisabled = isIgnoringBatteryOptimizations(context)
-                activityRecognitionEnabled = ActivityRecognitionPermissionUtils.hasPermission(context)
+                activityRecognitionEnabled = ActivityRecognitionOnboardingHelper.hasPermission(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -447,11 +453,11 @@ private fun SystemPermissionsPage(context: Context, onContinue: () -> Unit) {
 
         PermissionCard(
             title = "Aktivitätserkennung",
-            benefit = "Nutzen: Schritt-Trends können dir zusätzliche Rückmeldung über Aktivitätsmuster geben.",
+            benefit = "Nutzen: Die Aktivitätserkennung hilft, Schritte als Trend zu sehen und Rückfälle in Inaktivität früh zu bemerken.",
             privacyHint = if (activityRecognitionRequired) {
-                "Datenschutz: Verarbeitung erfolgt primär lokal. Die Berechtigung ist getrennt von der Datenspende und jederzeit widerrufbar."
+                "Transparenz: Schrittinformationen werden primär lokal auf deinem Gerät verarbeitet. Eine Weitergabe erfolgt nur, wenn du Datenspende separat aktivierst. Die Berechtigung ist jederzeit in Android widerrufbar."
             } else {
-                "Datenschutz: Auf deinem Gerät ist keine zusätzliche Berechtigung nötig."
+                "Transparenz: Auf deinem Gerät ist keine zusätzliche Berechtigung erforderlich."
             },
             isEnabled = activityRecognitionEnabled,
             deferred = activityDeferred,
@@ -476,17 +482,21 @@ private fun SystemPermissionsPage(context: Context, onContinue: () -> Unit) {
             enabled = dataDonationEnabled,
             onOptIn = {
                 donationDeferred = false
+                donationChoiceMade = true
                 scope.launch { settingsRepository.setDataDonationEnabled(true) }
             },
             onOptOut = {
                 donationDeferred = false
+                donationChoiceMade = true
                 scope.launch { settingsRepository.setDataDonationEnabled(false) }
             },
             onDefer = {
                 donationDeferred = true
+                donationChoiceMade = false
                 scope.launch { settingsRepository.setDataDonationEnabled(false) }
             },
-            deferred = donationDeferred
+            deferred = donationDeferred,
+            choiceMade = donationChoiceMade
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -514,7 +524,8 @@ private fun DataDonationCard(
     onOptIn: () -> Unit,
     onOptOut: () -> Unit,
     onDefer: () -> Unit,
-    deferred: Boolean
+    deferred: Boolean,
+    choiceMade: Boolean
 ) {
     Card(
         shape = RoundedCornerShape(18.dp),
@@ -537,13 +548,13 @@ private fun DataDonationCard(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Datenschutz: Die Datenspende ist freiwillig und getrennt von der Kernnutzung. Keine freien Texte werden für Werbung verkauft.",
+                text = "Datenschutz kurz: Die Datenspende ist freiwillig, getrennt von Kernfunktionen und jederzeit widerrufbar. Es werden keine freien Tagebuchtexte für Werbung verkauft.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = if (enabled) "Status: Aktiviert" else if (deferred) "Status: Nicht aktiviert (vorerst übersprungen)" else "Status: Nicht aktiviert",
+                text = if (enabled) "Status: Aktiviert" else if (!choiceMade || deferred) "Status: Noch keine Auswahl" else "Status: Nicht aktiviert (Opt-out)",
                 style = MaterialTheme.typography.labelLarge,
                 color = if (enabled) MaterialTheme.colorScheme.primary else Color(0xFFB45309)
             )
@@ -558,7 +569,7 @@ private fun DataDonationCard(
             }
             Spacer(modifier = Modifier.height(8.dp))
             TextButton(onClick = onDefer, modifier = Modifier.align(Alignment.End)) {
-                Text("Später")
+                Text("Noch nicht entscheiden")
             }
         }
     }
@@ -636,7 +647,7 @@ private fun PermissionCard(
                     Text(actionText)
                 }
                 TextButton(onClick = onDefer, modifier = Modifier.weight(1f)) {
-                    Text("Später")
+                    Text("Noch nicht entscheiden")
                 }
             }
         }
@@ -645,6 +656,24 @@ private fun PermissionCard(
 
 @Composable
 private fun OnboardingCompletionPage(onFinished: () -> Unit) {
+    val context = LocalContext.current
+    val settingsRepository = remember(context) { SettingsRepository(context.applicationContext) }
+
+    val dataDonationEnabled by settingsRepository.dataDonationEnabled.collectAsState(initial = false)
+
+    var notificationsEnabled by remember { mutableStateOf(areNotificationsEnabled(context)) }
+    var batteryOptimizationDisabled by remember { mutableStateOf(isIgnoringBatteryOptimizations(context)) }
+    var activityRecognitionEnabled by remember {
+        mutableStateOf(ActivityRecognitionOnboardingHelper.hasPermission(context))
+    }
+
+    DisposableEffect(context) {
+        notificationsEnabled = areNotificationsEnabled(context)
+        batteryOptimizationDisabled = isIgnoringBatteryOptimizations(context)
+        activityRecognitionEnabled = ActivityRecognitionOnboardingHelper.hasPermission(context)
+        onDispose { }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -672,6 +701,13 @@ private fun OnboardingCompletionPage(onFinished: () -> Unit) {
         Text(
             text = "Zusammenfassung:\n• Du hast die wichtigsten Systempunkte geprüft.\n• Nicht aktivierte Punkte sind klar markiert und blockieren dich nicht.\n• Du kannst jederzeit mit einem nächsten kleinen Schritt weitermachen.",
             style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        SummaryCard(
+            notificationsEnabled = notificationsEnabled,
+            batteryOptimizationDisabled = batteryOptimizationDisabled,
+            activityRecognitionEnabled = activityRecognitionEnabled,
+            dataDonationEnabled = dataDonationEnabled
         )
         Spacer(modifier = Modifier.height(20.dp))
         Button(onClick = onFinished, modifier = Modifier.fillMaxWidth()) {

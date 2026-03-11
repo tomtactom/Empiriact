@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.empiriact.app.EmpiriactApplication
 import com.empiriact.app.data.SettingsRepository
-import com.empiriact.app.util.ActivityRecognitionPermissionUtils
+import com.empiriact.app.util.ActivityRecognitionOnboardingHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -140,14 +140,14 @@ class SettingsViewModel(
     }
 
     fun hasActivityRecognitionPermission(): Boolean =
-        ActivityRecognitionPermissionUtils.hasPermission(application)
+        ActivityRecognitionOnboardingHelper.hasPermission(application)
 
     fun isActivityRecognitionPermissionRequired(): Boolean =
-        ActivityRecognitionPermissionUtils.isPermissionRequired()
+        ActivityRecognitionOnboardingHelper.isPermissionRequired()
 
     fun onPassiveStepsPermissionDenied() {
         viewModelScope.launch {
-            settingsRepository.setPassiveStepsEnabled(false)
+            ActivityRecognitionOnboardingHelper.onPermissionDenied(settingsRepository)
             _statusMessage.value =
                 "Schrittzahl benötigt die Aktivitätserkennung. Ohne diese Berechtigung bleibt die Funktion aus."
         }
