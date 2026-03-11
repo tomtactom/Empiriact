@@ -184,6 +184,48 @@ class StepTrackingServiceTest {
         assertEquals(listOf(55, 120), day.map { it.stepCount })
     }
 
+    @Test
+    fun `same-hour retry updates snapshot to avoid inflated next hour delta`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 1_000,
+            hour = ZonedDateTime.of(2026, 1, 3, 10, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val firstRetry = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(1_100)
+        )
+
+        val secondHourCapture = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(1_160)
+        )
+
+        assertTrue(
+            firstRetry.captureHourlySnapshot(
+                ZonedDateTime.of(2026, 1, 3, 10, 45, 0, 0, ZoneId.of("UTC"))
+            )
+        )
+
+        assertTrue(
+            secondHourCapture.captureHourlySnapshot(
+                ZonedDateTime.of(2026, 1, 3, 11, 1, 0, 0, ZoneId.of("UTC"))
+            )
+        )
+
+        val day = passive.observeDay(LocalDate.of(2026, 1, 3)).first().sortedBy { it.hour }
+        assertEquals(listOf(11), day.map { it.hour })
+        assertEquals(listOf(60), day.map { it.stepCount })
+    }
+
     private class FakeStepCounterSource(
         private val total: Long?
     ) : StepCounterSource {

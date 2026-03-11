@@ -75,7 +75,7 @@ class StepTrackingService(
         val shouldUpdateSnapshot = when {
             previousHour == null || previousTotalSteps == null -> true
             currentHour.isAfter(previousHour) -> true
-            currentHour.isEqual(previousHour) -> currentTotalSteps < previousTotalSteps
+            currentHour.isEqual(previousHour) -> currentTotalSteps != previousTotalSteps
             else -> true
         }
 
