@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -43,6 +44,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +64,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
+import com.empiriact.app.data.SettingsRepository
+import com.empiriact.app.util.ActivityRecognitionPermissionUtils
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -325,14 +329,30 @@ private fun IntroContentPage(page: IntroPage) {
 @Composable
 private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val scope = rememberCoroutineScope()
+    val settingsRepository = remember(context) { SettingsRepository(context.applicationContext) }
+
+    val dataDonationEnabled by settingsRepository.dataDonationEnabled.collectAsState(initial = false)
 
     var notificationsEnabled by remember { mutableStateOf(areNotificationsEnabled(context)) }
     var batteryOptimizationDisabled by remember { mutableStateOf(isIgnoringBatteryOptimizations(context)) }
+    var activityRecognitionEnabled by remember {
+        mutableStateOf(ActivityRecognitionPermissionUtils.hasPermission(context))
+    }
+
+    val activityRecognitionRequired = ActivityRecognitionPermissionUtils.isPermissionRequired()
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) {
         notificationsEnabled = areNotificationsEnabled(context)
+    }
+
+    val activityRecognitionPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        activityRecognitionEnabled =
+            granted || ActivityRecognitionPermissionUtils.hasPermission(context)
     }
 
     val batteryOptimizationLauncher = rememberLauncherForActivityResult(
@@ -346,6 +366,7 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
             if (event == Lifecycle.Event.ON_RESUME) {
                 notificationsEnabled = areNotificationsEnabled(context)
                 batteryOptimizationDisabled = isIgnoringBatteryOptimizations(context)
+                activityRecognitionEnabled = ActivityRecognitionPermissionUtils.hasPermission(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -398,6 +419,52 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
             openBatteryOptimizationSettings(context, batteryOptimizationLauncher::launch)
         }
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        PermissionCard(
+            title = "Aktivitätserkennung für Schrittmuster",
+            description = if (activityRecognitionRequired) {
+                "Wenn du zustimmst, erkennt die App Bewegungsmuster für passive Schritt-Trends. Die Auswertung läuft primär lokal auf deinem Gerät; eine eventuelle Datenspende bleibt separat und freiwillig. Du kannst die Berechtigung jederzeit in den Systemeinstellungen widerrufen."
+            } else {
+                "Auf deinem Android-Gerät ist keine zusätzliche Berechtigung erforderlich."
+            },
+            isEnabled = activityRecognitionEnabled,
+            enabledText = "Aktiv",
+            disabledText = "Nicht aktiv",
+            actionText = if (activityRecognitionRequired) "Berechtigung verwalten" else "Nicht erforderlich"
+        ) {
+            if (!activityRecognitionRequired) {
+                return@PermissionCard
+            }
+
+            if (!activityRecognitionEnabled) {
+                activityRecognitionPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+            } else {
+                openAppDetailSettings(context)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        DataDonationCard(
+            enabled = dataDonationEnabled,
+            onOptIn = {
+                scope.launch { settingsRepository.setDataDonationEnabled(true) }
+            },
+            onOptOut = {
+                scope.launch { settingsRepository.setDataDonationEnabled(false) }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        SummaryCard(
+            notificationsEnabled = notificationsEnabled,
+            batteryOptimizationDisabled = batteryOptimizationDisabled,
+            activityRecognitionEnabled = activityRecognitionEnabled,
+            dataDonationEnabled = dataDonationEnabled
+        )
+
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
@@ -416,6 +483,81 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+    }
+}
+
+@Composable
+private fun DataDonationCard(
+    enabled: Boolean,
+    onOptIn: () -> Unit,
+    onOptOut: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Datenspende: bewusst entscheiden",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Du kannst optional anonymisierte Nutzungsdaten teilen, damit Empiriact wissenschaftlich weiter verbessert werden kann. Standardmäßig ist nichts erzwungen: Du wählst aktiv Ja oder Nein und kannst deine Entscheidung jederzeit in den Einstellungen ändern.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Kurz zum Datenschutz: Keine Inhalte aus deinen freien Texteingaben werden für Werbung verkauft. Die Datenspende ist freiwillig und unabhängig von deiner Kernnutzung.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = if (enabled) "Status: Aktiv" else "Status: Nicht aktiv",
+                style = MaterialTheme.typography.labelLarge,
+                color = if (enabled) MaterialTheme.colorScheme.primary else Color(0xFFB45309)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedButton(onClick = onOptOut, modifier = Modifier.weight(1f)) {
+                    Text("Nein, nicht teilen")
+                }
+                Button(onClick = onOptIn, modifier = Modifier.weight(1f)) {
+                    Text("Ja, anonym teilen")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryCard(
+    notificationsEnabled: Boolean,
+    batteryOptimizationDisabled: Boolean,
+    activityRecognitionEnabled: Boolean,
+    dataDonationEnabled: Boolean
+) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                text = "Onboarding-Zusammenfassung",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(text = "• Benachrichtigungen: ${if (notificationsEnabled) "Aktiv" else "Nicht aktiv"}")
+            Text(text = "• Akkuoptimierung: ${if (batteryOptimizationDisabled) "Deaktiviert" else "Aktiv"}")
+            Text(text = "• Aktivitätserkennung: ${if (activityRecognitionEnabled) "Aktiv" else "Nicht aktiv"}")
+            Text(text = "• Datenspende: ${if (dataDonationEnabled) "Aktiv" else "Nicht aktiv"}")
         }
     }
 }
@@ -477,6 +619,13 @@ private fun isIgnoringBatteryOptimizations(context: Context): Boolean {
 private fun openNotificationSettings(context: Context) {
     val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
         putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+    }
+    context.startActivity(intent)
+}
+
+private fun openAppDetailSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.parse("package:${context.packageName}")
     }
     context.startActivity(intent)
 }
