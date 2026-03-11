@@ -1,6 +1,10 @@
 package com.empiriact.app.services
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -23,6 +27,12 @@ class StepTrackingService(
         val optIn = settingsRepository.passiveMarkersOptInEnabled()
         val stepsEnabled = settingsRepository.passiveStepsCollectionEnabled()
         if (!optIn || !stepsEnabled) {
+            settingsRepository.clearPassiveStepsTrackingState()
+            return false
+        }
+
+        if (!stepCounterSource.hasRequiredPermission()) {
+            settingsRepository.setPassiveStepsEnabled(false)
             settingsRepository.clearPassiveStepsTrackingState()
             return false
         }
@@ -57,11 +67,24 @@ class StepTrackingService(
 
 interface StepCounterSource {
     suspend fun readCurrentTotalSteps(): Long?
+
+    fun hasRequiredPermission(): Boolean = true
 }
 
 class SensorStepCounterSource(
     private val context: Context
 ) : StepCounterSource {
+
+    override fun hasRequiredPermission(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return true
+        }
+
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACTIVITY_RECOGNITION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
     override suspend fun readCurrentTotalSteps(): Long? {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager ?: return null

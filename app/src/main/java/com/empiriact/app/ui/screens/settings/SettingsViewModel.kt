@@ -1,6 +1,10 @@
 package com.empiriact.app.ui.screens.settings
 
 import android.app.ActivityManager
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.empiriact.app.EmpiriactApplication
@@ -135,6 +139,42 @@ class SettingsViewModel(
     fun setPassiveStepsEnabled(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setPassiveStepsEnabled(enabled)
+        }
+    }
+
+    fun hasActivityRecognitionPermission(): Boolean {
+        if (!isActivityRecognitionPermissionRequired()) {
+            return true
+        }
+
+        return ContextCompat.checkSelfPermission(
+            application,
+            Manifest.permission.ACTIVITY_RECOGNITION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun isActivityRecognitionPermissionRequired(): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+
+    fun onPassiveStepsPermissionDenied() {
+        viewModelScope.launch {
+            settingsRepository.setPassiveStepsEnabled(false)
+            _statusMessage.value =
+                "Schrittzahl benötigt die Aktivitätserkennung. Ohne diese Berechtigung bleibt die Funktion aus."
+        }
+    }
+
+    fun syncPassiveStepsPermissionState() {
+        if (!isActivityRecognitionPermissionRequired()) {
+            return
+        }
+
+        viewModelScope.launch {
+            if (settingsRepository.passiveStepsCollectionEnabled() && !hasActivityRecognitionPermission()) {
+                settingsRepository.setPassiveStepsEnabled(false)
+                _statusMessage.value =
+                    "Aktivitätserkennung wurde entzogen. Schritt-Tracking wurde aus Datenschutzgründen gestoppt."
+            }
         }
     }
 
