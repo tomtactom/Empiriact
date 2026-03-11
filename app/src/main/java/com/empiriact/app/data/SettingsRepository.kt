@@ -34,6 +34,9 @@ class SettingsRepository(context: Context) {
         val BA_BASELINE_DAYS = intPreferencesKey("ba_baseline_days")
         val BA_ACTIVITY_CRITERIA_ACKNOWLEDGED = booleanPreferencesKey("ba_activity_criteria_acknowledged")
         val BA_ACTIVITY_PREFERENCE_TAGS = stringSetPreferencesKey("ba_activity_preference_tags")
+        val BA_MAINTENANCE_STATUS = stringPreferencesKey("ba_maintenance_status")
+        val BA_MAINTENANCE_INTERVAL = stringPreferencesKey("ba_maintenance_interval")
+        val BA_MAINTENANCE_LAST_REMINDER_DATE = stringPreferencesKey("ba_maintenance_last_reminder_date")
     }
 
     enum class ThemeMode {
@@ -49,6 +52,29 @@ class SettingsRepository(context: Context) {
         companion object {
             fun fromPersisted(value: String?): InputMode {
                 return entries.firstOrNull { it.persistedValue == value } ?: STANDARD
+            }
+        }
+    }
+
+    enum class BaMaintenanceStatus(val persistedValue: String) {
+        OFF("off"),
+        ACTIVE("active");
+
+        companion object {
+            fun fromPersisted(value: String?): BaMaintenanceStatus {
+                return entries.firstOrNull { it.persistedValue == value } ?: OFF
+            }
+        }
+    }
+
+    enum class BaMaintenanceInterval(val persistedValue: String, val requiredDays: Long) {
+        DAILY("daily", 1),
+        BIWEEKLY("biweekly", 14),
+        MONTHLY("monthly", 30);
+
+        companion object {
+            fun fromPersisted(value: String?): BaMaintenanceInterval {
+                return entries.firstOrNull { it.persistedValue == value } ?: DAILY
             }
         }
     }
@@ -171,6 +197,43 @@ class SettingsRepository(context: Context) {
     suspend fun setBaActivityPreferenceTags(tags: Set<String>) {
         dataStore.edit { settings ->
             settings[PreferencesKeys.BA_ACTIVITY_PREFERENCE_TAGS] = tags
+        }
+    }
+
+    val baMaintenanceStatus: Flow<BaMaintenanceStatus> = dataStore.data
+        .map { preferences ->
+            BaMaintenanceStatus.fromPersisted(preferences[PreferencesKeys.BA_MAINTENANCE_STATUS])
+        }
+
+    suspend fun setBaMaintenanceStatus(status: BaMaintenanceStatus) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.BA_MAINTENANCE_STATUS] = status.persistedValue
+        }
+    }
+
+    val baMaintenanceInterval: Flow<BaMaintenanceInterval> = dataStore.data
+        .map { preferences ->
+            BaMaintenanceInterval.fromPersisted(preferences[PreferencesKeys.BA_MAINTENANCE_INTERVAL])
+        }
+
+    suspend fun setBaMaintenanceInterval(interval: BaMaintenanceInterval) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.BA_MAINTENANCE_INTERVAL] = interval.persistedValue
+        }
+    }
+
+    val baMaintenanceLastReminderDate: Flow<LocalDate?> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.BA_MAINTENANCE_LAST_REMINDER_DATE]?.let(LocalDate::parse)
+        }
+
+    suspend fun setBaMaintenanceLastReminderDate(date: LocalDate?) {
+        dataStore.edit { settings ->
+            if (date == null) {
+                settings.remove(PreferencesKeys.BA_MAINTENANCE_LAST_REMINDER_DATE)
+            } else {
+                settings[PreferencesKeys.BA_MAINTENANCE_LAST_REMINDER_DATE] = date.toString()
+            }
         }
     }
 

@@ -11,6 +11,8 @@ import com.empiriact.app.MainActivity
 import com.empiriact.app.R
 import com.empiriact.app.data.SettingsRepository
 import kotlinx.coroutines.flow.first
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class HourlyPromptWorker(
     appContext: Context,
@@ -18,14 +20,28 @@ class HourlyPromptWorker(
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
-        val enabled = SettingsRepository(applicationContext).hourlyPromptsEnabled.first()
-        if (enabled) {
+        val settingsRepository = SettingsRepository(applicationContext)
+        val enabled = settingsRepository.hourlyPromptsEnabled.first()
+        if (enabled && shouldSendReminder(settingsRepository)) {
             NotificationChannels.ensure(applicationContext)
             showNotification()
+            settingsRepository.setBaMaintenanceLastReminderDate(LocalDate.now())
         }
 
         HourlyPromptScheduler.ensureScheduled(applicationContext)
         return Result.success()
+    }
+
+    private suspend fun shouldSendReminder(settingsRepository: SettingsRepository): Boolean {
+        val status = settingsRepository.baMaintenanceStatus.first()
+        if (status != SettingsRepository.BaMaintenanceStatus.ACTIVE) {
+            return true
+        }
+
+        val interval = settingsRepository.baMaintenanceInterval.first()
+        val lastReminderDate = settingsRepository.baMaintenanceLastReminderDate.first() ?: return true
+        val daysSinceReminder = ChronoUnit.DAYS.between(lastReminderDate, LocalDate.now())
+        return daysSinceReminder >= interval.requiredDays
     }
 
     private fun showNotification() {
