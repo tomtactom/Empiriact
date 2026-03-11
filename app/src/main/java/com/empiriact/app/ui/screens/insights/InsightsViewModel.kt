@@ -3,6 +3,7 @@ package com.empiriact.app.ui.screens.insights
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.empiriact.app.data.ActivityLogRepository
+import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.db.ActivityLogEntity
 import com.empiriact.app.services.PassiveMarkerContext
 import com.empiriact.app.services.PassiveMarkerService
@@ -17,7 +18,8 @@ import java.time.LocalDate
 
 class InsightsViewModel(
     private val activityLogRepository: ActivityLogRepository,
-    private val passiveMarkerService: PassiveMarkerService
+    private val passiveMarkerService: PassiveMarkerService,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
@@ -32,10 +34,17 @@ class InsightsViewModel(
     private val _passiveVsActive = MutableStateFlow<List<PassiveVsActiveDataPoint>>(emptyList())
     val passiveVsActive: StateFlow<List<PassiveVsActiveDataPoint>> = _passiveVsActive
 
+    private val _showStepsBaselineInfo = MutableStateFlow(false)
+    val showStepsBaselineInfo: StateFlow<Boolean> = _showStepsBaselineInfo
+
     private var passiveContextJob: Job? = null
     private var passiveComparisonJob: Job? = null
 
     init {
+        settingsRepository.passiveStepsBaselineHourPending
+            .onEach { isPending -> _showStepsBaselineInfo.value = isPending }
+            .launchIn(viewModelScope)
+
         _selectedDate.onEach { date ->
             activityLogRepository.getLogsForDay(
                 startDate = date,

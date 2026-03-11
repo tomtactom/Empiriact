@@ -55,7 +55,8 @@ fun InsightsScreen(@Suppress("UNUSED_PARAMETER") factory: ViewModelProvider.Fact
                 @Suppress("UNCHECKED_CAST")
                 return InsightsViewModel(
                     application.activityLogRepository,
-                    PassiveMarkerService(application.settingsRepository, application.passiveMarkerRepository)
+                    PassiveMarkerService(application.settingsRepository, application.passiveMarkerRepository),
+                    application.settingsRepository
                 ) as T
             }
         }
@@ -65,6 +66,7 @@ fun InsightsScreen(@Suppress("UNUSED_PARAMETER") factory: ViewModelProvider.Fact
     val activities by viewModel.activities.collectAsState()
     val passiveContextByCheckin by viewModel.passiveContextByCheckin.collectAsState()
     val passiveVsActive by viewModel.passiveVsActive.collectAsState()
+    val showBaselineInfo by viewModel.showStepsBaselineInfo.collectAsState()
     var showEditDialog by remember { mutableStateOf<HourlyActivity?>(null) }
 
     Scaffold(
@@ -82,6 +84,9 @@ fun InsightsScreen(@Suppress("UNUSED_PARAMETER") factory: ViewModelProvider.Fact
             LazyColumn(modifier = Modifier.padding(padding).padding(horizontal = 16.dp)) {
                 item {
                     InsightsTransparencyCard()
+                    if (showBaselineInfo) {
+                        StepsBaselineInfoCard()
+                    }
                     if (passiveVsActive.isNotEmpty()) {
                         PassiveVsActiveSection(passiveVsActive)
                     }
@@ -127,6 +132,20 @@ private fun InsightsTransparencyCard() {
             Text(
                 text = "Passive Marker werden nur als Kontext neben aktiven Check-ins angezeigt. " +
                     "Keine verdeckte Diagnostik, keine automatische Bewertung deiner Person.",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun StepsBaselineInfoCard() {
+    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Schritt-Baseline aktiv", style = MaterialTheme.typography.titleSmall)
+            Text(
+                text = "Erste Messung gesetzt; Vergleichswerte ab nächster Stunde.",
                 style = MaterialTheme.typography.bodySmall
             )
         }

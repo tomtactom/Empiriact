@@ -48,6 +48,7 @@ class SettingsRepository(context: Context) {
         val PASSIVE_SCREEN_TIME_PROXIMITY_ENABLED = booleanPreferencesKey("passive_screen_time_proximity_enabled")
         val PASSIVE_STEPS_LAST_COUNTER_TOTAL = longPreferencesKey("passive_steps_last_counter_total")
         val PASSIVE_STEPS_LAST_COUNTER_HOUR = stringPreferencesKey("passive_steps_last_counter_hour")
+        val PASSIVE_STEPS_BASELINE_HOUR_PENDING = booleanPreferencesKey("passive_steps_baseline_hour_pending")
     }
 
     enum class ThemeMode {
@@ -304,6 +305,22 @@ class SettingsRepository(context: Context) {
             if (!enabled) {
                 settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL)
                 settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR)
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_BASELINE_HOUR_PENDING)
+            }
+        }
+    }
+
+    val passiveStepsBaselineHourPending: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PASSIVE_STEPS_BASELINE_HOUR_PENDING] ?: false
+        }
+
+    suspend fun setPassiveStepsBaselineHourPending(pending: Boolean) {
+        dataStore.edit { settings ->
+            if (pending) {
+                settings[PreferencesKeys.PASSIVE_STEPS_BASELINE_HOUR_PENDING] = true
+            } else {
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_BASELINE_HOUR_PENDING)
             }
         }
     }
@@ -333,6 +350,7 @@ class SettingsRepository(context: Context) {
         dataStore.edit { settings ->
             settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL)
             settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR)
+            settings.remove(PreferencesKeys.PASSIVE_STEPS_BASELINE_HOUR_PENDING)
         }
     }
 

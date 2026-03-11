@@ -30,6 +30,82 @@ class StepTrackingServiceTest {
         return PassiveMarkerRepository(db.passiveMarkerDao())
     }
 
+
+    @Test
+    fun `initial start without previous snapshot sets baseline flag and no hourly delta`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(1_350)
+        )
+
+        val captureTime = ZonedDateTime.of(2026, 1, 1, 11, 5, 0, 0, ZoneId.of("UTC"))
+        val captured = service.captureHourlySnapshot(captureTime)
+
+        assertTrue(captured)
+        assertEquals(1_350, settings.getPassiveStepsLastCounterTotal())
+        assertEquals(captureTime.withMinute(0).withSecond(0).withNano(0), settings.getPassiveStepsLastCounterHour())
+        assertTrue(settings.passiveStepsBaselineHourPending.first())
+
+        val day = passive.observeDay(LocalDate.of(2026, 1, 1)).first()
+        assertTrue(day.isEmpty())
+    }
+
+    @Test
+    fun `reactivation after clearing state sets fresh baseline then resolves on next hour`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 900,
+            hour = ZonedDateTime.of(2026, 1, 1, 10, 0, 0, 0, ZoneId.of("UTC"))
+        )
+        settings.setPassiveStepsBaselineHourPending(true)
+        settings.clearPassiveStepsTrackingState()
+
+        val baselineCapture = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(1_000)
+        )
+
+        assertTrue(
+            baselineCapture.captureHourlySnapshot(
+                ZonedDateTime.of(2026, 1, 1, 12, 10, 0, 0, ZoneId.of("UTC"))
+            )
+        )
+        assertTrue(settings.passiveStepsBaselineHourPending.first())
+
+        val nextHourCapture = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(1_120)
+        )
+
+        assertTrue(
+            nextHourCapture.captureHourlySnapshot(
+                ZonedDateTime.of(2026, 1, 1, 13, 5, 0, 0, ZoneId.of("UTC"))
+            )
+        )
+        assertFalse(settings.passiveStepsBaselineHourPending.first())
+
+        val day = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
+        assertEquals(listOf(13), day.map { it.hour })
+        assertEquals(listOf(120), day.map { it.stepCount })
+    }
+
     @Test
     fun `stores hourly delta when consent and steps are enabled`() = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
