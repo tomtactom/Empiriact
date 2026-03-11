@@ -494,6 +494,105 @@ class StepTrackingServiceTest {
         assertEquals(listOf(60, 60), day.map { it.stepCount })
     }
 
+    @Test
+    fun `uses hourly history as primary source when fully available`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 100,
+            hour = ZonedDateTime.of(2026, 1, 5, 10, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Timeout),
+            hourlyStepHistorySource = FakeHourlyStepHistorySource(
+                HourlyStepHistoryReadResult.Success(
+                    listOf(
+                        HourBucket(ZonedDateTime.of(2026, 1, 5, 11, 0, 0, 0, ZoneId.of("UTC")), 120),
+                        HourBucket(ZonedDateTime.of(2026, 1, 5, 12, 0, 0, 0, ZoneId.of("UTC")), 140)
+                    )
+                )
+            )
+        )
+
+        assertTrue(service.captureHourlySnapshot(ZonedDateTime.of(2026, 1, 5, 12, 35, 0, 0, ZoneId.of("UTC"))))
+
+        val day = passive.observeDay(LocalDate.of(2026, 1, 5)).first().sortedBy { it.hour }
+        assertEquals(listOf(11, 12), day.map { it.hour })
+        assertEquals(listOf(120, 140), day.map { it.stepCount })
+        assertEquals(null, settings.passiveStepsLastReadError.first())
+    }
+
+    @Test
+    fun `history gaps only persist available buckets`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 100,
+            hour = ZonedDateTime.of(2026, 1, 6, 10, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Timeout),
+            hourlyStepHistorySource = FakeHourlyStepHistorySource(
+                HourlyStepHistoryReadResult.Success(
+                    listOf(
+                        HourBucket(ZonedDateTime.of(2026, 1, 6, 11, 0, 0, 0, ZoneId.of("UTC")), 80),
+                        HourBucket(ZonedDateTime.of(2026, 1, 6, 13, 0, 0, 0, ZoneId.of("UTC")), 90)
+                    )
+                )
+            )
+        )
+
+        assertTrue(service.captureHourlySnapshot(ZonedDateTime.of(2026, 1, 6, 13, 5, 0, 0, ZoneId.of("UTC"))))
+
+        val day = passive.observeDay(LocalDate.of(2026, 1, 6)).first().sortedBy { it.hour }
+        assertEquals(listOf(11, 13), day.map { it.hour })
+        assertEquals(listOf(80, 90), day.map { it.stepCount })
+    }
+
+    @Test
+    fun `falls back to live sensor delta when history source is empty`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 1_000,
+            hour = ZonedDateTime.of(2026, 1, 7, 10, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_180)),
+            hourlyStepHistorySource = FakeHourlyStepHistorySource(HourlyStepHistoryReadResult.SourceEmpty)
+        )
+
+        assertTrue(service.captureHourlySnapshot(ZonedDateTime.of(2026, 1, 7, 11, 20, 0, 0, ZoneId.of("UTC"))))
+
+        val day = passive.observeDay(LocalDate.of(2026, 1, 7)).first().sortedBy { it.hour }
+        assertEquals(listOf(11), day.map { it.hour })
+        assertEquals(listOf(180), day.map { it.stepCount })
+    }
+
     private class FakeStepCounterSource(
         private val readResult: StepReadResult,
         private val sensorAvailable: Boolean = true,
@@ -504,5 +603,11 @@ class StepTrackingServiceTest {
         override fun isSensorAvailable(): Boolean = sensorAvailable
 
         override fun hasRequiredPermission(): Boolean = hasPermission
+    }
+
+    private class FakeHourlyStepHistorySource(
+        private val result: HourlyStepHistoryReadResult
+    ) : HourlyStepHistorySource {
+        override suspend fun readHourlySteps(start: ZonedDateTime, end: ZonedDateTime): HourlyStepHistoryReadResult = result
     }
 }

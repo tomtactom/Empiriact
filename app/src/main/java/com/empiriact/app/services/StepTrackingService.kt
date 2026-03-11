@@ -21,7 +21,8 @@ import kotlin.math.roundToLong
 class StepTrackingService(
     private val settingsRepository: SettingsRepository,
     private val passiveMarkerRepository: PassiveMarkerRepository,
-    private val stepCounterSource: StepCounterSource
+    private val stepCounterSource: StepCounterSource,
+    private val hourlyStepHistorySource: HourlyStepHistorySource = NoOpHourlyStepHistorySource()
 ) {
 
     suspend fun captureHourlySnapshot(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
@@ -33,6 +34,94 @@ class StepTrackingService(
             return false
         }
 
+        val currentHour = now.withMinute(0).withSecond(0).withNano(0)
+
+        val previousTotalSteps = settingsRepository.getPassiveStepsLastCounterTotal()
+        val previousHour = settingsRepository.getPassiveStepsLastCounterHour()
+
+        if (previousHour != null && currentHour.isAfter(previousHour)) {
+            val historyStart = previousHour.plusHours(1)
+            val historyEnd = currentHour.plusHours(1)
+
+            when (val historyResult = hourlyStepHistorySource.readHourlySteps(historyStart, historyEnd)) {
+                is HourlyStepHistoryReadResult.Success -> {
+                    if (historyResult.buckets.isNotEmpty()) {
+                        settingsRepository.clearPassiveStepsReadError()
+                        settingsRepository.setPassiveStepsBaselineHourPending(false)
+                        historyResult.buckets.forEach { bucket ->
+                            val bucketHour = bucket.start.withMinute(0).withSecond(0).withNano(0)
+                            if (!bucketHour.isBefore(historyStart) && bucketHour.isBefore(historyEnd)) {
+                                passiveMarkerRepository.upsertHour(
+                                    date = bucketHour.toLocalDate(),
+                                    hour = bucketHour.hour,
+                                    stepCount = bucket.stepCount,
+                                    isEstimated = bucket.isEstimated
+                                )
+                            }
+                        }
+                    } else {
+                        settingsRepository.setPassiveStepsReadError(
+                            reason = SettingsRepository.PassiveStepsReadErrorReason.SOURCE_EMPTY,
+                            capturedAt = now
+                        )
+                        return captureFromLiveDelta(previousHour, previousTotalSteps, currentHour, now)
+                    }
+                }
+
+                HourlyStepHistoryReadResult.PermissionMissing -> {
+                    settingsRepository.setPassiveStepsEnabled(false)
+                    settingsRepository.clearPassiveStepsTrackingState()
+                    settingsRepository.setPassiveStepsReadError(
+                        reason = SettingsRepository.PassiveStepsReadErrorReason.PERMISSION_MISSING,
+                        capturedAt = now
+                    )
+                    return false
+                }
+
+                HourlyStepHistoryReadResult.SourceEmpty -> {
+                    settingsRepository.setPassiveStepsReadError(
+                        reason = SettingsRepository.PassiveStepsReadErrorReason.SOURCE_EMPTY,
+                        capturedAt = now
+                    )
+                    return captureFromLiveDelta(previousHour, previousTotalSteps, currentHour, now)
+                }
+
+                HourlyStepHistoryReadResult.SyncError -> {
+                    settingsRepository.setPassiveStepsReadError(
+                        reason = SettingsRepository.PassiveStepsReadErrorReason.SYNC_FAILED,
+                        capturedAt = now
+                    )
+                    return captureFromLiveDelta(previousHour, previousTotalSteps, currentHour, now)
+                }
+            }
+        }
+
+        val liveRead = stepCounterSource.readCurrentTotalSteps()
+        if (liveRead is StepReadResult.Success) {
+            settingsRepository.setPassiveStepsLastSnapshot(
+                totalSteps = liveRead.total,
+                hour = currentHour
+            )
+        }
+
+        if (previousTotalSteps == null || previousHour == null) {
+            if (liveRead is StepReadResult.Success) {
+                settingsRepository.setPassiveStepsBaselineHourPending(true)
+                settingsRepository.clearPassiveStepsReadError()
+                return true
+            }
+            return handleLiveReadFailure(now, liveRead)
+        }
+
+        return true
+    }
+
+    private suspend fun captureFromLiveDelta(
+        previousHour: ZonedDateTime?,
+        previousTotalSteps: Long?,
+        currentHour: ZonedDateTime,
+        now: ZonedDateTime
+    ): Boolean {
         if (!stepCounterSource.hasRequiredPermission()) {
             settingsRepository.setPassiveStepsEnabled(false)
             settingsRepository.clearPassiveStepsTrackingState()
@@ -54,40 +143,9 @@ class StepTrackingService(
         }
 
         val currentTotalSteps = when (val readResult = stepCounterSource.readCurrentTotalSteps()) {
-            is StepReadResult.Success -> {
-                settingsRepository.clearPassiveStepsReadError()
-                readResult.total
-            }
-            StepReadResult.Timeout -> {
-                settingsRepository.setPassiveStepsReadError(
-                    reason = SettingsRepository.PassiveStepsReadErrorReason.TIMEOUT,
-                    capturedAt = now
-                )
-                return false
-            }
-            StepReadResult.SensorUnavailable -> {
-                settingsRepository.setPassiveStepsEnabled(false)
-                settingsRepository.clearPassiveStepsTrackingState()
-                settingsRepository.setPassiveStepsReadError(
-                    reason = SettingsRepository.PassiveStepsReadErrorReason.SENSOR_UNAVAILABLE,
-                    capturedAt = now
-                )
-                return false
-            }
-            StepReadResult.PermissionMissing -> {
-                settingsRepository.setPassiveStepsEnabled(false)
-                settingsRepository.clearPassiveStepsTrackingState()
-                settingsRepository.setPassiveStepsReadError(
-                    reason = SettingsRepository.PassiveStepsReadErrorReason.PERMISSION_MISSING,
-                    capturedAt = now
-                )
-                return false
-            }
+            is StepReadResult.Success -> readResult.total
+            else -> return handleLiveReadFailure(now, readResult)
         }
-        val currentHour = now.withMinute(0).withSecond(0).withNano(0)
-
-        val previousTotalSteps = settingsRepository.getPassiveStepsLastCounterTotal()
-        val previousHour = settingsRepository.getPassiveStepsLastCounterHour()
 
         if (previousTotalSteps == null || previousHour == null) {
             settingsRepository.setPassiveStepsLastSnapshot(
@@ -147,12 +205,45 @@ class StepTrackingService(
         }
 
         if (shouldUpdateSnapshot) {
-            settingsRepository.setPassiveStepsLastSnapshot(
-                totalSteps = currentTotalSteps,
-                hour = currentHour
-            )
+            settingsRepository.setPassiveStepsLastSnapshot(totalSteps = currentTotalSteps, hour = currentHour)
         }
+        settingsRepository.clearPassiveStepsReadError()
         return true
+    }
+
+    private suspend fun handleLiveReadFailure(now: ZonedDateTime, readResult: StepReadResult): Boolean {
+        when (readResult) {
+            StepReadResult.Timeout -> {
+                settingsRepository.setPassiveStepsReadError(
+                    reason = SettingsRepository.PassiveStepsReadErrorReason.TIMEOUT,
+                    capturedAt = now
+                )
+            }
+
+            StepReadResult.SensorUnavailable -> {
+                settingsRepository.setPassiveStepsEnabled(false)
+                settingsRepository.clearPassiveStepsTrackingState()
+                settingsRepository.setPassiveStepsReadError(
+                    reason = SettingsRepository.PassiveStepsReadErrorReason.SENSOR_UNAVAILABLE,
+                    capturedAt = now
+                )
+            }
+
+            StepReadResult.PermissionMissing -> {
+                settingsRepository.setPassiveStepsEnabled(false)
+                settingsRepository.clearPassiveStepsTrackingState()
+                settingsRepository.setPassiveStepsReadError(
+                    reason = SettingsRepository.PassiveStepsReadErrorReason.PERMISSION_MISSING,
+                    capturedAt = now
+                )
+            }
+
+            is StepReadResult.Success -> {
+                settingsRepository.clearPassiveStepsReadError()
+                return true
+            }
+        }
+        return false
     }
 }
 
