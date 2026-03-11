@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -125,7 +124,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
         )
     }
 
-    val pageCount = pages.size + 1
+    val pageCount = pages.size + 2
     val pagerState = rememberPagerState(pageCount = { pageCount })
 
     Column(
@@ -196,39 +195,48 @@ fun OnboardingScreen(onFinished: () -> Unit) {
         ) { page ->
             if (page < pages.size) {
                 IntroContentPage(page = pages[page])
+            } else if (page == pages.size) {
+                SystemPermissionsPage(
+                    context = context,
+                    onContinue = {
+                        scope.launch { pagerState.animateScrollToPage(page + 1) }
+                    }
+                )
             } else {
-                SystemPermissionsPage(context = context, onFinished = onFinished)
+                OnboardingCompletionPage(onFinished = onFinished)
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(
-                onClick = {
-                    if (pagerState.currentPage > 0) {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-                    }
-                },
-                enabled = pagerState.currentPage > 0
+        if (pagerState.currentPage < pages.size) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Zurück")
-            }
-
-            Button(
-                onClick = {
-                    if (pagerState.currentPage < pageCount - 1) {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                    } else {
-                        onFinished()
-                    }
+                OutlinedButton(
+                    onClick = {
+                        if (pagerState.currentPage > 0) {
+                            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+                        }
+                    },
+                    enabled = pagerState.currentPage > 0
+                ) {
+                    Text("Zurück")
                 }
-            ) {
-                Text(if (pagerState.currentPage == pageCount - 1) "Fertig" else "Weiter")
+
+                Button(
+                    onClick = {
+                        if (pagerState.currentPage < pageCount - 1) {
+                            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                        } else {
+                            onFinished()
+                        }
+                    }
+                ) {
+                    Text("Weiter")
+                }
             }
         }
 
@@ -327,7 +335,7 @@ private fun IntroContentPage(page: IntroPage) {
 }
 
 @Composable
-private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
+private fun SystemPermissionsPage(context: Context, onContinue: () -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
     val settingsRepository = remember(context) { SettingsRepository(context.applicationContext) }
@@ -339,6 +347,10 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
     var activityRecognitionEnabled by remember {
         mutableStateOf(ActivityRecognitionPermissionUtils.hasPermission(context))
     }
+    var notificationsDeferred by remember { mutableStateOf(false) }
+    var batteryDeferred by remember { mutableStateOf(false) }
+    var activityDeferred by remember { mutableStateOf(false) }
+    var donationDeferred by remember { mutableStateOf(false) }
 
     val activityRecognitionRequired = ActivityRecognitionPermissionUtils.isPermissionRequired()
 
@@ -380,27 +392,37 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Letzter Schritt: App zuverlässig machen",
+            text = "Setup in kleinen Schritten",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Du entscheidest selbst, welche Einstellungen du aktivieren möchtest. Sie können Erinnerungen und Übungen im Alltag verlässlicher unterstützen.",
+            text = "Wähle jetzt, was dich aktuell unterstützt. Jeder Punkt ist optional und später in den Einstellungen änderbar.",
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(20.dp))
 
+        Text(
+            text = "Setup-Checkliste",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         PermissionCard(
-            title = "Benachrichtigungen erlauben",
-            description = "Du erhältst kurze Impulse zu den Zeiten, die für dich passend sind.",
+            title = "Benachrichtigungen",
+            benefit = "Nutzen: Freundliche Erinnerungen helfen dir, kleine Schritte im Alltag leichter dranzubleiben.",
+            privacyHint = "Datenschutz: Du bestimmst Zeitpunkt und Umfang. Inhalte aus Einträgen werden nicht für Werbung genutzt.",
             isEnabled = notificationsEnabled,
-            enabledText = "Aktiv",
-            disabledText = "Nicht aktiv",
-            actionText = "Jetzt erlauben"
+            deferred = notificationsDeferred,
+            actionText = "Benachrichtigungen aktivieren",
+            onDefer = { notificationsDeferred = true }
         ) {
             if (!notificationsEnabled) {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                notificationsDeferred = false
             } else {
                 openNotificationSettings(context)
             }
@@ -409,29 +431,32 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
         Spacer(modifier = Modifier.height(12.dp))
 
         PermissionCard(
-            title = "Akkuoptimierung deaktivieren",
-            description = "So kann Empiriact Hintergrundfunktionen zuverlässiger ausführen.",
+            title = "Akku-Optimierung",
+            benefit = "Nutzen: Erinnerungen und Hintergrundfunktionen laufen verlässlicher.",
+            privacyHint = "Datenschutz: Diese Einstellung betrifft nur die Systemsteuerung im Hintergrund, nicht zusätzliche Datensammlung.",
             isEnabled = batteryOptimizationDisabled,
-            enabledText = "Deaktiviert",
-            disabledText = "Aktiv",
-            actionText = "Einstellung öffnen"
+            deferred = batteryDeferred,
+            actionText = "Akku-Optimierung anpassen",
+            onDefer = { batteryDeferred = true }
         ) {
+            batteryDeferred = false
             openBatteryOptimizationSettings(context, batteryOptimizationLauncher::launch)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         PermissionCard(
-            title = "Aktivitätserkennung für Schrittmuster",
-            description = if (activityRecognitionRequired) {
-                "Wenn du zustimmst, erkennt die App Bewegungsmuster für passive Schritt-Trends. Die Auswertung läuft primär lokal auf deinem Gerät; eine eventuelle Datenspende bleibt separat und freiwillig. Du kannst die Berechtigung jederzeit in den Systemeinstellungen widerrufen."
+            title = "Aktivitätserkennung",
+            benefit = "Nutzen: Schritt-Trends können dir zusätzliche Rückmeldung über Aktivitätsmuster geben.",
+            privacyHint = if (activityRecognitionRequired) {
+                "Datenschutz: Verarbeitung erfolgt primär lokal. Die Berechtigung ist getrennt von der Datenspende und jederzeit widerrufbar."
             } else {
-                "Auf deinem Android-Gerät ist keine zusätzliche Berechtigung erforderlich."
+                "Datenschutz: Auf deinem Gerät ist keine zusätzliche Berechtigung nötig."
             },
             isEnabled = activityRecognitionEnabled,
-            enabledText = "Aktiv",
-            disabledText = "Nicht aktiv",
-            actionText = if (activityRecognitionRequired) "Berechtigung verwalten" else "Nicht erforderlich"
+            deferred = activityDeferred,
+            actionText = if (activityRecognitionRequired) "Aktivitätserkennung aktivieren" else "Nicht erforderlich",
+            onDefer = { activityDeferred = true }
         ) {
             if (!activityRecognitionRequired) {
                 return@PermissionCard
@@ -439,6 +464,7 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
 
             if (!activityRecognitionEnabled) {
                 activityRecognitionPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                activityDeferred = false
             } else {
                 openAppDetailSettings(context)
             }
@@ -449,29 +475,24 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
         DataDonationCard(
             enabled = dataDonationEnabled,
             onOptIn = {
+                donationDeferred = false
                 scope.launch { settingsRepository.setDataDonationEnabled(true) }
             },
             onOptOut = {
+                donationDeferred = false
                 scope.launch { settingsRepository.setDataDonationEnabled(false) }
-            }
+            },
+            onDefer = {
+                donationDeferred = true
+                scope.launch { settingsRepository.setDataDonationEnabled(false) }
+            },
+            deferred = donationDeferred
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SummaryCard(
-            notificationsEnabled = notificationsEnabled,
-            batteryOptimizationDisabled = batteryOptimizationDisabled,
-            activityRecognitionEnabled = activityRecognitionEnabled,
-            dataDonationEnabled = dataDonationEnabled
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Button(
-            onClick = onFinished,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Jetzt mit Empiriact starten")
+        Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
+            Text("Weiter zur Zusammenfassung")
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsEnabled) {
@@ -491,7 +512,9 @@ private fun SystemPermissionsPage(context: Context, onFinished: () -> Unit) {
 private fun DataDonationCard(
     enabled: Boolean,
     onOptIn: () -> Unit,
-    onOptOut: () -> Unit
+    onOptOut: () -> Unit,
+    onDefer: () -> Unit,
+    deferred: Boolean
 ) {
     Card(
         shape = RoundedCornerShape(18.dp),
@@ -509,29 +532,33 @@ private fun DataDonationCard(
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Du kannst optional anonymisierte Nutzungsdaten teilen, damit Empiriact wissenschaftlich weiter verbessert werden kann. Standardmäßig ist nichts erzwungen: Du wählst aktiv Ja oder Nein und kannst deine Entscheidung jederzeit in den Einstellungen ändern.",
+                text = "Nutzen: Mit optionalen anonymisierten Nutzungsdaten kann Empiriact wissenschaftlich weiter verbessert werden.",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Kurz zum Datenschutz: Keine Inhalte aus deinen freien Texteingaben werden für Werbung verkauft. Die Datenspende ist freiwillig und unabhängig von deiner Kernnutzung.",
+                text = "Datenschutz: Die Datenspende ist freiwillig und getrennt von der Kernnutzung. Keine freien Texte werden für Werbung verkauft.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = if (enabled) "Status: Aktiv" else "Status: Nicht aktiv",
+                text = if (enabled) "Status: Aktiviert" else if (deferred) "Status: Nicht aktiviert (vorerst übersprungen)" else "Status: Nicht aktiviert",
                 style = MaterialTheme.typography.labelLarge,
                 color = if (enabled) MaterialTheme.colorScheme.primary else Color(0xFFB45309)
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                 OutlinedButton(onClick = onOptOut, modifier = Modifier.weight(1f)) {
                     Text("Nein, nicht teilen")
                 }
                 Button(onClick = onOptIn, modifier = Modifier.weight(1f)) {
                     Text("Ja, anonym teilen")
                 }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(onClick = onDefer, modifier = Modifier.align(Alignment.End)) {
+                Text("Später")
             }
         }
     }
@@ -565,11 +592,12 @@ private fun SummaryCard(
 @Composable
 private fun PermissionCard(
     title: String,
-    description: String,
+    benefit: String,
+    privacyHint: String,
     isEnabled: Boolean,
-    enabledText: String,
-    disabledText: String,
+    deferred: Boolean,
     actionText: String,
+    onDefer: () -> Unit,
     onAction: () -> Unit
 ) {
     val statusColor = if (isEnabled) {
@@ -589,21 +617,74 @@ private fun PermissionCard(
         ) {
             Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(6.dp))
-            Text(text = description, style = MaterialTheme.typography.bodyMedium)
+            Text(text = benefit, style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = privacyHint,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = if (isEnabled) "Status: $enabledText" else "Status: $disabledText",
+                text = if (isEnabled) "Status: Aktiviert" else if (deferred) "Status: Nicht aktiviert (vorerst übersprungen)" else "Status: Nicht aktiviert",
                 style = MaterialTheme.typography.labelLarge,
                 color = statusColor
             )
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
-                onClick = onAction,
-                modifier = Modifier.widthIn(min = 180.dp)
-            ) {
-                Text(actionText)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(onClick = onAction, modifier = Modifier.weight(1f)) {
+                    Text(actionText)
+                }
+                TextButton(onClick = onDefer, modifier = Modifier.weight(1f)) {
+                    Text("Später")
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun OnboardingCompletionPage(onFinished: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Abschluss",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Du bist startklar",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = "Danke, dass du dir Zeit für dein Setup genommen hast. Kleine, regelmäßige Schritte reichen vollkommen aus.",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Zusammenfassung:\n• Du hast die wichtigsten Systempunkte geprüft.\n• Nicht aktivierte Punkte sind klar markiert und blockieren dich nicht.\n• Du kannst jederzeit mit einem nächsten kleinen Schritt weitermachen.",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(onClick = onFinished, modifier = Modifier.fillMaxWidth()) {
+            Text("App starten")
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = "Hinweis: Alles ist jederzeit in den Einstellungen änderbar.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
