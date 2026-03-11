@@ -17,7 +17,8 @@
 
         <receiver
             android:name=".notifications.BootReceiver"
-            android:exported="false">
+            android:exported="true">
+            <!-- System broadcasts require this receiver to be exported on Android 12+. -->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
