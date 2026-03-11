@@ -41,6 +41,7 @@ import com.empiriact.app.ui.screens.resources.methods.SelectiveAttentionExercise
 import com.empiriact.app.ui.screens.resources.methods.SharedAttentionExercise
 import com.empiriact.app.ui.screens.resources.methods.SituationalAttentionRefocusingExercise
 import com.empiriact.app.ui.screens.resources.methods.ValuesCompassExercise
+import com.empiriact.app.ui.screens.skills.RuminationExerciseScreen
 import com.empiriact.app.ui.screens.settings.SettingsScreen
 import com.empiriact.app.ui.screens.today.FlowChartExerciseScreen
 import com.empiriact.app.ui.screens.today.TodayScreen
@@ -158,6 +159,9 @@ private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navControlle
     composable(Route.ThumbRuleModule.route) { ThumbRuleModuleScreen(onBack = { navController.popBackStack() }) }
 
     composable(Route.Resources.route) { ResourcesScreen(navController) }
+    composable(Route.RuminationExercise.route) {
+        RuminationExerciseScreen(onFinish = { navController.popBackStack() })
+    }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }
     composable(Route.FlowChartExercise.route) { FlowChartExerciseScreen(navController) }
     composable(Route.PsychoeducationActivationFoundations.route) { PsychoeducationActivationFoundationsScreen(navController) }
