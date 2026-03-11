@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -223,26 +222,33 @@ fun EditHourEntryDialog(
     var activity by remember { mutableStateOf(entry.activity) }
     var valence by remember { mutableStateOf(entry.valence) }
 
-    BasicAlertDialog(onDismissRequest = onDismiss) {
-        Surface(shape = MaterialTheme.shapes.large) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                Text("Eintrag für ${entry.hour}:00 Uhr", style = MaterialTheme.typography.headlineSmall)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Eintrag für ${entry.hour}:00 Uhr", style = MaterialTheme.typography.headlineSmall) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = activity,
+                    onValueChange = { activity = it },
+                    label = { Text("Wichtigste Aktivität") }
+                )
                 Spacer(Modifier.height(16.dp))
-
-                OutlinedTextField(value = activity, onValueChange = { activity = it }, label = { Text("Wichtigste Aktivität") })
-                Spacer(Modifier.height(16.dp))
-
                 Text("Stimmung: ${valenceToEmoji(valence)}")
-                Slider(value = valence.toFloat(), onValueChange = { valence = it.toInt() }, valueRange = -2f..2f, steps = 3)
-
-                Spacer(Modifier.height(24.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onDismiss) { Text("Abbrechen") }
-                    Button(onClick = { onConfirm(activity, valence) }) { Text("Speichern") }
-                }
+                Slider(
+                    value = valence.toFloat(),
+                    onValueChange = { valence = it.toInt() },
+                    valueRange = -2f..2f,
+                    steps = 3
+                )
             }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Abbrechen") }
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(activity, valence) }) { Text("Speichern") }
         }
-    }
+    )
 }
 
 private fun valenceToEmoji(valence: Int): String {
