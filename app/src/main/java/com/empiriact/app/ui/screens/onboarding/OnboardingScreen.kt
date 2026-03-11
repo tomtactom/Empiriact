@@ -232,38 +232,42 @@ private fun SystemPermissionsPage() {
         PermissionCard(
             title = "Benachrichtigungen",
             description = "Erinnerungen unterstützen dich bei geplanten Schritten der Behavioral Activation.",
-            statusText = if (uiState.setupItems.notifications.enabled) "Aktiv" else "Offen",
-            actionText = "Freigabe öffnen"
-        ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                openNotificationSettings(context)
+            statusText = if (uiState.setupItems.notifications.enabled) "Abgeschlossen" else "Noch offen",
+            actionText = "Freigabe öffnen",
+            onAction = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    openNotificationSettings(context)
+                }
             }
-        }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         PermissionCard(
             title = "Akku-Optimierung",
             description = "Eine passende Einstellung verbessert die Zuverlässigkeit von Erinnerungen im Hintergrund.",
-            statusText = if (uiState.setupItems.batteryOptimization.enabled) "Aktiv" else "Offen",
-            actionText = "Einstellungen öffnen"
-        ) {
-            openBatteryOptimizationSettings(context) { batteryLauncher.launch(it) }
-        }
+            statusText = if (uiState.setupItems.batteryOptimization.enabled) "Abgeschlossen" else "Noch offen",
+            actionText = "Einstellungen öffnen",
+            onAction = { openBatteryOptimizationSettings(context) { batteryLauncher.launch(it) } }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        val activityRecognitionRequired = uiState.setupItems.activityRecognition.required
+        val activityRecognitionDone = uiState.setupItems.activityRecognition.enabled || !activityRecognitionRequired
         PermissionCard(
             title = "Aktivitätserkennung",
             description = "Optional für passive Marker wie Schritte, damit Alltagstrends besser sichtbar werden.",
-            statusText = if (uiState.setupItems.activityRecognition.enabled || !uiState.setupItems.activityRecognition.required) "Aktiv" else "Offen",
-            actionText = if (uiState.setupItems.activityRecognition.required) "Freigabe öffnen" else "Bereits geklärt"
-        ) {
-            if (!uiState.setupItems.activityRecognition.required) return@PermissionCard
-            activityLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
-        }
+            statusText = if (activityRecognitionDone) "Abgeschlossen" else "Noch offen",
+            actionText = if (activityRecognitionRequired) "Freigabe öffnen" else "Keine Aktion erforderlich",
+            onAction = if (activityRecognitionRequired) {
+                { activityLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION) }
+            } else {
+                null
+            }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -281,7 +285,7 @@ private fun PermissionCard(
     description: String,
     statusText: String,
     actionText: String,
-    onAction: () -> Unit
+    onAction: (() -> Unit)? = null
 ) {
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -290,9 +294,17 @@ private fun PermissionCard(
             Text(
                 text = "Status: $statusText",
                 style = MaterialTheme.typography.labelLarge,
-                color = if (statusText == "Aktiv") MaterialTheme.colorScheme.primary else Color(0xFFB45309)
+                color = if (statusText == "Abgeschlossen") MaterialTheme.colorScheme.primary else Color(0xFFB45309)
             )
-            OutlinedButton(onClick = onAction, modifier = Modifier.fillMaxWidth()) { Text(actionText) }
+            if (onAction != null) {
+                OutlinedButton(onClick = onAction, modifier = Modifier.fillMaxWidth()) { Text(actionText) }
+            } else {
+                Text(
+                    text = actionText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
