@@ -35,6 +35,9 @@ class TodayViewModelTest {
         whenever(repository.getUniqueActivities()).thenReturn(MutableStateFlow(listOf("Spaziergang")))
         whenever(repository.getLogsForDay(any(), any())).thenReturn(MutableStateFlow(emptyList<ActivityLogEntity>()))
         whenever(settingsRepository.todayIntroCompleted).thenReturn(MutableStateFlow(false))
+        whenever(settingsRepository.baInputMode).thenReturn(MutableStateFlow(SettingsRepository.InputMode.STANDARD))
+        whenever(settingsRepository.baBaselineStart).thenReturn(MutableStateFlow(null))
+        whenever(settingsRepository.baBaselineDays).thenReturn(MutableStateFlow(7))
 
         val viewModel = TodayViewModel(repository, settingsRepository)
         val date = LocalDate.of(2026, 1, 10)
@@ -55,6 +58,9 @@ class TodayViewModelTest {
         whenever(repository.getUniqueActivities()).thenReturn(MutableStateFlow(emptyList()))
         whenever(repository.getLogsForDay(any(), any())).thenReturn(MutableStateFlow(emptyList<ActivityLogEntity>()))
         whenever(settingsRepository.todayIntroCompleted).thenReturn(MutableStateFlow(false))
+        whenever(settingsRepository.baInputMode).thenReturn(MutableStateFlow(SettingsRepository.InputMode.STANDARD))
+        whenever(settingsRepository.baBaselineStart).thenReturn(MutableStateFlow(null))
+        whenever(settingsRepository.baBaselineDays).thenReturn(MutableStateFlow(7))
         whenever(repository.upsert(any(), any(), any(), any())).thenThrow(IllegalStateException("db down"))
 
         val viewModel = TodayViewModel(repository, settingsRepository)
@@ -74,6 +80,9 @@ class TodayViewModelTest {
         whenever(repository.getUniqueActivities()).thenReturn(uniqueActivitiesFlow)
         whenever(repository.getLogsForDay(any(), any())).thenReturn(MutableStateFlow(emptyList<ActivityLogEntity>()))
         whenever(settingsRepository.todayIntroCompleted).thenReturn(MutableStateFlow(false))
+        whenever(settingsRepository.baInputMode).thenReturn(MutableStateFlow(SettingsRepository.InputMode.STANDARD))
+        whenever(settingsRepository.baBaselineStart).thenReturn(MutableStateFlow(null))
+        whenever(settingsRepository.baBaselineDays).thenReturn(MutableStateFlow(7))
 
         val viewModel = TodayViewModel(repository, settingsRepository)
 
@@ -83,4 +92,21 @@ class TodayViewModelTest {
         assertEquals(listOf("Lesen", "Spazieren"), viewModel.uniqueActivities.value)
         verify(repository, never()).upsert(any(), any(), any(), any())
     }
+
+    @Test
+    fun `baseline mode exposes observation hint`() = runTest {
+        whenever(repository.getUniqueActivities()).thenReturn(MutableStateFlow(emptyList()))
+        whenever(repository.getLogsForDay(any(), any())).thenReturn(MutableStateFlow(emptyList<ActivityLogEntity>()))
+        whenever(settingsRepository.todayIntroCompleted).thenReturn(MutableStateFlow(false))
+        whenever(settingsRepository.baInputMode).thenReturn(MutableStateFlow(SettingsRepository.InputMode.BASELINE))
+        whenever(settingsRepository.baBaselineStart).thenReturn(MutableStateFlow(LocalDate.now().minusDays(1)))
+        whenever(settingsRepository.baBaselineDays).thenReturn(MutableStateFlow(7))
+
+        val viewModel = TodayViewModel(repository, settingsRepository)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.baselineUiStatus.value.isBaselineMode)
+        assertEquals("Tag 2/7 Beobachtung", viewModel.baselineUiStatus.value.observationHint)
+    }
+
 }

@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -26,12 +28,26 @@ class SettingsRepository(context: Context) {
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val TODAY_INTRO_COMPLETED = booleanPreferencesKey("today_intro_completed")
         val THEME_MODE = stringPreferencesKey("theme_mode")
+        val BA_INPUT_MODE = stringPreferencesKey("ba_input_mode")
+        val BA_BASELINE_START = stringPreferencesKey("ba_baseline_start")
+        val BA_BASELINE_DAYS = intPreferencesKey("ba_baseline_days")
     }
 
     enum class ThemeMode {
         SYSTEM,
         LIGHT,
         DARK
+    }
+
+    enum class InputMode(val persistedValue: String) {
+        STANDARD("standard"),
+        BASELINE("baseline");
+
+        companion object {
+            fun fromPersisted(value: String?): InputMode {
+                return entries.firstOrNull { it.persistedValue == value } ?: STANDARD
+            }
+        }
     }
 
     val hourlyPromptsEnabled: Flow<Boolean> = dataStore.data
@@ -93,6 +109,43 @@ class SettingsRepository(context: Context) {
     suspend fun setThemeMode(mode: ThemeMode) {
         dataStore.edit { settings ->
             settings[PreferencesKeys.THEME_MODE] = mode.name
+        }
+    }
+
+    val baInputMode: Flow<InputMode> = dataStore.data
+        .map { preferences ->
+            InputMode.fromPersisted(preferences[PreferencesKeys.BA_INPUT_MODE])
+        }
+
+    suspend fun setBaInputMode(mode: InputMode) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.BA_INPUT_MODE] = mode.persistedValue
+        }
+    }
+
+    val baBaselineStart: Flow<LocalDate?> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.BA_BASELINE_START]?.let { LocalDate.parse(it) }
+        }
+
+    suspend fun setBaBaselineStart(date: LocalDate?) {
+        dataStore.edit { settings ->
+            if (date == null) {
+                settings.remove(PreferencesKeys.BA_BASELINE_START)
+            } else {
+                settings[PreferencesKeys.BA_BASELINE_START] = date.toString()
+            }
+        }
+    }
+
+    val baBaselineDays: Flow<Int> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.BA_BASELINE_DAYS] ?: 7
+        }
+
+    suspend fun setBaBaselineDays(days: Int) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.BA_BASELINE_DAYS] = days
         }
     }
 
