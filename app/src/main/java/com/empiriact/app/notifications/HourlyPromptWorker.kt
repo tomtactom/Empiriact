@@ -10,6 +10,10 @@ import androidx.work.WorkerParameters
 import com.empiriact.app.MainActivity
 import com.empiriact.app.R
 import com.empiriact.app.data.SettingsRepository
+import com.empiriact.app.data.db.EmpiriactDatabase
+import com.empiriact.app.data.repo.PassiveMarkerRepository
+import com.empiriact.app.services.SensorStepCounterSource
+import com.empiriact.app.services.StepTrackingService
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -21,6 +25,16 @@ class HourlyPromptWorker(
 
     override suspend fun doWork(): Result {
         val settingsRepository = SettingsRepository(applicationContext)
+        val passiveMarkerRepository = PassiveMarkerRepository(
+            EmpiriactDatabase.getDatabase(applicationContext).passiveMarkerDao()
+        )
+        val stepTrackingService = StepTrackingService(
+            settingsRepository = settingsRepository,
+            passiveMarkerRepository = passiveMarkerRepository,
+            stepCounterSource = SensorStepCounterSource(applicationContext)
+        )
+        stepTrackingService.captureHourlySnapshot()
+
         val enabled = settingsRepository.hourlyPromptsEnabled.first()
         if (enabled && shouldSendReminder(settingsRepository)) {
             NotificationChannels.ensure(applicationContext)

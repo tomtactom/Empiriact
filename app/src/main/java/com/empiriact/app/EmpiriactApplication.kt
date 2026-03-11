@@ -9,6 +9,7 @@ import com.empiriact.app.data.ExerciseRepository
 import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.repo.GratitudeRepository
 import com.empiriact.app.data.repo.PassiveMarkerRepository
+import com.empiriact.app.notifications.HourlyPromptScheduler
 import com.empiriact.app.services.JsonExportService
 import com.empiriact.app.ui.common.ViewModelFactory
 
@@ -17,6 +18,7 @@ class EmpiriactApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         AppGraph.provide(applicationContext)
+        HourlyPromptScheduler.ensureScheduled(applicationContext)
     }
 
     private val database by lazy { EmpiriactDatabase.getDatabase(this) }
