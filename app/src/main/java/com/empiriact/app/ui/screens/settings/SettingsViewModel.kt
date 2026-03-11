@@ -55,6 +55,20 @@ class SettingsViewModel(
             initialValue = 7
         )
 
+    val baActivityCriteriaAcknowledged: StateFlow<Boolean> = settingsRepository.baActivityCriteriaAcknowledged
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    val baActivityPreferenceTags: StateFlow<Set<String>> = settingsRepository.baActivityPreferenceTags
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptySet()
+        )
+
     val baselineEnabled: StateFlow<Boolean> = baInputMode
         .combine(baBaselineDays) { mode, _ -> mode == SettingsRepository.InputMode.BASELINE }
         .stateIn(
@@ -84,6 +98,22 @@ class SettingsViewModel(
         }
     }
 
+
+
+    fun setBaActivityCriteriaAcknowledged(acknowledged: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setBaActivityCriteriaAcknowledged(acknowledged)
+        }
+    }
+
+    fun toggleBaActivityPreferenceTag(tag: String) {
+        viewModelScope.launch {
+            val updatedTags = baActivityPreferenceTags.value.toMutableSet().apply {
+                if (contains(tag)) remove(tag) else add(tag)
+            }
+            settingsRepository.setBaActivityPreferenceTags(updatedTags)
+        }
+    }
 
     fun setBaselineEnabled(enabled: Boolean) {
         viewModelScope.launch {

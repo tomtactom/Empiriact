@@ -27,10 +27,12 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
@@ -52,6 +54,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -82,6 +85,8 @@ fun TodayScreen(navController: NavController) {
     val unsavedChanges by vm.unsavedChanges.collectAsState()
     val todayIntroCompleted by vm.todayIntroCompleted.collectAsState()
     val baselineUiStatus by vm.baselineUiStatus.collectAsState()
+    val baCriteriaAcknowledged by vm.baActivityCriteriaAcknowledged.collectAsState()
+    val baPreferenceTags by vm.baActivityPreferenceTags.collectAsState()
 
     val now = LocalDateTime.now()
     val today = now.toLocalDate()
@@ -132,6 +137,10 @@ fun TodayScreen(navController: NavController) {
         if (!todayIntroCompleted) {
             item(key = "today_intro") {
                 TodayIntroCoachCard(
+                    criteriaAcknowledged = baCriteriaAcknowledged,
+                    selectedPreferenceTags = baPreferenceTags,
+                    onTogglePreferenceTag = vm::toggleBaActivityPreferenceTag,
+                    onAcknowledgeCriteria = vm::acknowledgeActivityCriteria,
                     onStart = {
                         expandedEntry = HourEntryKey(today, currentHour)
                     },
@@ -188,7 +197,8 @@ fun TodayScreen(navController: NavController) {
                         suggestions = uniqueActivities,
                         peopleSuggestions = uniquePeople,
                         cachedData = unsavedChanges[HourEntryKey(item.date, item.hour)],
-                        onCacheChanged = { cache -> vm.cacheHourEntry(item.date, item.hour, cache) }
+                        onCacheChanged = { cache -> vm.cacheHourEntry(item.date, item.hour, cache) },
+                        selectedPreferenceTags = baPreferenceTags
                     )
                 }
                 is TodayScreenItem.ShowMoreButton -> {
@@ -206,6 +216,10 @@ fun TodayScreen(navController: NavController) {
 
 @Composable
 private fun TodayIntroCoachCard(
+    criteriaAcknowledged: Boolean,
+    selectedPreferenceTags: Set<String>,
+    onTogglePreferenceTag: (String) -> Unit,
+    onAcknowledgeCriteria: () -> Unit,
     onStart: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -240,6 +254,32 @@ private fun TodayIntroCoachCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
+            Text(
+                text = "Was zählt hier als Aktivität?",
+                style = MaterialTheme.typography.titleSmall
+            )
+            Text(
+                text = "Alles, was du bewusst tust: Eigeninitiative, kleine Schritte oder Routine. Es geht um Beobachtung statt Bewertung – bitte freundlich mit dir sprechen.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            TextButton(onClick = onAcknowledgeCriteria) {
+                Text(if (criteriaAcknowledged) "✓ Leitlinien gespeichert" else "Leitlinien verstanden")
+            }
+            val introOptionalTags = listOf("Kleiner Schritt", "Eigeninitiative", "Routine", "Aktive Handlung")
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                introOptionalTags.forEach { tag ->
+                    FilterChip(
+                        selected = selectedPreferenceTags.contains(tag),
+                        onClick = { onTogglePreferenceTag(tag) },
+                        label = { Text(tag) }
+                    )
+                }
+            }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
                 modifier = Modifier.fillMaxWidth()
@@ -340,7 +380,8 @@ private fun HourEntry(
     suggestions: List<String>,
     peopleSuggestions: List<String>,
     cachedData: HourEntryCache?,
-    onCacheChanged: (HourEntryCache) -> Unit
+    onCacheChanged: (HourEntryCache) -> Unit,
+    selectedPreferenceTags: Set<String>
 ) {
     // Initialize state from either cache or existing log
     val initialChips = cachedData?.activities
@@ -365,6 +406,8 @@ private fun HourEntry(
     var difficultyRatingInput by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialDifficultyRating?.toString().orEmpty()) }
     var activationLatencyInput by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialActivationLatencyMinutes?.toString().orEmpty()) }
     var advancedObservationExpanded by remember(hour, isExpanded, log, cachedData) { mutableStateOf(false) }
+    var showCriteriaGuidelines by remember(hour, isExpanded, log, cachedData) { mutableStateOf(false) }
+    var hourClassificationTags by remember(hour, isExpanded, log, cachedData) { mutableStateOf(selectedPreferenceTags.intersect(setOf("Routine", "Aktive Handlung"))) }
 
     // Synchronize state when underlying data changes (e.g., after app restart or data refresh)
     LaunchedEffect(log, cachedData, isExpanded) {
@@ -593,6 +636,44 @@ private fun HourEntry(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
+                Text(
+                    text = if (showCriteriaGuidelines) "Kriterien ausblenden" else "Kriterien anzeigen",
+                    style = MaterialTheme.typography.labelMedium.copy(textDecoration = TextDecoration.Underline),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { showCriteriaGuidelines = !showCriteriaGuidelines }
+                )
+                AnimatedVisibility(showCriteriaGuidelines) {
+                    Text(
+                        text = "Orientierung: Aktivität kann Eigeninitiative, ein kleiner Schritt oder bewusst ausgeführte Routine sein. Keine Selbstabwertung – jede ehrliche Eintragung ist hilfreich.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                val loggingTypeTags = listOf("Routine", "Aktive Handlung")
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                    verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    loggingTypeTags.forEach { tag ->
+                        FilterChip(
+                            selected = hourClassificationTags.contains(tag),
+                            onClick = {
+                                hourClassificationTags = hourClassificationTags.toMutableSet().apply {
+                                    if (contains(tag)) remove(tag) else add(tag)
+                                }
+                            },
+                            label = { Text(tag) }
+                        )
+                    }
+                }
+                Text(
+                    text = "Freiwillige Einordnung zur Orientierung – Speichern funktioniert weiterhin wie gewohnt.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
                 // Valence selection
                 Column(

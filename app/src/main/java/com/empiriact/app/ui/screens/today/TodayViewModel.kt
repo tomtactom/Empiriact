@@ -54,6 +54,20 @@ class TodayViewModel(
             initialValue = false
         )
 
+    val baActivityCriteriaAcknowledged: StateFlow<Boolean> = settingsRepository.baActivityCriteriaAcknowledged
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    val baActivityPreferenceTags: StateFlow<Set<String>> = settingsRepository.baActivityPreferenceTags
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptySet()
+        )
+
     val baselineUiStatus: StateFlow<BaselineUiStatus> = combine(
         settingsRepository.baInputMode,
         settingsRepository.baBaselineStart,
@@ -158,6 +172,21 @@ class TodayViewModel(
             val currentCache = _unsavedChanges.value.toMutableMap()
             currentCache.remove(HourEntryKey(date = date, hour = hour))
             _unsavedChanges.value = currentCache
+        }
+    }
+
+    fun acknowledgeActivityCriteria() {
+        viewModelScope.launch {
+            settingsRepository.setBaActivityCriteriaAcknowledged(true)
+        }
+    }
+
+    fun toggleBaActivityPreferenceTag(tag: String) {
+        viewModelScope.launch {
+            val updatedTags = baActivityPreferenceTags.value.toMutableSet().apply {
+                if (contains(tag)) remove(tag) else add(tag)
+            }
+            settingsRepository.setBaActivityPreferenceTags(updatedTags)
         }
     }
 
