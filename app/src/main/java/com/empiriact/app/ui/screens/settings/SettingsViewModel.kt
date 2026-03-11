@@ -40,6 +40,34 @@ class SettingsViewModel(
             initialValue = false
         )
 
+    val passiveMarkersOptIn: StateFlow<Boolean> = settingsRepository.passiveMarkersOptIn
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    val passiveStepsEnabled: StateFlow<Boolean> = settingsRepository.passiveStepsEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    val passiveSleepEnabled: StateFlow<Boolean> = settingsRepository.passiveSleepEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    val passiveScreenTimeProximityEnabled: StateFlow<Boolean> = settingsRepository.passiveScreenTimeProximityEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
 
     val baInputMode: StateFlow<SettingsRepository.InputMode> = settingsRepository.baInputMode
         .stateIn(
@@ -98,7 +126,29 @@ class SettingsViewModel(
         }
     }
 
+    fun setPassiveMarkersOptIn(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setPassiveMarkersOptIn(enabled)
+        }
+    }
 
+    fun setPassiveStepsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setPassiveStepsEnabled(enabled)
+        }
+    }
+
+    fun setPassiveSleepEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setPassiveSleepEnabled(enabled)
+        }
+    }
+
+    fun setPassiveScreenTimeProximityEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setPassiveScreenTimeProximityEnabled(enabled)
+        }
+    }
 
     fun setBaActivityCriteriaAcknowledged(acknowledged: Boolean) {
         viewModelScope.launch {

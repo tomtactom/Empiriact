@@ -14,8 +14,8 @@ import com.empiriact.app.data.Evaluation
 import com.empiriact.app.data.UserValue
 
 @Database(
-    entities = [ActivityLogEntity::class, Routine::class, Resource::class, Evaluation::class, UserValue::class, ExerciseRatingEntity::class, ExerciseReflectionEntity::class, GratitudeEntity::class, PsychoeducationalModuleEntity::class],
-    version = 13,
+    entities = [ActivityLogEntity::class, Routine::class, Resource::class, Evaluation::class, UserValue::class, ExerciseRatingEntity::class, ExerciseReflectionEntity::class, GratitudeEntity::class, PsychoeducationalModuleEntity::class, PassiveMarkerHourlyEntity::class],
+    version = 14,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -30,6 +30,7 @@ abstract class EmpiriactDatabase : RoomDatabase() {
     abstract fun exerciseReflectionDao(): ExerciseReflectionDao
     abstract fun gratitudeDao(): GratitudeDao
     abstract fun psychoeducationalModuleDao(): PsychoeducationalModuleDao
+    abstract fun passiveMarkerDao(): PassiveMarkerDao
 
     companion object {
         internal val MIGRATION_8_9 = object : Migration(8, 9) {
@@ -97,6 +98,32 @@ abstract class EmpiriactDatabase : RoomDatabase() {
             }
         }
 
+
+        internal val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `passive_marker_hourly` (
+                        `key` TEXT NOT NULL,
+                        `localDate` INTEGER NOT NULL,
+                        `hour` INTEGER NOT NULL,
+                        `stepCount` INTEGER,
+                        `sleepDurationMinutesPreviousNight` INTEGER,
+                        `screenTimeMinutesInHour` INTEGER,
+                        `updatedAtEpochMs` INTEGER NOT NULL,
+                        PRIMARY KEY(`key`)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE UNIQUE INDEX IF NOT EXISTS `index_passive_marker_hourly_localDate_hour`
+                    ON `passive_marker_hourly` (`localDate`, `hour`)
+                    """.trimIndent()
+                )
+            }
+        }
+
         @Volatile
         internal var INSTANCE: EmpiriactDatabase? = null
 
@@ -107,7 +134,7 @@ abstract class EmpiriactDatabase : RoomDatabase() {
                     EmpiriactDatabase::class.java,
                     "empiriact_database"
                 )
-                    .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
+                     .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
                     .apply {
                         val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
                         if (isDebuggable) {
