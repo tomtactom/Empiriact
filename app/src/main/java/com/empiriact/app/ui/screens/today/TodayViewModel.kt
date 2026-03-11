@@ -8,6 +8,7 @@ import com.empiriact.app.data.repo.ActivityLogRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -18,6 +19,13 @@ import java.time.LocalDate
 // Data class to hold the unsaved state for an hour entry.
 data class HourEntryCache(val activities: List<String> = emptyList(), val valence: Int = 0, val inputText: String = "", val peopleText: String = "", val peopleChips: List<String> = emptyList(), val peopleInputText: String = "")
 data class HourEntryKey(val date: LocalDate, val hour: Int)
+
+
+data class BaselineUiStatus(
+    val isBaselineMode: Boolean = false,
+    val observationHint: String? = null,
+    val baselineDays: Int = 7
+)
 
 class TodayViewModel(
     private val repository: ActivityLogRepository,
@@ -35,6 +43,31 @@ class TodayViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = false
         )
+
+    val baselineUiStatus: StateFlow<BaselineUiStatus> = combine(
+        settingsRepository.baInputMode,
+        settingsRepository.baBaselineStart,
+        settingsRepository.baBaselineDays
+    ) { inputMode, baselineStart, baselineDays ->
+        if (inputMode != SettingsRepository.InputMode.BASELINE) {
+            BaselineUiStatus(isBaselineMode = false, baselineDays = baselineDays)
+        } else {
+            val start = baselineStart ?: LocalDate.now()
+            val dayOfBaseline = java.time.temporal.ChronoUnit.DAYS.between(start, LocalDate.now()).toInt() + 1
+            val safeDays = baselineDays.coerceAtLeast(1)
+            val shownDay = dayOfBaseline.coerceAtLeast(1)
+            BaselineUiStatus(
+                isBaselineMode = true,
+                observationHint = "Tag ${shownDay}/${safeDays} Beobachtung",
+                baselineDays = safeDays
+            )
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = BaselineUiStatus()
+    )
+
 
     // Flow for logs of the last 2 days to cover "yesterday" entries shown after midnight.
     val todayLogs: StateFlow<List<ActivityLogEntity>> = repository.getLogsForDay(

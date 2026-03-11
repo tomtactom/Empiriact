@@ -43,6 +43,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,6 +81,7 @@ fun TodayScreen(navController: NavController) {
     val uniquePeople by vm.uniquePeople.collectAsState()
     val unsavedChanges by vm.unsavedChanges.collectAsState()
     val todayIntroCompleted by vm.todayIntroCompleted.collectAsState()
+    val baselineUiStatus by vm.baselineUiStatus.collectAsState()
 
     val now = LocalDateTime.now()
     val today = now.toLocalDate()
@@ -87,6 +89,7 @@ fun TodayScreen(navController: NavController) {
     var expandedEntry by remember { mutableStateOf<HourEntryKey?>(null) }
     var showAllHours by remember { mutableStateOf(false) }
     var isInitialized by remember { mutableStateOf(false) }
+    var showBaselineInfoCard by rememberSaveable { mutableStateOf(true) }
 
     // Initialize expanded entry only once on first load
     LaunchedEffect(isInitialized) {
@@ -133,6 +136,15 @@ fun TodayScreen(navController: NavController) {
                         expandedEntry = HourEntryKey(today, currentHour)
                     },
                     onDismiss = { vm.completeTodayIntro() }
+                )
+            }
+        }
+
+        if (baselineUiStatus.isBaselineMode && showBaselineInfoCard) {
+            item(key = "baseline_info") {
+                BaselineInfoCard(
+                    hint = baselineUiStatus.observationHint.orEmpty(),
+                    onDismiss = { showBaselineInfoCard = false }
                 )
             }
         }
@@ -239,6 +251,51 @@ private fun TodayIntroCoachCard(
                     Text("Jetzt starten")
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+private fun BaselineInfoCard(
+    hint: String,
+    onDismiss: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+            modifier = Modifier.padding(Dimensions.paddingMedium)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Baseline-Zielsetzung (optional)",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                FilledTonalButton(onClick = onDismiss) {
+                    Text("Ausblenden")
+                }
+            }
+            if (hint.isNotBlank()) {
+                Text(
+                    text = hint,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+            Text(
+                text = "Fokus: Beobachte heute möglichst neutral, was du tust – ohne Selbstkritik oder Leistungsdruck. Jede Eintragung hilft, Muster sichtbar zu machen.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
     }
 }

@@ -8,7 +8,9 @@ import com.empiriact.app.data.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -38,6 +40,29 @@ class SettingsViewModel(
             initialValue = false
         )
 
+
+    val baInputMode: StateFlow<SettingsRepository.InputMode> = settingsRepository.baInputMode
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = SettingsRepository.InputMode.STANDARD
+        )
+
+    val baBaselineDays: StateFlow<Int> = settingsRepository.baBaselineDays
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 7
+        )
+
+    val baselineEnabled: StateFlow<Boolean> = baInputMode
+        .combine(baBaselineDays) { mode, _ -> mode == SettingsRepository.InputMode.BASELINE }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
     private val _statusMessage = MutableStateFlow<String?>(null)
     val statusMessage: StateFlow<String?> = _statusMessage.asStateFlow()
 
@@ -56,6 +81,20 @@ class SettingsViewModel(
     fun setDataDonationEnabled(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setDataDonationEnabled(enabled)
+        }
+    }
+
+
+    fun setBaselineEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            if (enabled) {
+                settingsRepository.setBaInputMode(SettingsRepository.InputMode.BASELINE)
+                if (settingsRepository.baBaselineStart.first() == null) {
+                    settingsRepository.setBaBaselineStart(java.time.LocalDate.now())
+                }
+            } else {
+                settingsRepository.setBaInputMode(SettingsRepository.InputMode.STANDARD)
+            }
         }
     }
 

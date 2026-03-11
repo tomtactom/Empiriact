@@ -60,6 +60,8 @@ fun SettingsScreen() {
     val hourlyPromptsEnabled by settingsViewModel.hourlyPromptsEnabled.collectAsState()
     val dataDonationEnabled by settingsViewModel.dataDonationEnabled.collectAsState()
     val statusMessage by settingsViewModel.statusMessage.collectAsState()
+    val baselineEnabled by settingsViewModel.baselineEnabled.collectAsState()
+    val baselineDays by settingsViewModel.baBaselineDays.collectAsState()
 
     var isThemeMenuExpanded by remember { mutableStateOf(false) }
 
@@ -141,6 +143,29 @@ fun SettingsScreen() {
             Switch(
                 checked = dataDonationEnabled,
                 onCheckedChange = settingsViewModel::setDataDonationEnabled
+            )
+        }
+
+        Text("Verhaltensaktivierung", style = MaterialTheme.typography.headlineSmall)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Baseline nutzen (optional)")
+                Text(
+                    text = if (baselineEnabled) {
+                        "Aktiv: $baselineDays Tage beobachtend dokumentieren (ohne Bewertung)."
+                    } else {
+                        "Deaktiviert: Standard-Eingabemodus. Bereits erfasste Daten bleiben erhalten."
+                    },
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Switch(
+                checked = baselineEnabled,
+                onCheckedChange = settingsViewModel::setBaselineEnabled
             )
         }
 
