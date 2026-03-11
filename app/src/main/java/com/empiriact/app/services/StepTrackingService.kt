@@ -13,6 +13,7 @@ import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.repo.PassiveMarkerRepository
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
+import java.time.temporal.ChronoUnit
 import java.time.ZonedDateTime
 import kotlin.coroutines.resume
 import kotlin.math.roundToLong
@@ -49,12 +50,26 @@ class StepTrackingService(
                 .coerceAtMost(Int.MAX_VALUE.toLong())
                 .toInt()
 
-            val completedHour = currentHour.minusHours(1)
-            passiveMarkerRepository.upsertHour(
-                date = completedHour.toLocalDate(),
-                hour = completedHour.hour,
-                stepCount = delta
-            )
+            val missingHours = ChronoUnit.HOURS.between(previousHour, currentHour)
+                .coerceAtLeast(0)
+                .coerceAtMost(Int.MAX_VALUE.toLong())
+                .toInt()
+
+            if (missingHours > 0) {
+                val baseDistribution = delta / missingHours
+                val remainder = delta % missingHours
+
+                repeat(missingHours) { index ->
+                    val hourToFill = previousHour.plusHours(index.toLong())
+                    val distributedSteps = baseDistribution + if (index >= missingHours - remainder) 1 else 0
+
+                    passiveMarkerRepository.upsertHour(
+                        date = hourToFill.toLocalDate(),
+                        hour = hourToFill.hour,
+                        stepCount = distributedSteps
+                    )
+                }
+            }
         }
 
         settingsRepository.setPassiveStepsLastSnapshot(

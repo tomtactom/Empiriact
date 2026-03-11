@@ -12,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -81,6 +82,100 @@ class StepTrackingServiceTest {
         assertFalse(captured)
         val day = passive.observeDay(ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC")).toLocalDate()).first()
         assertTrue(day.isEmpty())
+    }
+
+    @Test
+    fun `backfills evenly across multi-hour gap`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 1_000,
+            hour = ZonedDateTime.of(2026, 1, 1, 10, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(1_401)
+        )
+
+        val captured = service.captureHourlySnapshot(
+            ZonedDateTime.of(2026, 1, 1, 14, 5, 0, 0, ZoneId.of("UTC"))
+        )
+
+        assertTrue(captured)
+        val jan1 = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
+        assertEquals(4, jan1.size)
+        assertEquals(listOf(10, 11, 12, 13), jan1.map { it.hour })
+        assertEquals(listOf(100, 100, 100, 101), jan1.map { it.stepCount })
+    }
+
+    @Test
+    fun `backfills zeros when sensor total decreases`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 2_000,
+            hour = ZonedDateTime.of(2026, 1, 1, 22, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(1_900)
+        )
+
+        val captured = service.captureHourlySnapshot(
+            ZonedDateTime.of(2026, 1, 2, 1, 15, 0, 0, ZoneId.of("UTC"))
+        )
+
+        assertTrue(captured)
+
+        val jan1 = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
+        val jan2 = passive.observeDay(LocalDate.of(2026, 1, 2)).first().sortedBy { it.hour }
+
+        assertEquals(listOf(22, 23), jan1.map { it.hour })
+        assertEquals(listOf(0, 0), jan1.map { it.stepCount })
+        assertEquals(listOf(0), jan2.map { it.hour })
+        assertEquals(listOf(0), jan2.map { it.stepCount })
+    }
+
+    @Test
+    fun `one-hour gap behavior stays unchanged`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 500,
+            hour = ZonedDateTime.of(2026, 1, 3, 7, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(620)
+        )
+
+        val captured = service.captureHourlySnapshot(
+            ZonedDateTime.of(2026, 1, 3, 8, 1, 0, 0, ZoneId.of("UTC"))
+        )
+
+        assertTrue(captured)
+        val day = passive.observeDay(LocalDate.of(2026, 1, 3)).first().sortedBy { it.hour }
+        assertEquals(1, day.size)
+        assertEquals(7, day.first().hour)
+        assertEquals(120, day.first().stepCount)
     }
 
     private class FakeStepCounterSource(
