@@ -6,16 +6,19 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -41,6 +44,8 @@ class SettingsRepository(context: Context) {
         val PASSIVE_STEPS_ENABLED = booleanPreferencesKey("passive_steps_enabled")
         val PASSIVE_SLEEP_ENABLED = booleanPreferencesKey("passive_sleep_enabled")
         val PASSIVE_SCREEN_TIME_PROXIMITY_ENABLED = booleanPreferencesKey("passive_screen_time_proximity_enabled")
+        val PASSIVE_STEPS_LAST_COUNTER_TOTAL = longPreferencesKey("passive_steps_last_counter_total")
+        val PASSIVE_STEPS_LAST_COUNTER_HOUR = stringPreferencesKey("passive_steps_last_counter_hour")
     }
 
     enum class ThemeMode {
@@ -253,6 +258,8 @@ class SettingsRepository(context: Context) {
                 settings[PreferencesKeys.PASSIVE_STEPS_ENABLED] = false
                 settings[PreferencesKeys.PASSIVE_SLEEP_ENABLED] = false
                 settings[PreferencesKeys.PASSIVE_SCREEN_TIME_PROXIMITY_ENABLED] = false
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL)
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR)
             }
         }
     }
@@ -265,6 +272,38 @@ class SettingsRepository(context: Context) {
     suspend fun setPassiveStepsEnabled(enabled: Boolean) {
         dataStore.edit { settings ->
             settings[PreferencesKeys.PASSIVE_STEPS_ENABLED] = enabled
+            if (!enabled) {
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL)
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR)
+            }
+        }
+    }
+
+    suspend fun passiveMarkersOptInEnabled(): Boolean = passiveMarkersOptIn.first()
+
+    suspend fun passiveStepsCollectionEnabled(): Boolean = passiveStepsEnabled.first()
+
+    suspend fun getPassiveStepsLastCounterTotal(): Long? = dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL] }
+        .first()
+
+    suspend fun getPassiveStepsLastCounterHour(): ZonedDateTime? = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR]?.let(ZonedDateTime::parse)
+        }
+        .first()
+
+    suspend fun setPassiveStepsLastSnapshot(totalSteps: Long, hour: ZonedDateTime) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL] = totalSteps
+            settings[PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR] = hour.toString()
+        }
+    }
+
+    suspend fun clearPassiveStepsTrackingState() {
+        dataStore.edit { settings ->
+            settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL)
+            settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR)
         }
     }
 
