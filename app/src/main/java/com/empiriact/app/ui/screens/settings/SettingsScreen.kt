@@ -77,6 +77,7 @@ fun SettingsScreen() {
     val passiveStepsEnabled by settingsViewModel.passiveStepsEnabled.collectAsState()
     val stepCounterSensorAvailable = settingsViewModel.stepCounterSensorAvailable
     val passiveSleepEnabled by settingsViewModel.passiveSleepEnabled.collectAsState()
+    val passiveStepsDiagnosticMessage by settingsViewModel.passiveStepsDiagnosticMessage.collectAsState()
     val passiveScreenTimeProximityEnabled by settingsViewModel.passiveScreenTimeProximityEnabled.collectAsState()
     val baselineEnabled by settingsViewModel.baselineEnabled.collectAsState()
     val baselineDays by settingsViewModel.baBaselineDays.collectAsState()
@@ -254,6 +255,14 @@ fun SettingsScreen() {
                     enabled = passiveMarkersOptIn && stepCounterSensorAvailable
                 )
             }
+            if (passiveMarkersOptIn && passiveStepsEnabled && passiveStepsDiagnosticMessage != null) {
+                Text(
+                    text = passiveStepsDiagnosticMessage.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

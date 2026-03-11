@@ -28,6 +28,7 @@ class StepTrackingService(
         val optIn = settingsRepository.passiveMarkersOptInEnabled()
         val stepsEnabled = settingsRepository.passiveStepsCollectionEnabled()
         if (!optIn || !stepsEnabled) {
+            settingsRepository.clearPassiveStepsReadError()
             settingsRepository.clearPassiveStepsTrackingState()
             return false
         }
@@ -35,16 +36,54 @@ class StepTrackingService(
         if (!stepCounterSource.hasRequiredPermission()) {
             settingsRepository.setPassiveStepsEnabled(false)
             settingsRepository.clearPassiveStepsTrackingState()
+            settingsRepository.setPassiveStepsReadError(
+                reason = SettingsRepository.PassiveStepsReadErrorReason.PERMISSION_MISSING,
+                capturedAt = now
+            )
             return false
         }
 
         if (!stepCounterSource.isSensorAvailable()) {
             settingsRepository.setPassiveStepsEnabled(false)
             settingsRepository.clearPassiveStepsTrackingState()
+            settingsRepository.setPassiveStepsReadError(
+                reason = SettingsRepository.PassiveStepsReadErrorReason.SENSOR_UNAVAILABLE,
+                capturedAt = now
+            )
             return false
         }
 
-        val currentTotalSteps = stepCounterSource.readCurrentTotalSteps() ?: return false
+        val currentTotalSteps = when (val readResult = stepCounterSource.readCurrentTotalSteps()) {
+            is StepReadResult.Success -> {
+                settingsRepository.clearPassiveStepsReadError()
+                readResult.total
+            }
+            StepReadResult.Timeout -> {
+                settingsRepository.setPassiveStepsReadError(
+                    reason = SettingsRepository.PassiveStepsReadErrorReason.TIMEOUT,
+                    capturedAt = now
+                )
+                return false
+            }
+            StepReadResult.SensorUnavailable -> {
+                settingsRepository.setPassiveStepsEnabled(false)
+                settingsRepository.clearPassiveStepsTrackingState()
+                settingsRepository.setPassiveStepsReadError(
+                    reason = SettingsRepository.PassiveStepsReadErrorReason.SENSOR_UNAVAILABLE,
+                    capturedAt = now
+                )
+                return false
+            }
+            StepReadResult.PermissionMissing -> {
+                settingsRepository.setPassiveStepsEnabled(false)
+                settingsRepository.clearPassiveStepsTrackingState()
+                settingsRepository.setPassiveStepsReadError(
+                    reason = SettingsRepository.PassiveStepsReadErrorReason.PERMISSION_MISSING,
+                    capturedAt = now
+                )
+                return false
+            }
+        }
         val currentHour = now.withMinute(0).withSecond(0).withNano(0)
 
         val previousTotalSteps = settingsRepository.getPassiveStepsLastCounterTotal()
@@ -117,8 +156,15 @@ class StepTrackingService(
     }
 }
 
+sealed class StepReadResult {
+    data class Success(val total: Long) : StepReadResult()
+    data object Timeout : StepReadResult()
+    data object SensorUnavailable : StepReadResult()
+    data object PermissionMissing : StepReadResult()
+}
+
 interface StepCounterSource {
-    suspend fun readCurrentTotalSteps(): Long?
+    suspend fun readCurrentTotalSteps(): StepReadResult
 
     fun isSensorAvailable(): Boolean = true
 
@@ -145,18 +191,24 @@ class SensorStepCounterSource(
         return sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null
     }
 
-    override suspend fun readCurrentTotalSteps(): Long? {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager ?: return null
-        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) ?: return null
+    override suspend fun readCurrentTotalSteps(): StepReadResult {
+        if (!hasRequiredPermission()) {
+            return StepReadResult.PermissionMissing
+        }
 
-        return withTimeoutOrNull(3_000) {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+            ?: return StepReadResult.SensorUnavailable
+        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+            ?: return StepReadResult.SensorUnavailable
+
+        val reading = withTimeoutOrNull(3_000) {
             suspendCancellableCoroutine { continuation ->
                 val listener = object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent) {
                         val value = event.values.firstOrNull()?.roundToLong()
                         sensorManager.unregisterListener(this)
                         if (continuation.isActive) {
-                            continuation.resume(value)
+                            continuation.resume(value?.let { StepReadResult.Success(it) } ?: StepReadResult.Timeout)
                         }
                     }
 
@@ -172,7 +224,7 @@ class SensorStepCounterSource(
                 if (!registered) {
                     sensorManager.unregisterListener(listener)
                     if (continuation.isActive) {
-                        continuation.resume(null)
+                        continuation.resume(StepReadResult.SensorUnavailable)
                     }
                     return@suspendCancellableCoroutine
                 }
@@ -182,5 +234,7 @@ class SensorStepCounterSource(
                 }
             }
         }
+
+        return reading ?: StepReadResult.Timeout
     }
 }
