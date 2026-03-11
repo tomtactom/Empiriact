@@ -20,4 +20,21 @@ class InsightsScreenFormattingTest {
             formatPassiveReadingLine("Schrittzahl", "120 Schritte", isEstimated = false)
         )
     }
+
+    @Test
+    fun `returns estimate distribution hint when estimated values are present`() {
+        assertEquals(
+            "Hinweis: Werte mit \"geschätzt\" wurden über fehlende Stunden verteilt und dienen als Näherung.",
+            estimatedDistributionHint(hasEstimatedValues = true)
+        )
+    }
+
+    @Test
+    fun `returns no estimate distribution hint when values are precise`() {
+        assertEquals(
+            null,
+            estimatedDistributionHint(hasEstimatedValues = false)
+        )
+    }
+
 }

@@ -101,7 +101,8 @@ fun InsightsScreen(@Suppress("UNUSED_PARAMETER") factory: ViewModelProvider.Fact
                         if (contextItem != null && contextItem.readings.isNotEmpty()) {
                             PassiveContextCard(
                                 explanation = contextItem.explanation,
-                                lines = contextItem.readings.map { formatPassiveReadingLine(it.label, it.valueText, it.isEstimated) }
+                                lines = contextItem.readings.map { formatPassiveReadingLine(it.label, it.valueText, it.isEstimated) },
+                                hasEstimatedValues = contextItem.readings.any { it.isEstimated }
                             )
                         }
                     }
@@ -177,13 +178,24 @@ internal fun formatPassiveReadingLine(label: String, valueText: String, isEstima
     return "• $label: $valueText$quality"
 }
 
+internal fun estimatedDistributionHint(hasEstimatedValues: Boolean): String? {
+    return if (hasEstimatedValues) {
+        "Hinweis: Werte mit \"geschätzt\" wurden über fehlende Stunden verteilt und dienen als Näherung."
+    } else {
+        null
+    }
+}
+
 @Composable
-private fun PassiveContextCard(explanation: String, lines: List<String>) {
+private fun PassiveContextCard(explanation: String, lines: List<String>, hasEstimatedValues: Boolean) {
     Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Passiver Kontext", style = MaterialTheme.typography.titleSmall)
             lines.forEach { line ->
                 Text(line, style = MaterialTheme.typography.bodySmall)
+            }
+            estimatedDistributionHint(hasEstimatedValues)?.let { hint ->
+                Text(hint, style = MaterialTheme.typography.labelSmall)
             }
             Spacer(Modifier.height(4.dp))
             Text(explanation, style = MaterialTheme.typography.labelSmall)
