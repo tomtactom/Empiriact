@@ -31,9 +31,21 @@ class OnboardingSetupViewModel(
         _uiState.update { state ->
             state.copy(
                 setupItems = state.setupItems.copy(
-                    notifications = state.setupItems.notifications.withDeferred(item == SetupItemType.NOTIFICATIONS),
-                    batteryOptimization = state.setupItems.batteryOptimization.withDeferred(item == SetupItemType.BATTERY_OPTIMIZATION),
-                    activityRecognition = state.setupItems.activityRecognition.withDeferred(item == SetupItemType.ACTIVITY_RECOGNITION)
+                    notifications = if (item == SetupItemType.NOTIFICATIONS) {
+                        state.setupItems.notifications.withDeferred(true)
+                    } else {
+                        state.setupItems.notifications
+                    },
+                    batteryOptimization = if (item == SetupItemType.BATTERY_OPTIMIZATION) {
+                        state.setupItems.batteryOptimization.withDeferred(true)
+                    } else {
+                        state.setupItems.batteryOptimization
+                    },
+                    activityRecognition = if (item == SetupItemType.ACTIVITY_RECOGNITION) {
+                        state.setupItems.activityRecognition.withDeferred(true)
+                    } else {
+                        state.setupItems.activityRecognition
+                    }
                 ),
                 dataCollection = if (item == SetupItemType.DATA_COLLECTION) {
                     state.dataCollection.copy(decision = OnboardingDecision.DEFERRED)

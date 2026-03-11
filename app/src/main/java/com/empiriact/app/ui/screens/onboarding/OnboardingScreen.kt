@@ -9,7 +9,6 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PsychologyAlt
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -85,37 +83,37 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 label = "Schritt 1 · Ankommen",
                 icon = Icons.Default.AutoAwesome,
                 title = "Willkommen bei Empiriact",
-                subtitle = "Du kannst hier in deinem Tempo erkunden, was dir im Alltag guttut. Jeder Check-in unterstützt dich dabei, klarer wahrzunehmen und stimmige Entscheidungen zu treffen.",
+                subtitle = "Hier bekommst du kurze, alltagstaugliche Übungen, die dir helfen, dich zu sortieren.",
                 highlights = listOf(
-                    "Mikro-Check-ins (30–90 Sekunden) lassen sich leicht in deinen Tag integrieren.",
-                    "Verhaltenstherapeutische Kernkompetenz: Wahrnehmen → benennen → bewusst handeln.",
-                    "Du wählst, was gerade passend ist: ein kleiner Schritt zählt voll."
+                    "Kurze Check-ins passen auch in volle Tage.",
+                    "Du übst: wahrnehmen, benennen, bewusst reagieren.",
+                    "Es geht nicht um Perfektion, sondern um den nächsten hilfreichen Schritt."
                 ),
-                microAction = "Wenn du magst: Nimm dir heute 1 Minute für Atem und Körperwahrnehmung."
+                microAction = "Mini-Schritt: Atme dreimal ruhig aus und frage dich: Was brauche ich gerade?"
             ),
             IntroPage(
-                label = "Schritt 2 · Flexibel bleiben",
+                label = "Schritt 2 · Abstand gewinnen",
                 icon = Icons.Default.PsychologyAlt,
-                title = "Wenn Gedanken intensiv werden",
-                subtitle = "Empiriact bietet dir kurze, strukturierte Übungen, mit denen du Abstand gewinnst und wieder handlungsfähig wirst.",
+                title = "Wenn Gedanken laut werden",
+                subtitle = "Du lernst, mit belastenden Gedanken umzugehen, statt dich von ihnen treiben zu lassen.",
                 highlights = listOf(
-                    "Kognitive Defusion: Gedanken als mentale Ereignisse einordnen.",
-                    "Emotionsregulation: Erregung gezielt herunterfahren und Orientierung stärken.",
-                    "Situative Selbststeuerung: Beobachten, erden, nächsten hilfreichen Schritt wählen."
+                    "Gedanken sind Gedanken – nicht automatisch Fakten.",
+                    "Mit kurzen Übungen kommst du zurück in den Moment.",
+                    "Dann wählst du den nächsten machbaren Schritt."
                 ),
-                microAction = "Wenn es für dich passt: Nutze den Satz „Ich bemerke den Gedanken, dass …“ als Anker."
+                microAction = "Hilfreicher Satz: „Ich bemerke gerade den Gedanken, dass …“"
             ),
             IntroPage(
-                label = "Schritt 3 · Werteorientiert handeln",
+                label = "Schritt 3 · Dranbleiben",
                 icon = Icons.Default.TrackChanges,
-                title = "Vom Verstehen ins Tun",
-                subtitle = "Du verbindest Übungen mit deinen persönlichen Werten, damit hilfreiche Gewohnheiten nachhaltig in deinen Alltag wachsen.",
+                title = "Vom Verstehen ins Handeln",
+                subtitle = "Du verknüpfst Übungen mit dem, was dir wichtig ist. So entsteht nachhaltige Veränderung.",
                 highlights = listOf(
-                    "Werteklärung: Du definierst, was dir wichtig ist und wie es im Alltag sichtbar wird.",
-                    "Konkrete Verhaltensplanung: Ein umsetzbarer Schritt pro Tag schafft Kontinuität.",
-                    "Selbstwirksamkeit entsteht durch wiederholte Erfahrungen in deinem eigenen Tempo."
+                    "Klare Werte geben dir Richtung.",
+                    "Kleine, konkrete Handlungen machen Fortschritt sichtbar.",
+                    "Wiederholung stärkt Selbstvertrauen in dich selbst."
                 ),
-                microAction = "Wenn du möchtest: Wähle heute einen Mini-Schritt, der zu einem deiner Werte passt."
+                microAction = "Frage dich heute: Welcher kleine Schritt passt zu meinem Wert?"
             )
         )
     }
@@ -138,21 +136,6 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
-                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(18.dp))
-                .padding(horizontal = 14.dp, vertical = 10.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(imageVector = Icons.Default.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Text("Sicherer Raum · evidenzbasiert · in deinem Tempo", style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("Einführung", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -206,7 +189,7 @@ private fun IntroContentPage(page: IntroPage) { /* unchanged content */
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Text("Mini-Experiment für heute", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                 }
-                Text("Freundlich mit dir selbst: Es geht nicht um Perfektion, sondern um einen hilfreichen nächsten Schritt.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Freundlich mit dir: Ein kleiner Schritt ist genug.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(page.microAction, style = MaterialTheme.typography.bodyMedium)
             }
         }
@@ -372,11 +355,9 @@ private fun OnboardingCompletionPage(onFinished: () -> Unit) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
-        Text("Abschluss", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Du bist startklar", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("Du bist bereit", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
-        Text("Danke, dass du dir Zeit für dein Setup genommen hast. Kleine, regelmäßige Schritte reichen vollkommen aus.")
+        Text("Danke für dein Setup. Du kannst jederzeit etwas anpassen.")
         Spacer(modifier = Modifier.height(16.dp))
         SummaryCard(uiState)
         Spacer(modifier = Modifier.height(20.dp))
