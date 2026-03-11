@@ -1,5 +1,6 @@
 package com.empiriact.app.ui.screens.overview
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -36,6 +38,29 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+
+// Analysis Types for extensibility
+sealed class AnalysisType {
+    data class MoodBoosters(val data: List<ActivityAnalysis>) : AnalysisType()
+    data class MoodDampers(val data: List<ActivityAnalysis>) : AnalysisType()
+    data class ActivityFrequencyAnalysis(val data: List<ActivityFrequency>) : AnalysisType()
+    data class ValenceTrends(val data: List<ValenceTrend>) : AnalysisType()
+}
+
+data class AnalysisItem(
+    val type: AnalysisType,
+    val title: String,
+    val emptyMessage: String,
+    val icon: ImageVector,
+    val iconTint: Color
+)
 
 private sealed class ProtocolScreenItem {
     data class Header(val date: LocalDate) : ProtocolScreenItem()
@@ -90,17 +115,93 @@ fun OverviewScreen(
 private fun AnalysisTab(vm: OverviewViewModel) {
     val moodBoosters by vm.moodBoosters.collectAsState()
     val moodDampers by vm.moodDampers.collectAsState()
+    val activityFrequency by vm.activityFrequency.collectAsState()
+    val valenceTrends by vm.valenceTrends.collectAsState()
+
+    Log.d("AnalysisTab", "Rendering with data sizes: boosters=${moodBoosters.size}, dampers=${moodDampers.size}, freq=${activityFrequency.size}, trends=${valenceTrends.size}")
+
+    // Loading state - show loading until data is available
+    val isLoading = moodBoosters.isEmpty() && moodDampers.isEmpty() && activityFrequency.isEmpty() && valenceTrends.isEmpty()
+
+    // Define strings and colors outside remember to avoid @Composable invocations in non-@Composable context
+    val moodBoostersTitle = stringResource(R.string.analysis_tab_mood_boosters_title)
+    val moodBoostersEmpty = stringResource(R.string.analysis_tab_mood_boosters_empty)
+    val moodDampersTitle = stringResource(R.string.analysis_tab_mood_dampers_title)
+    val moodDampersEmpty = stringResource(R.string.analysis_tab_mood_dampers_empty)
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+
+    // Build analysis items dynamically - this makes it easy to add new analysis types
+    val analysisItems = listOf(
+        AnalysisItem(
+            type = AnalysisType.MoodBoosters(moodBoosters),
+            title = moodBoostersTitle,
+            emptyMessage = moodBoostersEmpty,
+            icon = Icons.AutoMirrored.Filled.TrendingUp,
+            iconTint = UiConstants.POSITIVE_CHANGE_COLOR
+        ),
+        AnalysisItem(
+            type = AnalysisType.MoodDampers(moodDampers),
+            title = moodDampersTitle,
+            emptyMessage = moodDampersEmpty,
+            icon = Icons.AutoMirrored.Filled.TrendingDown,
+            iconTint = UiConstants.NEGATIVE_CHANGE_COLOR
+        ),
+        AnalysisItem(
+            type = AnalysisType.ActivityFrequencyAnalysis(activityFrequency),
+            title = "Aktivitäts Häufigkeit",
+            emptyMessage = "Keine Daten verfügbar",
+            icon = Icons.Default.BarChart,
+            iconTint = primaryColor
+        ),
+        AnalysisItem(
+            type = AnalysisType.ValenceTrends(valenceTrends),
+            title = "Valenz Trends",
+            emptyMessage = "Keine Daten verfügbar",
+            icon = Icons.Default.Timeline,
+            iconTint = secondaryColor
+        )
+    )
+
+    Log.d("AnalysisTab", "analysisItems built: ${analysisItems.size} items")
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(UiConstants.PADDING_LARGE),
         verticalArrangement = Arrangement.spacedBy(UiConstants.ARRANGEMENT_SPACING_LARGE)
     ) {
         item {
-            Text(stringResource(R.string.analysis_tab_title), style = MaterialTheme.typography.headlineMedium)
-            Text(stringResource(R.string.analysis_tab_subtitle), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = stringResource(R.string.analysis_tab_title),
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Text(
+                text = stringResource(R.string.analysis_tab_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
-        item { AnalysisSection(title = stringResource(R.string.analysis_tab_mood_boosters_title), analyses = moodBoosters, emptyMessage = stringResource(R.string.analysis_tab_mood_boosters_empty)) }
-        item { AnalysisSection(title = stringResource(R.string.analysis_tab_mood_dampers_title), analyses = moodDampers, emptyMessage = stringResource(R.string.analysis_tab_mood_dampers_empty)) }
+
+        if (isLoading) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(UiConstants.PADDING_MEDIUM)
+                ) {
+                    CircularProgressIndicator()
+                    Text(
+                        text = "Analysen werden berechnet...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            // Render analysis items dynamically
+            items(analysisItems, key = { it.title }) { analysisItem ->
+                AnalysisItemRenderer(analysisItem)
+            }
+        }
     }
 }
 
@@ -222,7 +323,7 @@ private fun ExerciseRatingRow(exercise: ExerciseWithRating, navController: NavCo
                 RatingBar(rating = exercise.averageRating)
                 Spacer(Modifier.height(UiConstants.PADDING_SMALL))
                 Text(
-                    text = String.format("Ø %.1f / 5.0", exercise.averageRating),
+                    text = String.format("Ø %.1f / 5.0", exercise.averageRating.takeIf { !it.isNaN() && !it.isInfinite() } ?: 0.0),
                     style = MaterialTheme.typography.labelSmall
                 )
             }
@@ -232,6 +333,7 @@ private fun ExerciseRatingRow(exercise: ExerciseWithRating, navController: NavCo
 
 @Composable
 private fun RatingBar(rating: Double, maxRating: Int = 5) {
+    val safeRating = rating.takeIf { !it.isNaN() && !it.isInfinite() } ?: 0.0
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(UiConstants.PADDING_SMALL),
@@ -239,8 +341,8 @@ private fun RatingBar(rating: Double, maxRating: Int = 5) {
     ) {
         repeat(maxRating) { index ->
             val fillPercentage = when {
-                index < rating.toInt() -> 1f
-                index == rating.toInt() -> (rating - index).toFloat()
+                index < safeRating.toInt() -> 1f
+                index == safeRating.toInt() -> (safeRating - index).toFloat()
                 else -> 0f
             }
             Box(
@@ -266,9 +368,24 @@ private fun ProtocolRow(log: ActivityLogEntity) {
 
 
 @Composable
-private fun AnalysisSection(title: String, analyses: List<ActivityAnalysis>, emptyMessage: String) {
+private fun AnalysisSection(title: String, analyses: List<ActivityAnalysis>, emptyMessage: String, icon: ImageVector, iconTint: Color) {
     Column {
-        Text(title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(bottom = UiConstants.PADDING_MEDIUM))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = UiConstants.PADDING_MEDIUM),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(UiConstants.ANALYSIS_SECTION_ICON_SIZE)
+            )
+            Spacer(modifier = Modifier.width(UiConstants.PADDING_MEDIUM))
+            Text(title, style = MaterialTheme.typography.headlineSmall)
+        }
+
         if (analyses.isEmpty()) {
             Text(emptyMessage, style = MaterialTheme.typography.bodyMedium)
         } else {
@@ -283,15 +400,149 @@ private fun AnalysisSection(title: String, analyses: List<ActivityAnalysis>, emp
 
 @Composable
 private fun ActivityAnalysisCard(analysis: ActivityAnalysis) {
+    val rating = analysis.averageRating
+    val ratingText = if (rating.isNaN() || rating.isInfinite()) "0.0" else String.format("%.1f", rating)
+    val color = when {
+        rating > 0 -> UiConstants.POSITIVE_CHANGE_COLOR
+        rating < 0 -> UiConstants.NEGATIVE_CHANGE_COLOR
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+
     Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(defaultElevation = UiConstants.CARD_ELEVATION)) {
         Row(modifier = Modifier.padding(UiConstants.PADDING_LARGE), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(analysis.activity, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Text(analysis.activity.ifBlank { "Unbekannte Aktivität" }, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
             Text(
-                text = String.format("%.1f", analysis.averageRating),
+                text = ratingText,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                color = if (analysis.averageRating > 0) UiConstants.POSITIVE_CHANGE_COLOR else UiConstants.NEGATIVE_CHANGE_COLOR
+                color = color
             )
+        }
+    }
+}
+
+@Composable
+private fun ActivityFrequencySection(frequencyData: List<ActivityFrequency>, title: String, emptyMessage: String, icon: ImageVector, iconTint: Color) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = UiConstants.PADDING_MEDIUM),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(UiConstants.ANALYSIS_SECTION_ICON_SIZE)
+            )
+            Spacer(modifier = Modifier.width(UiConstants.PADDING_MEDIUM))
+            Text(title, style = MaterialTheme.typography.headlineSmall)
+        }
+        if (frequencyData.isEmpty()) {
+            Text(emptyMessage, style = MaterialTheme.typography.bodyMedium)
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(UiConstants.PADDING_MEDIUM)) {
+                frequencyData.forEach { item ->
+                    Text("${item.activity}: ${item.count}")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ValenceTrendsSection(trends: List<ValenceTrend>, title: String, emptyMessage: String, icon: ImageVector, iconTint: Color) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = UiConstants.PADDING_MEDIUM),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(UiConstants.ANALYSIS_SECTION_ICON_SIZE)
+            )
+            Spacer(modifier = Modifier.width(UiConstants.PADDING_MEDIUM))
+            Text(title, style = MaterialTheme.typography.headlineSmall)
+        }
+        if (trends.isEmpty()) {
+            Text(emptyMessage, style = MaterialTheme.typography.bodyMedium)
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(UiConstants.PADDING_MEDIUM)
+            ) {
+                items(trends, key = { it.date.toString() }) { trend ->
+                    ValenceTrendItem(trend)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ValenceTrendItem(trend: ValenceTrend) {
+    val valence = trend.averageValence
+    val valenceText = if (valence.isNaN() || valence.isInfinite()) "0.0" else String.format("%.1f", valence)
+    val color = when {
+        valence > 0 -> UiConstants.POSITIVE_CHANGE_COLOR
+        valence < 0 -> UiConstants.NEGATIVE_CHANGE_COLOR
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = UiConstants.CARD_ELEVATION)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(UiConstants.PADDING_LARGE),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(trend.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = valenceText,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+        }
+    }
+}
+
+@Composable
+private fun AnalysisItemRenderer(analysisItem: AnalysisItem) {
+    Log.d("AnalysisItemRenderer", "Rendering item: ${analysisItem.title}")
+    when (analysisItem.type) {
+        is AnalysisType.MoodBoosters -> {
+            AnalysisSection(
+                title = analysisItem.title,
+                analyses = analysisItem.type.data,
+                emptyMessage = analysisItem.emptyMessage,
+                icon = analysisItem.icon,
+                iconTint = analysisItem.iconTint
+            )
+        }
+        is AnalysisType.MoodDampers -> {
+            AnalysisSection(
+                title = analysisItem.title,
+                analyses = analysisItem.type.data,
+                emptyMessage = analysisItem.emptyMessage,
+                icon = analysisItem.icon,
+                iconTint = analysisItem.iconTint
+            )
+        }
+        is AnalysisType.ActivityFrequencyAnalysis -> {
+            ActivityFrequencySection(analysisItem.type.data, analysisItem.title, analysisItem.emptyMessage, analysisItem.icon, analysisItem.iconTint)
+        }
+        is AnalysisType.ValenceTrends -> {
+            Text("ValenceTrends: ${analysisItem.type.data.size} items")
         }
     }
 }

@@ -38,8 +38,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.empiriact.app.ui.navigation.Route
 
-private data class ModuleItem(
+// ============== Datenklassen ==============
+
+data class ModuleItem(
     val title: String,
     val description: String,
     val icon: ImageVector,
@@ -48,25 +51,87 @@ private data class ModuleItem(
     val estimatedTime: String
 )
 
+data class ModuleSection(
+    val sectionTitle: String,
+    val sectionDescription: String,
+    val sectionModules: List<ModuleItem>
+)
+
+// ============== Hauptscreenkomponente ==============
+
 @Composable
 fun PsychoeducationModulesScreen(navController: NavController) {
-    val modules = listOf(
+    val psychoeducationModules = listOf(
         ModuleItem(
-            title = "Psychoedukation",
-            description = "4 umfassende Lernmodule mit psychologischen Inhalten",
+            title = "Grübeln & Rumination",
+            description = "Ein umfassendes Modul über Grübeln, seine Folgen und Regulationsmöglichkeiten",
             icon = Icons.Default.School,
             color = Color(0xFF6366F1),
-            route = "psychoeducation",
-            estimatedTime = "~30 min"
+            route = Route.GruebelnModule.route,
+            estimatedTime = "~45 min"
         ),
         ModuleItem(
-            title = "Interaktive Übungen",
-            description = "3 geführte Übungen mit Schritt-für-Schritt Anleitung",
+            title = "Denkstile verstehen",
+            description = "Unterscheide zwischen ungünstigen und günstigen Denkmustern",
+            icon = Icons.Default.School,
+            color = Color(0xFF8B5CF6),
+            route = Route.DenkstileModule.route,
+            estimatedTime = "~20 min"
+        ),
+        ModuleItem(
+            title = "RND verstehen & regulieren",
+            description = "Repetitives negatives Denken erkennen und transformieren",
+            icon = Icons.Default.School,
+            color = Color(0xFF3B82F6),
+            route = Route.RNDModule.route,
+            estimatedTime = "~35 min"
+        )
+    )
+
+    val interactiveExercises = listOf(
+        ModuleItem(
+            title = "5-4-3-2-1 Erdungsübung",
+            description = "Eine schnelle Technik, um aus Gedankenschleifen in die Gegenwart zu kommen",
+            icon = Icons.Default.FitnessCenter,
+            color = Color(0xFF3B82F6),
+            route = "interactive_exercises",
+            estimatedTime = "~5 min"
+        ),
+        ModuleItem(
+            title = "Progressive Muskelentspannung",
+            description = "Spanne und entspanne Muskelgruppen systematisch",
+            icon = Icons.Default.FitnessCenter,
+            color = Color(0xFF8B5CF6),
+            route = "interactive_exercises",
+            estimatedTime = "~10 min"
+        ),
+        ModuleItem(
+            title = "Gedanken-Etikettierung",
+            description = "Lerne, Gedanken als mentale Ereignisse zu behandeln",
             icon = Icons.Default.FitnessCenter,
             color = Color(0xFF10B981),
             route = "interactive_exercises",
-            estimatedTime = "5-10 min"
+            estimatedTime = "~7 min"
         ),
+        ModuleItem(
+            title = "Roten Faden finden",
+            description = "Erlebnis-Übung mit Wolle & räumlichen Metaphern",
+            icon = Icons.Default.FitnessCenter,
+            color = Color(0xFFFF6B9D),
+            route = "interactive_exercises",
+            estimatedTime = "~25 min"
+        ),
+        ModuleItem(
+            title = "3-Fragen-Daumenregel",
+            description = "Gedankenexperiment: Warum vs. Wie-Fragen",
+            icon = Icons.Default.FitnessCenter,
+            color = Color(0xFFFFA366),
+            route = "interactive_exercises",
+            estimatedTime = "~20 min"
+        )
+    )
+
+    val otherModules = listOf(
         ModuleItem(
             title = "Ressourcen-Bibliothek",
             description = "10+ psychologische Ressourcen mit Filter & Suche",
@@ -84,6 +149,25 @@ fun PsychoeducationModulesScreen(navController: NavController) {
             estimatedTime = "Selbstbestimmt"
         )
     )
+
+    val sections = listOf(
+        ModuleSection(
+            sectionTitle = "Psychoedukation",
+            sectionDescription = "Wissenschaftlich fundierte Lernmodule zur Psychoeduktion",
+            sectionModules = psychoeducationModules
+        ),
+        ModuleSection(
+            sectionTitle = "Interaktive Übungen",
+            sectionDescription = "Praktische Übungen zum Trainieren und Anwenden",
+            sectionModules = interactiveExercises
+        ),
+        ModuleSection(
+            sectionTitle = "Weitere Inhalte",
+            sectionDescription = "Zusätzliche Ressourcen und Lernwege",
+            sectionModules = otherModules
+        )
+    )
+
 
     Column(
         modifier = Modifier
@@ -142,21 +226,51 @@ fun PsychoeducationModulesScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Modules List
+        // Modules List mit Sektionen
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp)
         ) {
-            items(modules) { module ->
-                ModuleCard(
-                    module = module,
-                    onClick = {
-                        navController.navigate(module.route)
+            items(sections.size) { sectionIndex ->
+                val section = sections[sectionIndex]
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Section Header
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = section.sectionTitle,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = section.sectionDescription,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                )
+
+                    // Module Cards in dieser Sektion
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        for (module in section.sectionModules) {
+                            ModuleCard(
+                                module = module,
+                                onClick = {
+                                    navController.navigate(module.route)
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }

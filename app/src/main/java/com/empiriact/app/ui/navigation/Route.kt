@@ -54,12 +54,19 @@ sealed class Route(val route: String) {
 
     object PsychoeducationActivationFoundations : Route("psychoeducation_activation_foundations")
 
-    // Psychoedukation Module
-    object PsychoeducationModules : Route("psychoeducation_modules")
+    // Psychoedukation Screen (mit integrierten Modulen)
     object PsychoeducationScreen : Route("psychoeducation")
     object InteractiveExercisesScreen : Route("interactive_exercises")
     object ResourceBrowserScreen : Route("resource_browser")
     object LearningPathScreen : Route("learning_path")
+    object GruebelnModule : Route("gruebeln_module")
+    object DenkstileModule : Route("denkstile_module")
+    object RNDModule : Route("rnd_module")
+    object RuminationModule : Route("rumination_module")
+    object HabitModule : Route("habit_module")
+    object ContentModule : Route("content_module")
+    object ThreadModule : Route("thread_module")
+    object ThumbRuleModule : Route("thumb_rule_module")
 
     companion object {
         fun fromExerciseId(exerciseId: String, from: String = "overview"): String? {

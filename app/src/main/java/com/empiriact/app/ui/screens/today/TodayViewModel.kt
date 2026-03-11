@@ -9,13 +9,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 // Data class to hold the unsaved state for an hour entry.
-data class HourEntryCache(val activities: List<String> = emptyList(), val valence: Int = 0, val inputText: String = "")
+data class HourEntryCache(val activities: List<String> = emptyList(), val valence: Int = 0, val inputText: String = "", val peopleText: String = "", val peopleChips: List<String> = emptyList(), val peopleInputText: String = "")
 data class HourEntryKey(val date: LocalDate, val hour: Int)
 
 class TodayViewModel(
@@ -63,6 +64,19 @@ class TodayViewModel(
             initialValue = emptyList()
         )
 
+    // Flow for unique people names for suggestions.
+    val uniquePeople: StateFlow<List<String>> = repository.getAll()
+        .map { logs ->
+            logs.flatMap { log ->
+                log.peopleText.split(",").map { it.trim() }.filter { it.isNotBlank() }
+            }.groupingBy { it }.eachCount().toList().sortedByDescending { it.second }.map { it.first }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     /**
      * Caches the current state of an hour entry.
      */
@@ -76,13 +90,14 @@ class TodayViewModel(
      * Inserts or updates an activity log for a specific hour on a specific date,
      * then clears the cache for that hour.
      */
-    fun upsertActivityForHour(date: LocalDate, hour: Int, activityText: String, valence: Int) {
+    fun upsertActivityForHour(date: LocalDate, hour: Int, activityText: String, valence: Int, peopleText: String = "") {
         viewModelScope.launch {
             repository.upsert(
                 date = date,
                 hour = hour,
                 text = activityText.trim(),
-                valence = valence
+                valence = valence,
+                peopleText = peopleText.trim()
             )
             // Clear the cache for the successfully saved hour.
             val currentCache = _unsavedChanges.value.toMutableMap()
@@ -97,4 +112,17 @@ class TodayViewModel(
         }
     }
 
+    suspend fun exportDataAsCsv(): String {
+        val logs = repository.getAll().first()
+        val csvBuilder = StringBuilder()
+        csvBuilder.append("Date,Hour,ActivityText,Valence,PeopleText\n")
+        logs.forEach { log ->
+            val year = log.localDate / 10000
+            val month = (log.localDate / 100) % 100
+            val day = log.localDate % 100
+            val date = LocalDate.of(year, month, day)
+            csvBuilder.append("${date},${log.hour},\"${log.activityText.replace("\"", "\"\"")}\",${log.valence},\"${log.peopleText.replace("\"", "\"\"")}\"\n")
+        }
+        return csvBuilder.toString()
+    }
 }

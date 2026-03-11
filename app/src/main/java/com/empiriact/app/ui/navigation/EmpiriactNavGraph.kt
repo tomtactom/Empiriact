@@ -44,7 +44,14 @@ import com.empiriact.app.ui.screens.resources.methods.ValuesCompassExercise
 import com.empiriact.app.ui.screens.settings.SettingsScreen
 import com.empiriact.app.ui.screens.today.FlowChartExerciseScreen
 import com.empiriact.app.ui.screens.today.TodayScreen
-import com.empiriact.app.ui.screens.modules.PsychoeducationModulesScreen
+import com.empiriact.app.ui.screens.modules.GruebelnModuleScreen
+import com.empiriact.app.ui.screens.modules.DenkstileModuleScreen
+import com.empiriact.app.ui.screens.modules.RNDModuleScreen
+import com.empiriact.app.ui.screens.modules.RuminationModuleScreen
+import com.empiriact.app.ui.screens.modules.HabitModuleScreen
+import com.empiriact.app.ui.screens.modules.ContentModuleScreen
+import com.empiriact.app.ui.screens.modules.ThreadModuleScreen
+import com.empiriact.app.ui.screens.modules.ThumbRuleModuleScreen
 import com.empiriact.app.ui.screens.resources.PsychoeducationScreen
 import com.empiriact.app.ui.screens.resources.InteractiveExercisesScreen
 import com.empiriact.app.ui.screens.resources.ResourceBrowserScreen
@@ -60,7 +67,7 @@ fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRep
     val bottomNavItems = listOf(
         BottomNavItem(Route.Today, "Heute", Icons.Default.Today),
         BottomNavItem(Route.Overview, "Übersicht", Icons.Default.Assessment),
-        BottomNavItem(Route.PsychoeducationModules, "Module", Icons.Default.School),
+        BottomNavItem(Route.PsychoeducationScreen, "Module", Icons.Default.School),
         BottomNavItem(Route.Resources, "Inhalte", Icons.Default.AutoStories),
     )
 
@@ -136,12 +143,19 @@ private fun NavGraphBuilder.staticGraph(factory: ViewModelFactory, navController
 }
 
 private fun NavGraphBuilder.modularGraph(factory: ViewModelFactory, navController: NavController) {
-    // Psychoedukation Modules
-    composable(Route.PsychoeducationModules.route) { PsychoeducationModulesScreen(navController) }
+    // Psychoedukation Screen
     composable(Route.PsychoeducationScreen.route) { PsychoeducationScreen(onBack = { navController.popBackStack() }) }
     composable(Route.InteractiveExercisesScreen.route) { InteractiveExercisesScreen(onBack = { navController.popBackStack() }) }
     composable(Route.ResourceBrowserScreen.route) { ResourceBrowserScreen(onBack = { navController.popBackStack() }) }
     composable(Route.LearningPathScreen.route) { LearningPathScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.GruebelnModule.route) { GruebelnModuleScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.DenkstileModule.route) { DenkstileModuleScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.RNDModule.route) { RNDModuleScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.RuminationModule.route) { RuminationModuleScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.HabitModule.route) { HabitModuleScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.ContentModule.route) { ContentModuleScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.ThreadModule.route) { ThreadModuleScreen(onBack = { navController.popBackStack() }) }
+    composable(Route.ThumbRuleModule.route) { ThumbRuleModuleScreen(onBack = { navController.popBackStack() }) }
 
     composable(Route.Resources.route) { ResourcesScreen(navController) }
     composable(Route.ValuesCompassExercise.route) { ValuesCompassExercise(navController) }

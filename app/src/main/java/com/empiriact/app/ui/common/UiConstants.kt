@@ -18,6 +18,7 @@ object UiConstants {
 
     // Component Sizes
     val RATING_BAR_ITEM_SIZE = 20.dp
+    val ANALYSIS_SECTION_ICON_SIZE = 24.dp
 
     // Corner Shapes
     val RATING_BAR_CORNER_SHAPE = 4.dp

@@ -14,8 +14,8 @@ import com.empiriact.app.data.Evaluation
 import com.empiriact.app.data.UserValue
 
 @Database(
-    entities = [ActivityLogEntity::class, Routine::class, Resource::class, Evaluation::class, UserValue::class, ExerciseRatingEntity::class, ExerciseReflectionEntity::class, GratitudeEntity::class],
-    version = 10,
+    entities = [ActivityLogEntity::class, Routine::class, Resource::class, Evaluation::class, UserValue::class, ExerciseRatingEntity::class, ExerciseReflectionEntity::class, GratitudeEntity::class, PsychoeducationalModuleEntity::class],
+    version = 12,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -29,6 +29,7 @@ abstract class EmpiriactDatabase : RoomDatabase() {
     abstract fun exerciseRatingDao(): ExerciseRatingDao
     abstract fun exerciseReflectionDao(): ExerciseReflectionDao
     abstract fun gratitudeDao(): GratitudeDao
+    abstract fun psychoeducationalModuleDao(): PsychoeducationalModuleDao
 
     companion object {
         internal val MIGRATION_8_9 = object : Migration(8, 9) {
@@ -61,6 +62,33 @@ abstract class EmpiriactDatabase : RoomDatabase() {
             }
         }
 
+        internal val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `psychoeducational_modules` (
+                        `moduleId` TEXT PRIMARY KEY NOT NULL,
+                        `moduleTitle` TEXT NOT NULL,
+                        `category` TEXT NOT NULL,
+                        `isCompleted` INTEGER NOT NULL DEFAULT 0,
+                        `rating` INTEGER,
+                        `feedback` TEXT,
+                        `completedAt` INTEGER,
+                        `startedAt` INTEGER NOT NULL,
+                        `isBookmarked` INTEGER NOT NULL DEFAULT 0,
+                        `isExample` INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        internal val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `activity_logs` ADD COLUMN `peopleText` TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         @Volatile
         internal var INSTANCE: EmpiriactDatabase? = null
 
@@ -71,7 +99,7 @@ abstract class EmpiriactDatabase : RoomDatabase() {
                     EmpiriactDatabase::class.java,
                     "empiriact_database"
                 )
-                    .addMigrations(MIGRATION_8_9, MIGRATION_9_10)
+                    .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                     .apply {
                         val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
                         if (isDebuggable) {

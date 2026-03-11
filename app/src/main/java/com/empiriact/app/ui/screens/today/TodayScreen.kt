@@ -17,9 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.People
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,7 +33,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -44,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,6 +62,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 private sealed class TodayScreenItem {
     data class Header(val date: LocalDate) : TodayScreenItem()
@@ -73,6 +77,7 @@ fun TodayScreen(navController: NavController) {
     val vm: TodayViewModel = viewModel(factory = application.viewModelFactory)
     val logs by vm.todayLogs.collectAsState()
     val uniqueActivities by vm.uniqueActivities.collectAsState()
+    val uniquePeople by vm.uniquePeople.collectAsState()
     val unsavedChanges by vm.unsavedChanges.collectAsState()
     val todayIntroCompleted by vm.todayIntroCompleted.collectAsState()
 
@@ -81,12 +86,19 @@ fun TodayScreen(navController: NavController) {
     val currentHour = now.hour
     var expandedEntry by remember { mutableStateOf<HourEntryKey?>(null) }
     var showAllHours by remember { mutableStateOf(false) }
+    var isInitialized by remember { mutableStateOf(false) }
 
-    if (expandedEntry == null && logs.findForHourOnDate(currentHour, today) == null) {
-        expandedEntry = HourEntryKey(today, currentHour)
+    // Initialize expanded entry only once on first load
+    LaunchedEffect(isInitialized) {
+        if (!isInitialized && logs.findForHourOnDate(currentHour, today) == null) {
+            expandedEntry = HourEntryKey(today, currentHour)
+            isInitialized = true
+        } else if (!isInitialized) {
+            isInitialized = true
+        }
     }
 
-    val items = remember(showAllHours, currentHour, today) {
+    val items = remember(showAllHours, currentHour, today, logs) {
         val hoursInOrder = (currentHour downTo 0) + (23 downTo currentHour + 1)
         val displayedHours = if (showAllHours) hoursInOrder else hoursInOrder.take(3)
 
@@ -149,15 +161,17 @@ fun TodayScreen(navController: NavController) {
                                 HourEntryKey(item.date, item.hour)
                             }
                         },
-                        onSave = { activity, valence ->
+                        onSave = { activity, valence, people ->
                             vm.upsertActivityForHour(
                                 item.date,
                                 item.hour,
                                 activity,
-                                valence
+                                valence,
+                                people
                             )
                         },
                         suggestions = uniqueActivities,
+                        peopleSuggestions = uniquePeople,
                         cachedData = unsavedChanges[HourEntryKey(item.date, item.hour)],
                         onCacheChanged = { cache -> vm.cacheHourEntry(item.date, item.hour, cache) }
                     )
@@ -203,11 +217,11 @@ private fun TodayIntroCoachCard(
                 )
             }
             Text(
-                text = "Du musst nichts perfekt machen. Wir sammeln nur Beobachtungen: 1–3 Hauptaktivitäten pro Stunde und die Stimmung dazu.",
+                text = "Keine Bewertung – nur Beobachtung. Der Beobachtungsplan zeigt, welche Aktivitäten sich tatsächlich ereignen. Das ist der erste Schritt der Verhaltensaktivierung.",
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "Tipp: Trage direkt nach der Stunde ein. Auch Routinen oder \"wenig produktive\" Zeiten sind wertvolle Hinweise.",
+                text = "Tipp: Jede Stunde zählt – auch Routine und \"unproduktive\" Zeiten sind wertvoll für das Verständnis.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -262,39 +276,97 @@ private fun HourEntry(
     log: ActivityLogEntity?,
     isExpanded: Boolean,
     onExpand: () -> Unit,
-    onSave: (String, Int) -> Unit,
+    onSave: (String, Int, String) -> Unit,
     suggestions: List<String>,
+    peopleSuggestions: List<String>,
     cachedData: HourEntryCache?,
     onCacheChanged: (HourEntryCache) -> Unit
 ) {
-    var activityInputText by remember { mutableStateOf("") }
-    var activityChips by remember { mutableStateOf<List<String>>(emptyList()) }
-    var valence by remember { mutableStateOf(0) }
+    // Initialize state from either cache or existing log
+    val initialChips = cachedData?.activities
+        ?: log?.activityText?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }
+        ?: emptyList()
+    val initialValence = cachedData?.valence ?: log?.valence ?: 0
+    val initialActivityInput = cachedData?.inputText ?: ""
+    val initialPeopleChips = cachedData?.peopleChips
+        ?: log?.peopleText?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }
+        ?: emptyList()
+    val initialPeopleInput = cachedData?.peopleInputText ?: ""
 
-    val addChipFromInput = {
-        val textToAdd = activityInputText.trim()
-        if (textToAdd.isNotBlank() && activityChips.size < 3 && !activityChips.contains(textToAdd)) {
-            val newChips = activityChips + textToAdd
-            activityChips = newChips
-            activityInputText = ""
-            onCacheChanged(HourEntryCache(newChips, valence, ""))
+    var activityInputText by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialActivityInput) }
+    var activityChips by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialChips) }
+    var valence by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialValence) }
+    var peopleInputText by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialPeopleInput) }
+    var peopleChips by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialPeopleChips) }
+
+    // Synchronize state when underlying data changes (e.g., after app restart or data refresh)
+    LaunchedEffect(log, cachedData, isExpanded) {
+        if (isExpanded) {
+            activityInputText = initialActivityInput
+            activityChips = initialChips
+            valence = initialValence
+            peopleInputText = initialPeopleInput
+            peopleChips = initialPeopleChips
         }
     }
 
-    // When the view is expanded to edit, populate chips from the existing log or cache.
-    LaunchedEffect(hour, isExpanded, log, cachedData) {
-        if (isExpanded) {
-            val initialChips = cachedData?.activities ?: log?.activityText?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
-            val initialValence = cachedData?.valence ?: log?.valence ?: 0
-            val initialInput = cachedData?.inputText ?: ""
-            activityChips = initialChips
-            valence = initialValence
-            activityInputText = initialInput
-        } else {
-            activityChips = emptyList()
+    val updateCache = {
+        onCacheChanged(
+            HourEntryCache(
+                activities = activityChips,
+                valence = valence,
+                inputText = activityInputText,
+                peopleText = "",
+                peopleChips = peopleChips,
+                peopleInputText = peopleInputText
+            )
+        )
+    }
+
+    val addActivityChip = {
+        val textToAdd = activityInputText.trim()
+        if (textToAdd.isNotBlank() && activityChips.size < 3 && !activityChips.contains(textToAdd)) {
+            activityChips = activityChips + textToAdd
             activityInputText = ""
-            valence = 0
+            updateCache()
         }
+    }
+
+    val addPeopleChip = {
+        val textToAdd = peopleInputText.trim()
+        if (textToAdd.isNotBlank() && peopleChips.size < 3 && !peopleChips.contains(textToAdd)) {
+            peopleChips = peopleChips + textToAdd
+            peopleInputText = ""
+            updateCache()
+        }
+    }
+
+    val handleSave = {
+        if (activityChips.isNotEmpty()) {
+            val activityText = activityChips.joinToString(", ")
+            val peopleText = if (peopleChips.isNotEmpty()) peopleChips.joinToString(", ") else ""
+            onSave(activityText, valence, peopleText)
+            // Clear the cache immediately to prevent stale data
+            onCacheChanged(HourEntryCache())
+            // Clear the local input fields immediately after saving
+            activityInputText = ""
+            activityChips = emptyList()
+            valence = 0
+            peopleInputText = ""
+            peopleChips = emptyList()
+            // Collapse after save
+            onExpand()
+        }
+    }
+
+    val handleCancel = {
+        // Reset to original state and collapse
+        activityInputText = initialActivityInput
+        activityChips = initialChips
+        valence = initialValence
+        peopleInputText = initialPeopleInput
+        peopleChips = initialPeopleChips
+        onExpand()
     }
 
     val isSavedAndCollapsed = log != null && !isExpanded
@@ -310,12 +382,12 @@ private fun HourEntry(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                String.format("%02d:00 - %02d:59", hour, hour),
+                String.format(Locale.getDefault(), "%02d:00 - %02d:59", hour, hour),
                 style = MaterialTheme.typography.titleMedium
             )
             if (isSavedAndCollapsed) {
                 Text(
-                    text = log!!.activityText,
+                    text = log.activityText,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End,
@@ -335,63 +407,67 @@ private fun HourEntry(
 
         AnimatedVisibility(visible = isExpanded) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge),
-                modifier = Modifier.padding(top = Dimensions.paddingLarge)
+                verticalArrangement = Arrangement.spacedBy(Dimensions.spacingMedium),
+                modifier = Modifier.padding(top = Dimensions.paddingMedium)
             ) {
-                Text(
-                    text = "Fokussiere dich auf 1–3 Hauptaktivitäten dieser Stunde. Es geht um Beobachtung, nicht Bewertung.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
+                // Activities Section
                 if (activityChips.size < 3) {
                     OutlinedTextField(
                         value = activityInputText,
                         onValueChange = { newText ->
-                            activityInputText = newText
-                            onCacheChanged(HourEntryCache(activityChips, valence, newText))
-                            val lastChar = newText.lastOrNull()
-                            if ((lastChar == ',' || lastChar == ';') && newText.length > 1) {
-                                val chipText = newText.substring(0, newText.length - 1).trim()
+                            val filteredText = newText.replace("\n", "")
+                            activityInputText = filteredText
+                            updateCache()
+                            // Auto-chip on separator
+                            val lastChar = filteredText.lastOrNull()
+                            if ((lastChar == ',' || lastChar == ';') && filteredText.length > 1) {
+                                val chipText = filteredText.substring(0, filteredText.length - 1).trim()
                                 if (chipText.isNotBlank() && activityChips.size < 3 && !activityChips.contains(chipText)) {
-                                    val newChips = activityChips + chipText
-                                    activityChips = newChips
+                                    activityChips = activityChips + chipText
                                     activityInputText = ""
-                                    onCacheChanged(HourEntryCache(newChips, valence, ""))
+                                    updateCache()
                                 }
                             }
                         },
-                        label = { Text("Was war heute in dieser Stunde am wichtigsten?") },
+                        label = { Text("Hauptaktivitäten der Stunde") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.List,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { addActivityChip() }),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .onFocusChanged { if (!it.isFocused) addChipFromInput() }
+                            .onFocusChanged { if (!it.isFocused) addActivityChip() }
                     )
 
-                    val filteredSuggestions = suggestions.filter { it.contains(activityInputText, ignoreCase = true) && activityInputText.isNotBlank() && !activityChips.contains(it) }
+                    val filteredSuggestions = suggestions.filter {
+                        it.contains(activityInputText, ignoreCase = true) &&
+                        activityInputText.isNotBlank() &&
+                        !activityChips.contains(it)
+                    }
                     if (filteredSuggestions.isNotEmpty()) {
-                        LazyColumn(modifier = Modifier.heightIn(max = 150.dp)) {
+                        LazyColumn(modifier = Modifier.heightIn(max = 120.dp)) {
                             items(filteredSuggestions) { suggestion ->
                                 ListItem(
-                                    headlineContent = { Text(suggestion) },
-                                    modifier = Modifier.clickable {
-                                        if (activityChips.size < 3 && !activityChips.contains(suggestion)) {
-                                            val newChips = activityChips + suggestion
-                                            activityChips = newChips
-                                            activityInputText = ""
-                                            onCacheChanged(HourEntryCache(newChips, valence, ""))
+                                    headlineContent = { Text(suggestion, style = MaterialTheme.typography.bodySmall) },
+                                    modifier = Modifier
+                                        .clickable {
+                                            if (activityChips.size < 3 && !activityChips.contains(suggestion)) {
+                                                activityChips = activityChips + suggestion
+                                                activityInputText = ""
+                                                updateCache()
+                                            }
                                         }
-                                    }
+                                        .padding(vertical = 4.dp)
                                 )
                             }
                         }
                     }
-                } else {
-                    Text(
-                        text = "Sie können bis zu 3 Aktivitäten hinzufügen.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = Dimensions.paddingMedium, vertical = Dimensions.paddingSmall)
-                    )
                 }
 
                 if (activityChips.isNotEmpty()) {
@@ -402,7 +478,7 @@ private fun HourEntry(
                     ) {
                         activityChips.forEach { chipText ->
                             InputChip(
-                                label = { Text(chipText) },
+                                label = { Text(chipText, style = MaterialTheme.typography.bodySmall) },
                                 selected = false,
                                 onClick = { /* Nothing to do on click */ },
                                 trailingIcon = {
@@ -410,11 +486,10 @@ private fun HourEntry(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "Aktivität entfernen",
                                         modifier = Modifier
-                                            .size(InputChipDefaults.IconSize)
+                                            .size(16.dp)
                                             .clickable {
-                                                val newChips = activityChips - chipText
-                                                activityChips = newChips
-                                                onCacheChanged(HourEntryCache(newChips, valence, activityInputText))
+                                                activityChips = activityChips - chipText
+                                                updateCache()
                                             }
                                     )
                                 }
@@ -423,66 +498,185 @@ private fun HourEntry(
                     }
                 }
 
-                ValencePicker(selectedValence = valence, onValenceSelected = {
-                    valence = it
-                    onCacheChanged(HourEntryCache(activityChips, it, activityInputText))
-                })
-                Button(
-                    onClick = {
-                        addChipFromInput()
-                        val finalText = activityChips.joinToString(", ")
-                        onSave(finalText, valence)
-                        onExpand() // Collapse after save
-                    },
-                    enabled = activityInputText.isNotBlank() || activityChips.isNotEmpty(),
-                    modifier = Modifier.align(Alignment.End)
+                if (activityChips.size >= 3) {
+                    Text(
+                        text = "3 Aktivitäten erfasst",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Valence selection
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Eintrag speichern")
+                    Text(
+                        text = "Wie ist deine Stimmung?",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        val valenceOptions = listOf(
+                            -2 to "- -",
+                            -1 to "-",
+                            0 to "0",
+                            1 to "+",
+                            2 to "+ +"
+                        )
+                        valenceOptions.forEach { (v, symbol) ->
+                            Button(
+                                onClick = {
+                                    valence = v
+                                    updateCache()
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .heightIn(min = 40.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (valence == v) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = if (valence == v) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
+                                ),
+                                contentPadding = PaddingValues(4.dp)
+                            ) {
+                                Text(symbol, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+
+                // People section
+                if (peopleChips.size < 3) {
+                    OutlinedTextField(
+                        value = peopleInputText,
+                        onValueChange = { newText ->
+                            val filteredText = newText.replace("\n", "")
+                            peopleInputText = filteredText
+                            updateCache()
+                            // Auto-chip on separator
+                            val lastChar = filteredText.lastOrNull()
+                            if ((lastChar == ',' || lastChar == ';') && filteredText.length > 1) {
+                                val chipText = filteredText.substring(0, filteredText.length - 1).trim()
+                                if (chipText.isNotBlank() && peopleChips.size < 3 && !peopleChips.contains(chipText)) {
+                                    peopleChips = peopleChips + chipText
+                                    peopleInputText = ""
+                                    updateCache()
+                                }
+                            }
+                        },
+                        label = { Text("Wichtigste Personen/Gruppen in dieser Stunde") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.People,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { addPeopleChip() }),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged { if (!it.isFocused) addPeopleChip() }
+                    )
+
+                    val filteredPeopleSuggestions = peopleSuggestions.filter {
+                        it.contains(peopleInputText, ignoreCase = true) &&
+                        peopleInputText.isNotBlank() &&
+                        !peopleChips.contains(it)
+                    }
+                    if (filteredPeopleSuggestions.isNotEmpty()) {
+                        LazyColumn(modifier = Modifier.heightIn(max = 120.dp)) {
+                            items(filteredPeopleSuggestions) { suggestion ->
+                                ListItem(
+                                    headlineContent = { Text(suggestion, style = MaterialTheme.typography.bodySmall) },
+                                    modifier = Modifier
+                                        .clickable {
+                                            if (peopleChips.size < 3 && !peopleChips.contains(suggestion)) {
+                                                peopleChips = peopleChips + suggestion
+                                                peopleInputText = ""
+                                                updateCache()
+                                            }
+                                        }
+                                        .padding(vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (peopleChips.isNotEmpty()) {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                        verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+                    ) {
+                        peopleChips.forEach { chipText ->
+                            InputChip(
+                                label = { Text(chipText, style = MaterialTheme.typography.bodySmall) },
+                                selected = false,
+                                onClick = { /* Nothing to do on click */ },
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Person entfernen",
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .clickable {
+                                                peopleChips = peopleChips - chipText
+                                                updateCache()
+                                            }
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (peopleChips.size >= 3) {
+                    Text(
+                        text = "3 Personen/Gruppen erfasst",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Save/Cancel buttons
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Dimensions.spacingSmall),
+                    horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
+                ) {
+                    FilledTonalButton(
+                        onClick = handleCancel,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Abbrechen")
+                    }
+                    Button(
+                        onClick = handleSave,
+                        modifier = Modifier.weight(1f),
+                        enabled = activityChips.isNotEmpty()
+                    ) {
+                        Text("Speichern")
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-private fun ValencePicker(selectedValence: Int, onValenceSelected: (Int) -> Unit) {
-    val valences = listOf(-2, -1, 0, 1, 2)
-    val isCompactLayout = LocalConfiguration.current.screenWidthDp < 420
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall)
-    ) {
-        valences.forEach { v ->
-            val isSelected = selectedValence == v
-            FilledTonalButton(
-                onClick = { onValenceSelected(v) },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                )
-            ) {
-                Text(if (isCompactLayout) valenceShortLabel(v) else valenceLabel(v))
-            }
-        }
+private fun valenceLabel(valence: Int): String {
+    return when (valence) {
+        -2 -> "Sehr belastend"
+        -1 -> "Eher belastend"
+        0 -> "Neutral"
+        1 -> "Eher hilfreich"
+        2 -> "Sehr hilfreich"
+        else -> "Neutral"
     }
-}
-
-private fun valenceShortLabel(v: Int): String = when (v) {
-    -2 -> "--"
-    -1 -> "-"
-    0 -> "0"
-    1 -> "+"
-    2 -> "++"
-    else -> "0"
-}
-
-private fun valenceLabel(v: Int): String = when (v) {
-    -2 -> "Sehr belastend"
-    -1 -> "Eher belastend"
-    0 -> "Neutral"
-    1 -> "Eher hilfreich"
-    2 -> "Sehr hilfreich"
-    else -> "Neutral"
 }

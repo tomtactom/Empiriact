@@ -15,5 +15,6 @@ data class ActivityLogEntity(
     val hour: Int,            // 0..23
     val activityText: String,
     val valence: Int,         // -2..2
+    val peopleText: String,   // Personen/Gruppen, mit denen Zeit verbracht wurde, z.B. "@Anna, @Familie"
     val updatedAtEpochMs: Long
 )

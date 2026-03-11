@@ -408,6 +408,717 @@ private fun getPsychoeducationModules(): List<PsychoeducationModule> {
                     )
                 )
             )
+        ),
+        // ====== 6 GRUEBELN-MODULE ======
+        PsychoeducationModule(
+            id = "gruebeln_basics",
+            title = "Grübeln: Gedankenkaugummi",
+            subtitle = "[BEISPIEL] Verstehe Rumination und ihre Auswirkungen",
+            icon = Icons.Default.School,
+            color = Color(0xFFEC4899),
+            estimatedReadTime = 15,
+            difficulty = "Anfänger",
+            chapters = listOf(
+                Chapter(
+                    id = "ch1",
+                    title = "Was ist Grübeln?",
+                    content = "Grübeln bedeutet, bildlich gesprochen, eine Sache immer wieder »durchzukauen«. Ein zentrales Verhaltensmuster, das viele Menschen betrifft.",
+                    sections = listOf(
+                        Section(
+                            heading = "Die Definition von Rumination",
+                            text = "In der Fachsprache nennt man Grübeln Rumination, ein Begriff, der aus dem Tierreich von den Wiederkäuern (z.B. Kühen) stammt. Grübeln kann man sich vorstellen, als würden wir auf unseren Gedanken Kaugummi kauen.",
+                            examples = listOf(
+                                "🧠 Wiederkäuen von Gedanken und Problemen",
+                                "⏰ Anhaltende Fokussierung auf negative Inhalte",
+                                "🔄 Schwierig, sich von diesen Gedanken zu befreien"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln ist ein automatisches, wiederholendes Denkmuster",
+                        "Es fühlt sich an wie 'Gedankenkaugummi kauen'",
+                        "Viele Menschen grübeln – es ist ein normales Phänomen"
+                    )
+                ),
+                Chapter(
+                    id = "ch2",
+                    title = "Fokus: Vergangenheit & Zukunft",
+                    content = "Grübeln beschäftigt sich mit zwei zeitlichen Dimensionen: belastender Vergangenheit und bedrohlicher Zukunft.",
+                    sections = listOf(
+                        Section(
+                            heading = "Häufige Grübel-Themen",
+                            text = "Inhaltlich befasst sich Grübeln mit vergangenen Ereignissen, die belastend waren, und zukünftigen Ereignissen, von denen angenommen wird, sie könnten bedrohlich sein.",
+                            examples = listOf(
+                                "✗ Negative Bewertungen der eigenen Person (Selbstkritik)",
+                                "✗ Negative Vorstellungen über die Zukunft (Zukunftsängste)",
+                                "✗ Negatives Denken über andere Menschen",
+                                "✗ Angst vor negativen Bewertungen durch andere",
+                                "✗ Selbstvorwürfe bezüglich vergangener Ereignisse",
+                                "✗ Schamgefühle, Schuldgefühle, Ärger über Situationen"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln fixiert sich auf Vergangenheit oder Zukunft",
+                        "Typische Themen sind Selbstkritik und Sorgen",
+                        "Das Gegenwärtige wird oft übersehen"
+                    )
+                ),
+                Chapter(
+                    id = "ch3",
+                    title = "Unproduktives Denken",
+                    content = "Das paradoxe Problem von Grübeln: Es fühlt sich wie Problemlösen an, führt aber zu keinen Lösungen.",
+                    sections = listOf(
+                        Section(
+                            heading = "Warum Grübeln ineffektiv ist",
+                            text = "Grübeln beschäftigt sich wiederholt und andauernd mit negativen Inhalten. Es kann schwerfallen, sich von den Gedanken zu lösen. Das Denken ist unproduktiv, weil es weder zu einer Problemlösung noch zu einer Verbesserung der Situation beiträgt.",
+                            examples = listOf(
+                                "🔄 Gedanken drehen sich im Kreis",
+                                "❌ Kein konkreter Handlungsplan entsteht",
+                                "😔 Negative Stimmung verstärkt sich stattdessen"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Die Konsequenzen",
+                            text = "Es fühlt sich vielleicht so an, als würde man etwas tun, um seine Probleme zu lösen. Doch leider verringert Grübeln die Fähigkeit, das Problem zu lösen.",
+                            examples = listOf(
+                                "→ Negative Stimmung, Hilflosigkeit, Hoffnungslosigkeit",
+                                "→ Mehr negative Gedanken und Passivität folgen",
+                                "→ Eine passiv-negative Haltung entsteht"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln fühlt sich produktiv an, ist es aber nicht",
+                        "Es reduziert tatsächlich die Problemlösungsfähigkeit",
+                        "Passive Haltung entsteht statt aktiv Probleme zu lösen"
+                    )
+                ),
+                Chapter(
+                    id = "ch4",
+                    title = "Negative Folgen des Grübelns",
+                    content = "Übermäßiges Grübeln hat weitreichende negative Konsequenzen für Körper, Geist und soziale Beziehungen.",
+                    sections = listOf(
+                        Section(
+                            heading = "Emotionale & körperliche Auswirkungen",
+                            text = "Übermäßiges Grübeln zieht verschiedene negative Folgen nach sich.",
+                            examples = listOf(
+                                "😔 Unangenehme Emotionen: Traurigkeit, Angst, Ärger bis Hoffnungslosigkeit, Panik",
+                                "💪 Körperliche Zustände: Anspannung, Herzrasen, Schwitzen",
+                                "😴 Erschöpfung, Antriebslosigkeit, Schlafstörungen",
+                                "🧠 Konzentrationsschwierigkeiten"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Psychische & soziale Folgen",
+                            text = "Langfristige Auswirkungen erstrecken sich auf mentale Gesundheit und Beziehungen.",
+                            examples = listOf(
+                                "🏥 Entstehung psychischer Erkrankungen (Depressionen, Angststörungen)",
+                                "👥 Probleme im sozialen Umfeld (Unverständnis, Konflikte)"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln wirkt sich auf alle Bereiche aus: Körper, Geist, Beziehungen",
+                        "Psychische Erkrankungen können dadurch aufrechterhalten werden",
+                        "Soziale Spannungen entstehen durch wiederholtes Grübeln"
+                    )
+                ),
+                Chapter(
+                    id = "ch5",
+                    title = "Grübeln ist normal – in Maßen",
+                    content = "Grübeln ist ein verbreitetes, menschliches Phänomen. Der Unterschied liegt in Häufigkeit und Intensität.",
+                    sections = listOf(
+                        Section(
+                            heading = "Gelegentliches vs. problematisches Grübeln",
+                            text = "Grübeln ist ein normales, weitverbreitetes Phänomen. Wir alle grübeln gelegentlich. Auch gesunde Menschen grübeln in einem gewissen Umfang und Rahmen.",
+                            examples = listOf(
+                                "✓ Normal: Gelegentliches Grübeln, wenn Partnerschaft endet",
+                                "✓ Normal: Sich Sorgen machen vor einem Vortrag",
+                                "🟢 Gesund: Man kann die Gedanken wieder loslassen",
+                                "🔴 Problematisch: Ständiges, unkontrollierbares Grübeln",
+                                "🔴 Belastend: Beeinträchtigt die Lebensqualität"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Gelegentliches Grübeln ist vollkommen normal",
+                        "Der Unterschied liegt in Häufigkeit und Kontrolle",
+                        "Problematisches Grübeln beeinträchtigt die Lebensqualität"
+                    )
+                )
+            )
+        ),
+        PsychoeducationModule(
+            id = "denkstile_comparison",
+            title = "Denkstile: Ungünstig vs. Günstig",
+            subtitle = "[BEISPIEL] Lerne den Unterschied zwischen Denkmustern",
+            icon = Icons.Default.School,
+            color = Color(0xFF06B6D4),
+            estimatedReadTime = 18,
+            difficulty = "Fortgeschrittene",
+            chapters = listOf(
+                Chapter(
+                    id = "ch1",
+                    title = "Grübeln als ungünstige Gewohnheit",
+                    content = "Grübeln gehört zu den negativen Denkschleifen und ist ein erlerntes Muster, das wieder verlernt werden kann.",
+                    sections = listOf(
+                        Section(
+                            heading = "Automatisiert und unbewusst",
+                            text = "Das Denken startet unabsichtlich und unbewusst. Es ist schwierig zu beeinflussen oder zu beenden. Oft laden Gedanken auch in Situationen los, in denen man es gar nicht will.",
+                            examples = listOf(
+                                "🧠 Unabsichtlich auftauchend",
+                                "📍 In bestimmten Situationen automatisch ausgelöst (z.B. im Bett vor dem Einschlafen)",
+                                "❌ Kaum kontrollierbar"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Sich wiederholend und springhaft",
+                            text = "Das Denken kreist immer wieder um den gleichen Inhalt. Es verliert schnell den roten Faden und springt von einem Problem zum nächsten.",
+                            examples = listOf(
+                                "🔄 Kreist um dieselben Inhalte",
+                                "💫 Springt sprunghaft zwischen Problemen",
+                                "❌ Kein Problem wird befriedigend gelöst"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Negative, extreme, irrationale Inhalte",
+                            text = "Die Inhalte des Denkens sehen nur negative Aspekte. Positive oder neutrale Aspekte werden ausgeblendet.",
+                            examples = listOf(
+                                "😔 Nur negative Aspekte sichtbar",
+                                "🚫 Positive/Neutrale ausgeblendet",
+                                "🎭 Tendenz zu Überbewertung und Katastrophisierung"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Unproduktiv und abstrakt",
+                            text = "Es entsteht keine Lösung, kein Handlungsplan. Das Denken bleibt oberflächlich und verallgemeinernd, ohne konkrete Details zu betrachten.",
+                            examples = listOf(
+                                "❌ Keine Lösung oder Handlungsplan",
+                                "🌫️ Bleibt abstrakt, ohne Details",
+                                "📋 Verallgemeinert unzulässig ('immer', 'nie')"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln ist automatisiert und schwer kontrollierbar",
+                        "Es ist eine erlernte Gewohnheit, keine Charaktereigenschaft",
+                        "Gewohnheiten können wieder verlernt werden"
+                    )
+                ),
+                Chapter(
+                    id = "ch2",
+                    title = "Konstruktives, günstiges Denken",
+                    content = "Konstruktives Denken ist kontrollierbar, fokussiert und führt zu konkreten Lösungen.",
+                    sections = listOf(
+                        Section(
+                            heading = "Kernmerkmale produktiven Denkens",
+                            text = "Konstruktives Nachdenken lässt sich steuern und verfolgt Fragen in Richtung einer Lösung.",
+                            examples = listOf(
+                                "✅ Lässt sich steuern und bewusst gestalten",
+                                "🎯 Verfolgt konkrete Lösungsschritte",
+                                "💡 Führt zu Klarheit und Handlung"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Ausgewogen, rational und faktenbasiert",
+                            text = "Die positiven und negativen Aspekte einer Situation werden gleichermäßen betrachtet. Gegenüber der eigenen Person besteht eine wohlwollende Haltung.",
+                            examples = listOf(
+                                "⚖️ Sowohl positive als auch negative Aspekte betrachtet",
+                                "💭 Selbstmitgefühl statt Selbstkritik",
+                                "📊 Faktenbasiert und rational"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Produktiv und konkret",
+                            text = "Das Denken zielt auf eine Problemlösung ab. Es entstehen konkrete, schrittweise Lösungen und Handlungspläne.",
+                            examples = listOf(
+                                "✅ Konkrete Schritte identifizieren",
+                                "📋 To-do-Listen statt To-not-do-Listen",
+                                "🚀 Handlungsorientierung"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Flexibel und aktiv",
+                            text = "Die Gedanken lassen sich bewusst lenken. Neue Informationen führen zu Anpassung von Zielen. Es besteht eine Balance zwischen Denken und Handeln.",
+                            examples = listOf(
+                                "🔄 Flexibel zwischen Perspektiven wechseln",
+                                "🎯 Ziele basierend auf neuen Informationen anpassen",
+                                "⚖️ Gute Balance zwischen Denken und Handeln"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Konstruktives Denken ist kontrollierbar und zielgerichtet",
+                        "Es berücksichtigt mehrere Perspektiven",
+                        "Es führt zu konkreten Handlungsschritten"
+                    )
+                ),
+                Chapter(
+                    id = "ch3",
+                    title = "Der Unterschied in der Praxis",
+                    content = "Praktische Beispiele zeigen, wie sich ungünstige und günstige Denkmuster unterscheiden.",
+                    sections = listOf(
+                        Section(
+                            heading = "Beispiel: Ein Fehler bei der Arbeit",
+                            text = "Vergleich zwischen Grübeln und konstruktivem Denken in einer realistischen Situation.",
+                            examples = listOf(
+                                "🔴 Grübeln: 'Warum mache ich immer alles falsch?' → Gedankenschleife → Verzweiflung",
+                                "🟢 Konstruktiv: 'Was ist passiert? Wie kann ich es verbessern?' → Handlungsplan → Verbesserung"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Der Denkstil bestimmt das Ergebnis",
+                        "Bewusstsein über das Denkmuster ist der erste Schritt",
+                        "Veränderung ist durch wiederholte Übung möglich"
+                    )
+                )
+            )
+        ),
+        PsychoeducationModule(
+            id = "rnd_understanding",
+            title = "RND: Verstehen & Regulieren",
+            subtitle = "[BEISPIEL] Repetitives negatives Denken erkennen und regulieren",
+            icon = Icons.Default.School,
+            color = Color(0xFF8B5CF6),
+            estimatedReadTime = 22,
+            difficulty = "Fortgeschrittene",
+            chapters = listOf(
+                Chapter(
+                    id = "ch1",
+                    title = "Was ist RND?",
+                    content = "Repetitives negatives Denken (RND) ist ein universeller psychologischer Prozess, der bei vielen psychischen Belastungen eine Rolle spielt.",
+                    sections = listOf(
+                        Section(
+                            heading = "Definition & Merkmale",
+                            text = "Repetitives negatives Denken bedeutet, dass sich Gedanken wiederholt mit negativen Inhalten beschäftigen und dabei als schwer steuerbar erlebt werden.",
+                            examples = listOf(
+                                "🔄 Wiederkehrend – Gedanken kreisen immer wieder um dasselbe Thema",
+                                "😔 Negativ gefärbt – oft geht es um Fehler, Defizite, Gefahren",
+                                "🚨 Aufdringlich – tauchen scheinbar automatisch auf",
+                                "🌫️ Abstrakt – etwa in Form von 'Warum bin ich so?' oder 'Was, wenn alles schiefgeht?'",
+                                "❌ Unkontrollierbar – fühlen sich wie innerer Zwang an"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Zwei Formen von RND",
+                            text = "RND hat viele Ausprägungen, zwei sind besonders häufig und gut erforscht.",
+                            examples = listOf(
+                                "📖 Grübeln: Vergangenheitsbezogen (über Fehler, Kränkungen)",
+                                "🔮 Sich-Sorgen: Zukunftsbezogen (über mögliche Gefahren)"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "RND ist ein universeller psychologischer Prozess",
+                        "Es findet sich bei vielen verschiedenen psychischen Problemen",
+                        "Zwei Hauptformen: Grübeln (Vergangenheit) und Sorgen (Zukunft)"
+                    )
+                ),
+                Chapter(
+                    id = "ch2",
+                    title = "Die Funktionen und das Problem",
+                    content = "RND erfüllt ursprünglich sinnvolle Funktionen – wird aber problematisch, wenn es exzessiv wird.",
+                    sections = listOf(
+                        Section(
+                            heading = "Ursprüngliche Funktionen von RND",
+                            text = "Grübeln und Sorgen haben ursprünglich sinnvolle Funktionen für unser Überleben.",
+                            examples = listOf(
+                                "⚠️ Warnfunktion: aufmerksam auf mögliche Gefahren machen",
+                                "🎯 Relevanzfunktion: zeigen, dass etwas wichtig für uns ist",
+                                "👁️ Aufmerksamkeitsfunktion: Aufmerksamkeit auf ein Problem lenken",
+                                "🔧 Problemlösefunktion: Problemlösung anstoßen"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Wann wird es problematisch?",
+                            text = "RND wird belastend und dysfunktional, wenn bestimmte Merkmale erfüllt sind.",
+                            examples = listOf(
+                                "⏱️ Es nimmt sehr viel Zeit ein",
+                                "🔁 Es tritt gewohnheitsmäßig auf (z.B. abends im Bett)",
+                                "🌫️ Es bleibt abstrakt und verallgemeinernd",
+                                "❌ Es bringt keine konkreten Lösungen hervor",
+                                "📈 Es führt zu emotionaler Verschlechterung"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Der Kreislauf des Grübelns",
+                            text = "Ein sich selbst verstärkender Kreislauf entsteht, der RND perpetuiert.",
+                            examples = listOf(
+                                "1. Belastendes Ereignis oder Gefühl tritt auf",
+                                "2. Nachdenken beginnt",
+                                "3. Denken wird abstrakter ('Warum passiert mir das immer?')",
+                                "4. Negative Gefühle nehmen zu",
+                                "5. Bedürfnis zu analysieren wächst",
+                                "6. Gedanken verstärken sich → Denken wird selbst zum Stressor"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "RND hat ursprünglich sinnvolle Funktionen",
+                        "Problematisch wird es, wenn es exzessiv und unkontrollierbar ist",
+                        "Ein sich selbst verstärkender Kreislauf entsteht"
+                    )
+                ),
+                Chapter(
+                    id = "ch3",
+                    title = "Das realistische Ziel",
+                    content = "Das Ziel ist nicht Gedankenvermeidung, sondern Denkregulation und mehr Flexibilität.",
+                    sections = listOf(
+                        Section(
+                            heading = "Was ist kein realistisches Ziel?",
+                            text = "Ein häufiges Missverständnis ist die Annahme, das Ziel müsse sein, 'nie wieder negativ zu denken'. Das ist weder möglich noch sinnvoll.",
+                            examples = listOf(
+                                "🚫 'Nie wieder negativ denken' - unmöglich",
+                                "🚫 Gedanken komplett unterdrücken - kontraproduktiv",
+                                "✓ Negative Gedanken gehören zum Menschsein"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Hilfreiche Ziele",
+                            text = "Ein hilfreiches Ziel fokussiert auf Bewusstsein, Unterscheidung und Flexibilität.",
+                            examples = listOf(
+                                "👁️ Früher merken, wenn ich ins RND gerate",
+                                "🔍 Zwischen hilfreichem und unhilfreichem Denken unterscheiden",
+                                "🔄 Flexibler zwischen Denken und Handeln wechseln",
+                                "🎯 Aufmerksamkeit bewusster steuern",
+                                "💡 Es geht um Denkregulation, nicht Gedankenvermeidung"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Das Ziel ist nicht Gedankenvermeidung",
+                        "Es geht um Denkregulation und Bewusstsein",
+                        "Flexibilität ist der Schlüssel"
+                    )
+                )
+            )
+        ),
+        PsychoeducationModule(
+            id = "rumination_consequences",
+            title = "Grübeln & Negative Folgen",
+            subtitle = "[BEISPIEL] Verstehe die Auswirkungen von Rumination",
+            icon = Icons.Default.School,
+            color = Color(0xFFF43F5E),
+            estimatedReadTime = 20,
+            difficulty = "Anfänger",
+            chapters = listOf(
+                Chapter(
+                    id = "ch1",
+                    title = "Grübeln und Depression",
+                    content = "Grübeln ist eng mit depressiven Verstimmungen verbunden und kann depressionäre Zustände aufrechterhalten.",
+                    sections = listOf(
+                        Section(
+                            heading = "Die Beziehung zwischen Grübeln und Depression",
+                            text = "Die Forschung zeigt, dass Grübeln besonders eng mit depressiven Verstimmungen verbunden ist.",
+                            examples = listOf(
+                                "😢 Menschen mit depressiven Symptomen grübeln stark",
+                                "🔄 Sie denken über ihre Niedergeschlagenheit, deren Ursachen nach",
+                                "📚 Dies trägt aber nicht zur Verbesserung bei – Stimmung bleibt negativ oder verschlechtert sich"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Wichtig zu verstehen",
+                            text = "Grübeln verursacht keine Depression, aber es kann ein wichtiger Mechanismus sein, der depressive Zustände aufrechthält.",
+                            examples = listOf(
+                                "⚡ Es ist nicht einfach 'negatives Denken' ",
+                                "🔄 Grübeln verhindert Heilung durch Perpetuierung",
+                                "✓ Wenn wir Grübeln reduzieren, kann sich Stimmung verbessern"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln ist eng mit Depression verbunden",
+                        "Es hält depressive Zustände aufrecht",
+                        "Reduktion von Grübeln kann Verbesserung ermöglichen"
+                    )
+                ),
+                Chapter(
+                    id = "ch2",
+                    title = "Auswirkungen auf Emotionen und Körper",
+                    content = "Grübeln hat weitreichende Konsequenzen, die Emotionen, Körpergefühle und Funktionsfähigkeit beeinträchtigen.",
+                    sections = listOf(
+                        Section(
+                            heading = "Das Verstärkungs-Netzwerk",
+                            text = "Unser Gedächtnis verbindet Gedanken, Gefühle, Körperreaktionen und Erinnerungen miteinander. Grübeln aktiviert diese Netzwerke.",
+                            examples = listOf(
+                                "🧠 Trauriger Gedanke aktiviert wird",
+                                "🔗 Weitere traurige Erinnerungen werden leicht aktiviert",
+                                "📚 Weitere negative Bewertungen folgen",
+                                "⚖️ Stimmung kann sich deutlich verschlechtern"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Körperliche Folgen",
+                            text = "Grübeln hat auch körperliche Auswirkungen, die das Wohlbefinden beeinträchtigen.",
+                            examples = listOf(
+                                "💪 Anspannung, Muskelverspannungen",
+                                "❤️ Herzrasen, Blutdruckerhöhung",
+                                "😓 Schwitzen",
+                                "😴 Schlafprobleme und Konzentrationsschwierigkeiten",
+                                "😑 Antriebslosigkeit und Erschöpfung"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln verstärkt negative Gefühle durch Netzwerkeffekte",
+                        "Es hat auch körperliche Auswirkungen",
+                        "Ein Teufelskreis aus Körper und Geist entsteht"
+                    )
+                ),
+                Chapter(
+                    id = "ch3",
+                    title = "Auswirkungen auf Handeln und Beziehungen",
+                    content = "Grübeln führt zu Handlungsblockaden und Beziehungsproblemen, die die Situation verschärfen.",
+                    sections = listOf(
+                        Section(
+                            heading = "Handlungsblockade",
+                            text = "Ein großes Problem ist die Balance zwischen Denken und Handeln. Grübeln kann dazu führen, dass sehr viel Energie ins Analysieren fließt.",
+                            examples = listOf(
+                                "🧠 Viel Energie ins Denken",
+                                "📉 Wenig in konkrete Schritte",
+                                "📚 Je länger gedanklich bei Problem verweilt, desto überwältigender es wird",
+                                "❌ Motivation und Handlungsbereitschaft sinken"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Auswirkungen auf Beziehungen",
+                            text = "Grübeln betrifft nicht nur die innere Welt, sondern auch das soziale Umfeld.",
+                            examples = listOf(
+                                "🔄 Immer wieder dieselben Themen besprechen",
+                                "❓ Häufige Rückversicherungen einfordern",
+                                "😔 Lösungsvorschläge nicht umsetzen",
+                                "😞 Angehörige fühlen sich belastet",
+                                "💔 Betroffene fühlen sich unverstanden"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln führt zu Handlungsblockade",
+                        "Es hat auch Auswirkungen auf Beziehungen",
+                        "Ein Multiplikator-Effekt kann entstehen"
+                    )
+                )
+            )
+        ),
+        PsychoeducationModule(
+            id = "gruebeln_as_habit",
+            title = "Grübeln als Gewohnheit",
+            subtitle = "[BEISPIEL] Lerne, Grübeln als trainierbare Gewohnheit zu verstehen",
+            icon = Icons.Default.School,
+            color = Color(0xFF14B8A6),
+            estimatedReadTime = 18,
+            difficulty = "Fortgeschrittene",
+            chapters = listOf(
+                Chapter(
+                    id = "ch1",
+                    title = "Grübeln ist erlernt",
+                    content = "Grübeln ist nicht angeboren – es ist eine erlernte, oft automatisierte Strategie, die verändert werden kann.",
+                    sections = listOf(
+                        Section(
+                            heading = "Was ist eine Gewohnheit?",
+                            text = "Eine Gewohnheit ist ein automatisches Verhaltensmuster, das unabsichtlich und unbewusst ausgelöst wird.",
+                            examples = listOf(
+                                "🚗 Auto fahren – unbewusst",
+                                "🧘 Meditieren – wurde eingeübt",
+                                "🚭 Nägelkauen – automatische Reaktion auf Stress"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Wie entsteht eine Denkgewohnheit?",
+                            text = "Grübeln entwickelt sich als Gewohnheit durch wiederholte Verknüpfung zwischen Situation und Reaktion.",
+                            examples = listOf(
+                                "😔 Stimmung wird traurig oder unsicher",
+                                "🧠 Automatisch beginnt man zu grübeln",
+                                "🔁 Dies wiederholt sich immer wieder",
+                                "⚡ Mit Zeit reicht nur die Stimmung, um Grübeln auszulösen",
+                                "🤖 Die Verbindung wird automatisch und schnell"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln ist eine erlernte Gewohnheit, nicht angeboren",
+                        "Sie entsteht durch wiederholte Verknüpfung",
+                        "Gewohnheiten können verändert werden"
+                    )
+                ),
+                Chapter(
+                    id = "ch2",
+                    title = "Gewohnheiten können verändert werden",
+                    content = "Das Wichtigste: Wenn Grübeln gelernt wurde, kann man auch etwas Neues lernen.",
+                    sections = listOf(
+                        Section(
+                            heading = "Das entlastende Verständnis",
+                            text = "Diese Perspektive kann transformativ sein. Grübeln ist nicht Ihre Identität – es ist ein Muster.",
+                            examples = listOf(
+                                "🚫 NICHT: 'Ich bin ein Grübler' (Identität)",
+                                "✅ SONDERN: 'Ich habe mir Grübeln angewöhnt' (Gewohnheit)",
+                                "🎯 Und Gewohnheiten können verändert werden!"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Das realistischeZiel: Flexibilität",
+                            text = "Das Ziel ist nicht, Grübeln vollständig zu stoppen, sondern flexibler zu werden.",
+                            examples = listOf(
+                                "👁️ Grübeln früher erkennen",
+                                "⚡ Den automatischen Ablauf unterbrechen",
+                                "🔄 Schneller in hilfreicheres Denken wechseln",
+                                "🎯 Alternative Reaktionen einüben, bis sie selbst zur Gewohnheit werden"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Gegenkonditionierung: Der Schlüssel",
+                            text = "Wenn Grübeln eine Gewohnheit ist, hilft es, auf Auslöser neue Reaktionen zu trainieren.",
+                            examples = listOf(
+                                "😔 Wenn Niedergeschlagenheit auftritt → bewusst kleine Aktivität beginnen",
+                                "🔄 Wenn Gedanken kreisen → in konkretes Problemlösen wechseln",
+                                "😰 Wenn innere Anspannung entsteht → Entspannungsübung durchführen"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Grübeln ist nicht Ihre Identität",
+                        "Neue Gewohnheiten entstehen durch wiederholtes Üben",
+                        "Gegenkonditionierung ist der Schlüssel zur Veränderung"
+                    )
+                )
+            )
+        ),
+        PsychoeducationModule(
+            id = "rnd_contents",
+            title = "RND: Inhalte & Prozesse",
+            subtitle = "[BEISPIEL] Der Prozess ist ähnlich, die Inhalte unterschiedlich",
+            icon = Icons.Default.School,
+            color = Color(0xFFA78BFA),
+            estimatedReadTime = 20,
+            difficulty = "Fortgeschrittene",
+            chapters = listOf(
+                Chapter(
+                    id = "ch1",
+                    title = "Der gemeinsame Prozess",
+                    content = "So unterschiedlich die Themen von RND sind – der zugrunde liegende Prozess ist meist ähnlich.",
+                    sections = listOf(
+                        Section(
+                            heading = "Ein verbreitetes Muster",
+                            text = "Menschen unterscheiden sich weniger darin, dass sie RND haben, sondern eher darin, worüber sie es tun.",
+                            examples = listOf(
+                                "🔄 Wiederholtes Kreisen um negative Inhalte",
+                                "🎯 Starke Selbst- oder Gefahrenfokussierung",
+                                "❓ Abstrakte 'Warum'- oder 'Was-wäre-wenn'-Fragen",
+                                "📈 Zunehmende emotionale Aktivierung",
+                                "📉 Abnehmende Handlungsorientierung"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Warum ist diese Unterscheidung hilfreich?",
+                            text = "Wenn wir verstehen, dass es um den Prozess geht, nicht um die Inhalte, entsteht neue Hoffnung.",
+                            examples = listOf(
+                                "✓ Sie müssen nicht jedes Thema einzeln 'lösen'",
+                                "✓ Sie können den Denkstil selbst verändern",
+                                "✓ Strategien zur Unterbrechung sind ähnlich, unabhängig vom Thema"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "Alle RND teilen einen ähnlichen Prozess",
+                        "Die Inhalte unterscheiden sich, der Mechanismus ist gleich",
+                        "Veränderung des Prozesses hilft bei allen Themen"
+                    )
+                ),
+                Chapter(
+                    id = "ch2",
+                    title = "Unterschiedliche Inhalte von RND",
+                    content = "RND kann sich auf sehr verschiedene Lebensbereiche beziehen. Hier sind typische Schwerpunkte.",
+                    sections = listOf(
+                        Section(
+                            heading = "Selbstbezogenes Grübeln",
+                            text = "Hier stehen häufig Selbstbewertungen im Mittelpunkt.",
+                            examples = listOf(
+                                "❓ 'Warum bin ich so?'",
+                                "❓ 'Was stimmt nicht mit mir?'",
+                                "❓ 'Warum wird es nie besser?'",
+                                "📍 Fokus: Schwächen, Fehler, Vergleiche mit anderen"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Zukunftsbezogenes Sorgen",
+                            text = "Die Frage 'Was, wenn...?' steht im Vordergrund.",
+                            examples = listOf(
+                                "❓ 'Was wäre, wenn etwas Schlimmes passiert?'",
+                                "❓ 'Was ist, wenn ich das nicht schaffe?'",
+                                "🎯 Häufige Themen: Familie, Arbeit, Gesundheit, Sicherheit",
+                                "💭 Denken springt von einer möglichen Gefahr zur nächsten"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Soziale Selbstbeobachtung",
+                            text = "Gedanken kreisen um soziale Situationen und Bewertung durch andere.",
+                            examples = listOf(
+                                "❓ 'Habe ich komisch gewirkt?'",
+                                "❓ 'Was denken die anderen über mich?'",
+                                "📍 Post-Event-Grübeln nach sozialen Situationen",
+                                "😰 Angst vor Ablehnung und Blamage"
+                            ),
+                            isExpandable = true
+                        ),
+                        Section(
+                            heading = "Körper- und gesundheitsbezogenes Sorgen",
+                            text = "Aufmerksamkeit richtet sich intensiv auf körperliche Empfindungen.",
+                            examples = listOf(
+                                "❓ 'Was bedeutet dieses Symptom?'",
+                                "❓ 'Was, wenn das etwas Ernstes ist?'",
+                                "📍 Körperliche Signale werden intensiv beobachtet",
+                                "🔍 Kleine Veränderungen können stark vergrößert werden"
+                            ),
+                            isExpandable = true
+                        )
+                    ),
+                    keyTakeaways = listOf(
+                        "RND hat viele verschiedene thematische Formen",
+                        "Der Prozess bleibt aber ähnlich",
+                        "Alle lassen sich durch Prozessveränderung beeinflussen"
+                    )
+                )
+            )
         )
     )
 }

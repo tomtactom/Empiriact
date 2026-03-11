@@ -342,6 +342,180 @@ private fun getInteractiveExercises(): List<InteractiveExercise> {
                 "Erhöht mentale Flexibilität",
                 "Fördert Akzeptanz von Gedanken"
             )
+        ),
+        InteractiveExercise(
+            id = "red_thread",
+            title = "Roten Faden finden",
+            description = "[BEISPIEL] Erlebnis-Übung mit Wolle & räumlichen Metaphern",
+            duration = 25,
+            difficulty = "Fortgeschrittene",
+            category = "Grübeln-Regulation",
+            steps = listOf(
+                ExerciseStep(
+                    number = 1,
+                    title = "Vorbereitung: Das Grübelnetz",
+                    instruction = "Besorge dir ein Wollknäuel oder einen langen Faden. Du brauchst einen Raum mit verschiedenen Ankerpunkten (Stuhl, Regal, Türgriff, etc.).",
+                    duration = 180,
+                    guidance = "Denke an eine Grübelsituation aus deinem Leben – nicht zu überwältigend, sondern zum Üben. Befestige das Fadenende an einem Punkt – das ist dein Start-Gedanke.",
+                    tips = listOf(
+                        "Startgedanke könnte sein: 'Warum mache ich immer alles falsch?'",
+                        "Oder: 'Was denken die jetzt von mir?'",
+                        "Wähle eine Situation, bei der du viel gegrübelt hast"
+                    )
+                ),
+                ExerciseStep(
+                    number = 2,
+                    title = "Die Gedankensprünge visualisieren",
+                    instruction = "Gehe nun gedanklich die Grübelei durch. Mit jedem weiteren Gedanken spannst du den Faden zu einem neuen Punkt im Raum.",
+                    duration = 300,
+                    guidance = "Wenn das Denken springt → mache auch räumlich einen größeren Schritt. Wenn Gedanken kreisen → wickle den Faden mehrfach um denselben Punkt. Nach einigen Minuten entsteht ein sichtbares Netz.",
+                    tips = listOf(
+                        "Beobachte, wie komplex und verwirrend das Netz wird",
+                        "Das spiegelt dein inneres Grübeln wider",
+                        "Merke: 'Viele Verbindungen, viele Schleifen, wenig Klarheit'"
+                    )
+                ),
+                ExerciseStep(
+                    number = 3,
+                    title = "Das Netz betrachten",
+                    instruction = "Bleibe stehen und betrachte das entstandene Fadengeflecht. Wie fühlt sich dieses Bild an?",
+                    duration = 120,
+                    guidance = "Frage dich: Fühle ich Enge, Chaos, Verwirrung? Fühle ich mich erschöpft, gefangen, überfordert? Viele Menschen berichten, dass sie sich ähnlich fühlen wie beim tatsächlichen Grübeln.",
+                    tips = listOf(
+                        "Dieses Bild steht sinnbildlich für dein Grübeln",
+                        "Es zeigt dir körperlich-räumlich, wie sich Grübeln anfühlt",
+                        "Später kannst du dieses Bild abrufen"
+                    )
+                ),
+                ExerciseStep(
+                    number = 4,
+                    title = "Der rote Faden des konstruktiven Denkens",
+                    instruction = "Nimm ein neues Stück Faden (2-3 Meter) und lege es gerade durch den Raum von einem Startpunkt zu einem Zielpunkt.",
+                    duration = 180,
+                    guidance = "Der Startpunkt symbolisiert das Problem (z.B. 'Mir ist bei der Arbeit ein Fehler passiert'), der Zielpunkt die Lösung. Der gerade Faden symbolisiert konstruktives Denken.",
+                    tips = listOf(
+                        "Der gerade Faden: klar, fokussiert, zielgerichtet",
+                        "Vergleiche das jetzt mit dem Grübelnetz",
+                        "Der Unterschied wird deutlich sichtbar"
+                    )
+                ),
+                ExerciseStep(
+                    number = 5,
+                    title = "Schrittweise Lösung finden",
+                    instruction = "Gehe nun langsam entlang des geraden Fadens. Bei jedem Schritt stellst du dir eine konstruktive Frage.",
+                    duration = 240,
+                    guidance = "Zum Beispiel: 'Wie schwerwiegend ist der Fehler wirklich?' 'Was genau ist passiert?' 'Welche Handlungsmöglichkeiten habe ich?' 'Was wäre ein erster kleiner Schritt?'",
+                    tips = listOf(
+                        "Wenn selbstabwertende Gedanken auftauchen, mache eine kleine Schlaufe",
+                        "Kehre dann wieder zur geraden Linie zurück",
+                        "Das ist bereits Übung im Gewohnheitswechsel"
+                    )
+                ),
+                ExerciseStep(
+                    number = 6,
+                    title = "Der Unterschied",
+                    instruction = "Vergleiche beide Fäden: Das Grübelnetz und den roten Faden.",
+                    duration = 120,
+                    guidance = "Das Grübelnetz: viele Richtungen, Sprünge, Wiederholungen, Enge, kein klarer Ausgang. Der rote Faden: klarer Start, kleine konkrete Schritte, Bewegung in Richtung Lösung, Orientierung.",
+                    tips = listOf(
+                        "Grübeln ist meist abstrakt ('Warum bin ich so?')",
+                        "Konstruktives Denken ist konkret ('Was kann ich jetzt tun?')",
+                        "Dieses Bild hilft dir später im Alltag"
+                    )
+                )
+            ),
+            benefits = listOf(
+                "Körperliche Erfahrung von Grübeln",
+                "Visuell-räumliches Verständnis",
+                "Klar erkennter Unterschied zum konstruktiven Denken"
+            )
+        ),
+        InteractiveExercise(
+            id = "three_questions_thumb_rule",
+            title = "3-Fragen-Daumenregel",
+            description = "[BEISPIEL] Gedankenexperiment: Warum vs. Wie-Fragen",
+            duration = 20,
+            difficulty = "Anfänger",
+            category = "Grübeln-Erkennung",
+            steps = listOf(
+                ExerciseStep(
+                    number = 1,
+                    title = "Szenario vorstellen: Die Autopanne",
+                    instruction = "Stelle dir folgende Situation vor: Du hast einen Mietwagen für eine Urlaubsrundreise gebucht. Nach einer Weile fährt der Motor nicht mehr an.",
+                    duration = 120,
+                    guidance = "Schließe deine Augen, wenn möglich. Stelle dir diese Situation lebhaft vor.",
+                    tips = listOf(
+                        "Es geht um die innere Reaktion",
+                        "Wie würdest du denken?",
+                        "Was wäre deine automatische Reaktion?"
+                    )
+                ),
+                ExerciseStep(
+                    number = 2,
+                    title = "Warum-Fragen: Das Grübeln",
+                    instruction = "Stelle dir jetzt vor, wie du dich mit der Situation auseinandersetzt, indem du möglichst viele WARUM-Fragen stellst.",
+                    duration = 120,
+                    guidance = "Zum Beispiel: 'Warum muss das ausgerechnet jetzt passieren?' 'Warum habe ich das Auto nicht vorher besser geprüft?' 'Warum passiert immer mir so etwas?'",
+                    tips = listOf(
+                        "Das sind typische Grübel-Gedanken",
+                        "Nimm dir 2 Minuten für dieses Gedankenexperiment",
+                        "Beobachte deine Stimmung und wie nah du einer Lösung bist"
+                    )
+                ),
+                ExerciseStep(
+                    number = 3,
+                    title = "Messung: Stimmung & Lösung",
+                    instruction = "Nach 2 Minuten Grübeln: Wie ist deine Stimmung? Bist du einer Lösung näher gekommen?",
+                    duration = 60,
+                    guidance = "Rate dich selbst auf einer Skala von -3 (sehr negativ/weit entfernt) bis +3 (sehr positiv/Plan steht).",
+                    tips = listOf(
+                        "Typisch: Stimmung ist schlechter, Lösung ist ferner",
+                        "Das ist das Muster von Grübeln",
+                        "Merke dir diese Messung"
+                    )
+                ),
+                ExerciseStep(
+                    number = 4,
+                    title = "Wie-Fragen: Konstruktives Denken",
+                    instruction = "Stelle dir die Autosituation erneut vor. Dieses Mal stellst du WIE-Fragen statt WARUM-Fragen.",
+                    duration = 120,
+                    guidance = "Zum Beispiel: 'Wie komme ich jetzt am schnellsten zurück?' 'Wie gehe ich vor?' 'Was ist zu tun?' Fokus auf Lösungen, nicht auf Ursachen.",
+                    tips = listOf(
+                        "Das ist konstruktives Denken",
+                        "Nimm dir wieder 2 Minuten Zeit",
+                        "Beobachte wieder deine Stimmung und Lösungsnähe"
+                    )
+                ),
+                ExerciseStep(
+                    number = 5,
+                    title = "Messung: Vergleich",
+                    instruction = "Nach 2 Minuten konstruktives Denken: Wie ist JETZT deine Stimmung? Wie nah bist du einer Lösung?",
+                    duration = 60,
+                    guidance = "Rate dich wieder auf der gleichen Skala. Vergleiche mit der ersten Messung.",
+                    tips = listOf(
+                        "Typisch: Stimmung ist besser, Lösung ist näher",
+                        "Das ist der Unterschied zwischen Grübeln und konstruktivem Denken",
+                        "Diese Unterscheidung kannst du trainieren"
+                    )
+                ),
+                ExerciseStep(
+                    number = 6,
+                    title = "Die 3-Fragen-Daumenregel",
+                    instruction = "Merke dir folgende Regel für den Alltag: Wenn du unsicher bist, ob du grübelst, lass das Denken noch 2 Minuten weiterlaufen.",
+                    duration = 180,
+                    guidance = "Stelle dir dann diese 3 Fragen: (1) Bin ich einer Lösung näher gekommen? / Habe ich eine Idee, wie ich vorgehen werde? (2) Ist meine Stimmung besser geworden? (3) Bin ich weniger selbstkritisch geworden? Wenn du nicht wenigstens eine Frage eindeutig bejahen kannst, grübelst du.",
+                    tips = listOf(
+                        "Das ist ein praktisches Erkennungs-Tool",
+                        "Hilfreich: Denken → Handlungsplan, Hoffnung, Zuversicht",
+                        "Unhilfreich: Gedankenschleifen, Deprimierung, Ängstlichkeit"
+                    )
+                )
+            ),
+            benefits = listOf(
+                "Erkennung von Grübeln im Alltag",
+                "Unterscheidung: Grübeln vs. Konstruktiv",
+                "Praktische Daumenregel für sofort"
+            )
         )
     )
 }
