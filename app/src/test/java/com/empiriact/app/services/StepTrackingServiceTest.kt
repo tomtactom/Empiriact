@@ -56,7 +56,7 @@ class StepTrackingServiceTest {
         assertTrue(captured)
         val day = passive.observeDay(ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC")).toLocalDate()).first()
         assertEquals(1, day.size)
-        assertEquals(10, day.first().hour)
+        assertEquals(11, day.first().hour)
         assertEquals(350, day.first().stepCount)
     }
 
@@ -110,7 +110,7 @@ class StepTrackingServiceTest {
         assertTrue(captured)
         val jan1 = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
         assertEquals(4, jan1.size)
-        assertEquals(listOf(10, 11, 12, 13), jan1.map { it.hour })
+        assertEquals(listOf(11, 12, 13, 14), jan1.map { it.hour })
         assertEquals(listOf(100, 100, 100, 101), jan1.map { it.stepCount })
     }
 
@@ -142,14 +142,14 @@ class StepTrackingServiceTest {
         val jan1 = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
         val jan2 = passive.observeDay(LocalDate.of(2026, 1, 2)).first().sortedBy { it.hour }
 
-        assertEquals(listOf(22, 23), jan1.map { it.hour })
-        assertEquals(listOf(0, 0), jan1.map { it.stepCount })
-        assertEquals(listOf(0), jan2.map { it.hour })
-        assertEquals(listOf(0), jan2.map { it.stepCount })
+        assertEquals(listOf(23), jan1.map { it.hour })
+        assertEquals(listOf(0), jan1.map { it.stepCount })
+        assertEquals(listOf(0, 1), jan2.map { it.hour })
+        assertEquals(listOf(0, 0), jan2.map { it.stepCount })
     }
 
     @Test
-    fun `one-hour gap behavior stays unchanged`() = runTest {
+    fun `one-hour gap stores only current hour and keeps existing previous hour`() = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val settings = settingsRepo()
         val passive = passiveRepo(context)
@@ -167,15 +167,21 @@ class StepTrackingServiceTest {
             stepCounterSource = FakeStepCounterSource(620)
         )
 
+        passive.upsertHour(
+            date = LocalDate.of(2026, 1, 3),
+            hour = 7,
+            stepCount = 55
+        )
+
         val captured = service.captureHourlySnapshot(
             ZonedDateTime.of(2026, 1, 3, 8, 1, 0, 0, ZoneId.of("UTC"))
         )
 
         assertTrue(captured)
         val day = passive.observeDay(LocalDate.of(2026, 1, 3)).first().sortedBy { it.hour }
-        assertEquals(1, day.size)
-        assertEquals(7, day.first().hour)
-        assertEquals(120, day.first().stepCount)
+        assertEquals(2, day.size)
+        assertEquals(listOf(7, 8), day.map { it.hour })
+        assertEquals(listOf(55, 120), day.map { it.stepCount })
     }
 
     private class FakeStepCounterSource(
