@@ -37,7 +37,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -45,7 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -53,7 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -73,41 +70,40 @@ private data class IntroPage(
 
 @Composable
 fun OnboardingScreen(onFinished: () -> Unit) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val pages = remember {
         listOf(
             IntroPage(
-                label = "Schritt 1 · Ankommen",
+                label = "Schritt 1 · Orientierung",
                 icon = Icons.Default.AutoAwesome,
                 title = "Willkommen bei Empiriact",
-                subtitle = "Empiriact verbindet Empirie und ACT. Du nutzt wissenschaftlich fundierte Schritte für alltagsnahes, werteorientiertes Handeln.",
+                subtitle = "Der Name Empiriact verbindet Empirie und ACT: du sammelst alltagsnahe Beobachtungen und setzt werteorientiertes Handeln bewusst um.",
                 highlights = listOf(
-                    "Empirie macht Veränderungen sichtbar: du beobachtest, was wirkt.",
-                    "ACT stärkt Selbstwirksamkeit: du richtest Handeln an deinen Werten aus.",
-                    "Behavioral Activation bedeutet: kleine Handlungen bringen Aktivität und Orientierung in den Tag."
+                    "Empirie bedeutet hier: du prüfst mit deinen eigenen Daten, was dir im Alltag wirklich hilft.",
+                    "ACT unterstützt Selbstwirksamkeit: du triffst Entscheidungen auf Basis deiner Werte.",
+                    "Behavioral Activation heißt: kleine machbare Handlungen bringen dich zuverlässig in Bewegung."
                 )
             ),
             IntroPage(
-                label = "Schritt 2 · Verstehen",
+                label = "Schritt 2 · Anwendung",
                 icon = Icons.Default.PsychologyAlt,
                 title = "Empirie im Alltag nutzen",
-                subtitle = "Du sammelst eigene Erfahrung im Alltag und gewinnst Klarheit über hilfreiche Auslöser, Gedanken und Handlungen.",
+                subtitle = "Regelmäßige Einträge machen Muster sichtbar. Du erkennst förderliche Situationen und leitest konkrete nächste Schritte für deinen Tag ab.",
                 highlights = listOf(
-                    "Kurze Check-ins zeigen Zusammenhänge zwischen Situation, Gefühl und Verhalten.",
-                    "Deine Daten bleiben eine Grundlage für selbstbestimmte Entscheidungen.",
-                    "So entsteht ein persönlicher Kompass für den nächsten realistischen Schritt."
+                    "Du beobachtest Verhalten, Stimmung und Kontext strukturiert.",
+                    "Du entwickelst realistische Schritte, die du direkt umsetzen kannst.",
+                    "Du trainierst flexible Aufmerksamkeit und aktives Handeln im Alltag."
                 )
             ),
             IntroPage(
-                label = "Schritt 3 · Dranbleiben",
+                label = "Schritt 3 · Aktiv werden",
                 icon = Icons.Default.TrackChanges,
-                title = "Behavioral Activation leben",
-                subtitle = "Du setzt täglich kleine, konkrete Handlungen um. Damit wächst Schritt für Schritt aktive Teilhabe am eigenen Leben.",
+                title = "Behavioral Activation klar umsetzen",
+                subtitle = "Du setzt tägliche Handlungen mit kleinem Einstieg um und stärkst dadurch Handlungsfähigkeit, Stabilität und Selbstvertrauen.",
                 highlights = listOf(
-                    "Werte geben Richtung für Entscheidungen im Alltag.",
-                    "Regelmäßige Handlungen stärken Zuversicht und Handlungsfähigkeit.",
-                    "Empiriact begleitet dich dabei, Verhalten bewusst und wirksam zu gestalten."
+                    "Du wählst Handlungen, die zu deinen Werten und deinem aktuellen Energielevel passen.",
+                    "Du wiederholst hilfreiche Schritte und baust tragfähige Routinen auf.",
+                    "Du übernimmst aktiv Verantwortung für deinen Weg im Alltag."
                 )
             )
         )
@@ -131,10 +127,11 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text("Einführung", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            TextButton(onClick = onFinished) { Text("Überspringen") }
         }
 
         HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
@@ -145,10 +142,19 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             }
         }
 
-        if (pagerState.currentPage < pages.size) {
-            Button(onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                Text("Weiter")
-            }
+        Button(
+            onClick = {
+                if (pagerState.currentPage < pageCount - 1) {
+                    scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                } else {
+                    onFinished()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        ) {
+            Text(if (pagerState.currentPage == pageCount - 1) "App starten" else "Weiter")
         }
 
         PagerDots(pageCount = pageCount, currentPage = pagerState.currentPage, modifier = Modifier.padding(top = 12.dp, bottom = 16.dp))
@@ -157,7 +163,13 @@ fun OnboardingScreen(onFinished: () -> Unit) {
 
 @Composable
 private fun IntroContentPage(page: IntroPage) {
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(imageVector = page.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Text(page.label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
@@ -206,12 +218,17 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
     }
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
-        Text("Berechtigungen für stabile Begleitung", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text("Berechtigungen und Datennutzung", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Empiriact unterstützt dich im Alltag über Erinnerungen und optionale Sensorfunktionen. Du wählst jede Freigabe selbst und kannst sie jederzeit in Android anpassen.")
+        Text("Du richtest Empiriact hier einheitlich ein. Jede Freigabe unterstützt alltagsnahe Begleitung und bleibt jederzeit durch dich anpassbar.")
         Spacer(modifier = Modifier.height(16.dp))
 
-        PermissionCard("Benachrichtigungen", "Erinnerungen helfen dir, geplante ACT-Schritte im Tagesverlauf umzusetzen.", "Du steuerst Benachrichtigungen jederzeit über Android-Einstellungen.", uiState.setupItems.notifications, "Benachrichtigungen aktivieren") {
+        PermissionCard(
+            title = "Benachrichtigungen",
+            description = "Erinnerungen unterstützen dich bei geplanten Schritten der Behavioral Activation.",
+            statusText = if (uiState.setupItems.notifications.enabled) "Aktiv" else "Offen",
+            actionText = "Freigabe öffnen"
+        ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             } else {
@@ -219,52 +236,59 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        PermissionCard("Akku-Optimierung", "Eine Freigabe verbessert die Zuverlässigkeit von Erinnerungen und Hintergrundabläufen.", "Die Einstellung bleibt unter deiner Kontrolle und ist rückgängig machbar.", uiState.setupItems.batteryOptimization, "Akku-Optimierung anpassen") {
+        PermissionCard(
+            title = "Akku-Optimierung",
+            description = "Eine passende Einstellung verbessert die Zuverlässigkeit von Erinnerungen im Hintergrund.",
+            statusText = if (uiState.setupItems.batteryOptimization.enabled) "Aktiv" else "Offen",
+            actionText = "Einstellungen öffnen"
+        ) {
             openBatteryOptimizationSettings(context) { batteryLauncher.launch(it) }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        PermissionCard("Aktivitätserkennung", "Aktivitätserkennung ermöglicht optionale passive Marker wie Schrittzahlen.", "Die Funktion unterstützt empirische Selbstbeobachtung im Alltag.", uiState.setupItems.activityRecognition, if (uiState.setupItems.activityRecognition.required) "Aktivitätserkennung aktivieren" else "Bereits geklärt") {
+        PermissionCard(
+            title = "Aktivitätserkennung",
+            description = "Optional für passive Marker wie Schritte, damit Alltagstrends besser sichtbar werden.",
+            statusText = if (uiState.setupItems.activityRecognition.enabled || !uiState.setupItems.activityRecognition.required) "Aktiv" else "Offen",
+            actionText = if (uiState.setupItems.activityRecognition.required) "Freigabe öffnen" else "Bereits geklärt"
+        ) {
             if (!uiState.setupItems.activityRecognition.required) return@PermissionCard
             activityLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        DataCollectionCard(uiState.dataCollection, onDataDonationToggle = viewModel::setDataDonationEnabled, onPassiveMarkerToggle = viewModel::setPassiveMarkersOptIn)
+        DataCollectionCard(
+            state = uiState.dataCollection,
+            onDataDonationToggle = viewModel::setDataDonationEnabled,
+            onPassiveMarkerToggle = viewModel::setPassiveMarkersOptIn
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) { Text("Weiter zur Zusammenfassung") }
+        OutlinedButton(onClick = onContinue, modifier = Modifier.fillMaxWidth()) { Text("Weiter zur Zusammenfassung") }
     }
 }
 
 @Composable
-@Composable
 private fun PermissionCard(
     title: String,
-    benefit: String,
-    privacyHint: String,
-    state: SetupItemUiState,
+    description: String,
+    statusText: String,
     actionText: String,
     onAction: () -> Unit
 ) {
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(benefit)
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(privacyHint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(10.dp))
+            Text(description, style = MaterialTheme.typography.bodyMedium)
             Text(
-                if (state.enabled) "Status: Aktiv" else "Status: Offen",
+                text = "Status: $statusText",
                 style = MaterialTheme.typography.labelLarge,
-                color = if (state.enabled) MaterialTheme.colorScheme.primary else Color(0xFFB45309)
+                color = if (statusText == "Aktiv") MaterialTheme.colorScheme.primary else Color(0xFFB45309)
             )
-            Spacer(modifier = Modifier.height(12.dp))
             OutlinedButton(onClick = onAction, modifier = Modifier.fillMaxWidth()) { Text(actionText) }
         }
     }
@@ -279,11 +303,11 @@ private fun DataCollectionCard(
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Datennutzung", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text("Du entscheidest über anonymisierte Datenspende und optionale passive Marker. Beide Optionen unterstützen empirische Weiterentwicklung und deine Selbstbeobachtung.")
+            Text("Du steuerst Datenspende und passive Marker selbst. Beide Optionen dienen der empirischen Auswertung und deiner individuellen Orientierung im Alltag.")
             SettingToggleRow("Anonymisierte Datenspende", state.dataDonationEnabled, onDataDonationToggle)
             SettingToggleRow("Passive Marker", state.passiveMarkersOptIn, onPassiveMarkerToggle)
             Text(
-                text = if (state.done) "Status: Aktiv gewählt" else "Status: Bitte Auswahl treffen",
+                text = if (state.done) "Status: Auswahl gesetzt" else "Status: Auswahl ausstehend",
                 style = MaterialTheme.typography.labelLarge,
                 color = if (state.done) MaterialTheme.colorScheme.primary else Color(0xFFB45309)
             )
@@ -310,13 +334,13 @@ private fun OnboardingCompletionPage(onFinished: () -> Unit) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
-        Text("Du bist bereit", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("Dein Start ist vorbereitet", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
-        Text("Dein Einstieg ist abgeschlossen. Ab jetzt unterstützt dich Empiriact bei werteorientierter Behavioral Activation im Alltag.")
+        Text("Empiriact begleitet dich ab jetzt mit empirischer Selbstbeobachtung und werteorientierter Behavioral Activation im Alltag.")
         Spacer(modifier = Modifier.height(16.dp))
         SummaryCard(uiState)
         Spacer(modifier = Modifier.height(20.dp))
-        Button(onClick = onFinished, modifier = Modifier.fillMaxWidth()) { Text("App starten") }
+        OutlinedButton(onClick = onFinished, modifier = Modifier.fillMaxWidth()) { Text("App starten") }
     }
 }
 
@@ -324,7 +348,7 @@ private fun OnboardingCompletionPage(onFinished: () -> Unit) {
 private fun SummaryCard(uiState: OnboardingSetupUiState) {
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("Onboarding-Zusammenfassung", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("Zusammenfassung", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text("• Benachrichtigungen: ${if (uiState.setupItems.notifications.enabled) "Aktiv" else "Nicht aktiv"}")
             Text("• Akkuoptimierung: ${if (uiState.setupItems.batteryOptimization.enabled) "Deaktiviert" else "Aktiv"}")
             Text("• Aktivitätserkennung: ${if (uiState.setupItems.activityRecognition.enabled) "Aktiv" else "Nicht aktiv"}")
@@ -356,9 +380,15 @@ private fun PagerDots(pageCount: Int, currentPage: Int, modifier: Modifier = Mod
     Row(modifier = modifier, horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
         repeat(pageCount) { index ->
             val color = if (index == currentPage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-            Box(modifier = Modifier.padding(horizontal = 4.dp).size(if (index == currentPage) 10.dp else 8.dp).semantics {
-                contentDescription = "Seite ${index + 1} von $pageCount"
-            }.background(color = color, shape = CircleShape))
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .size(if (index == currentPage) 10.dp else 8.dp)
+                    .semantics {
+                        contentDescription = "Seite ${index + 1} von $pageCount"
+                    }
+                    .background(color = color, shape = CircleShape)
+            )
         }
     }
 }
