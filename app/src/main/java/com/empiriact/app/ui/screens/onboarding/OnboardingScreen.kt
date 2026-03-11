@@ -74,36 +74,36 @@ fun OnboardingScreen(onFinished: () -> Unit) {
     val pages = remember {
         listOf(
             IntroPage(
-                label = "Schritt 1 · Orientierung",
+                label = "Schritt 1 · Dein Einstieg",
                 icon = Icons.Default.AutoAwesome,
                 title = "Willkommen bei Empiriact",
-                subtitle = "Der Name Empiriact verbindet Empirie und ACT: du sammelst alltagsnahe Beobachtungen und setzt werteorientiertes Handeln bewusst um.",
+                subtitle = "Hier kannst du in deinem Tempo herausfinden, was dir im Alltag funktional hilft. Du entscheidest, wie viel du ausprobieren möchtest.",
                 highlights = listOf(
-                    "Empirie bedeutet hier: du prüfst mit deinen eigenen Daten, was dir im Alltag wirklich hilft.",
-                    "ACT unterstützt Selbstwirksamkeit: du triffst Entscheidungen auf Basis deiner Werte.",
-                    "Behavioral Activation heißt: kleine machbare Handlungen bringen dich zuverlässig in Bewegung."
+                    "Du kannst mit kleinen Beobachtungen starten, statt alles sofort zu verändern.",
+                    "Wenn es für dich passt, nutzt du Werte als Kompass für nächste Schritte.",
+                    "Es geht nicht um richtig oder falsch, sondern um nützliche Erfahrungen im Kontext."
                 )
             ),
             IntroPage(
-                label = "Schritt 2 · Anwendung",
+                label = "Schritt 2 · Im Alltag testen",
                 icon = Icons.Default.PsychologyAlt,
-                title = "Empirie im Alltag nutzen",
-                subtitle = "Regelmäßige Einträge machen Muster sichtbar. Du erkennst förderliche Situationen und leitest konkrete nächste Schritte für deinen Tag ab.",
+                title = "Muster flexibel erkennen",
+                subtitle = "Einträge können dir zeigen, wann etwas hilfreich ist und wann nicht. So leitest du Schritte ab, die zu deinem Tag und Energielevel passen.",
                 highlights = listOf(
-                    "Du beobachtest Verhalten, Stimmung und Kontext strukturiert.",
-                    "Du entwickelst realistische Schritte, die du direkt umsetzen kannst.",
-                    "Du trainierst flexible Aufmerksamkeit und aktives Handeln im Alltag."
+                    "Du wählst, ob du kurz notierst oder genauer hinschaust.",
+                    "Kleine Schritte sind ausreichend, auch an Tagen mit wenig Energie.",
+                    "Rückschläge sind normal und liefern Hinweise für eine passende Anpassung."
                 )
             ),
             IntroPage(
-                label = "Schritt 3 · Aktiv werden",
+                label = "Schritt 3 · Dranbleiben auf deine Art",
                 icon = Icons.Default.TrackChanges,
-                title = "Behavioral Activation klar umsetzen",
-                subtitle = "Du setzt tägliche Handlungen mit kleinem Einstieg um und stärkst dadurch Handlungsfähigkeit, Stabilität und Selbstvertrauen.",
+                title = "Handeln, das zu dir passt",
+                subtitle = "Du kannst Handlungen so klein wählen, dass sie heute machbar sind. Mit der Zeit entsteht aus vielen kleinen Schritten mehr Stabilität.",
                 highlights = listOf(
-                    "Du wählst Handlungen, die zu deinen Werten und deinem aktuellen Energielevel passen.",
-                    "Du wiederholst hilfreiche Schritte und baust tragfähige Routinen auf.",
-                    "Du übernimmst aktiv Verantwortung für deinen Weg im Alltag."
+                    "Du entscheidest täglich neu, was aktuell funktional und umsetzbar ist.",
+                    "Wenn etwas nicht klappt, kannst du den Plan flexibel vereinfachen.",
+                    "Jeder umgesetzte Mini-Schritt stärkt Vertrauen in deinen eigenen Weg."
                 )
             )
         )
