@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.empiriact.app.R
-import com.empiriact.app.data.db.ActivityLogEntity
 import com.empiriact.app.ui.common.getExerciseDisplayName
 import com.empiriact.app.ui.common.UiConstants
 import com.empiriact.app.ui.common.ViewModelFactory
@@ -64,7 +63,7 @@ data class AnalysisItem(
 
 private sealed class ProtocolScreenItem {
     data class Header(val date: LocalDate) : ProtocolScreenItem()
-    data class LogRow(val log: ActivityLogEntity) : ProtocolScreenItem()
+    data class LogRow(val row: ProtocolLogUiModel) : ProtocolScreenItem()
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -211,7 +210,7 @@ private fun ProtocolTab(vm: OverviewViewModel) {
     val dayLogs by vm.dayLogs.collectAsState()
 
     val protocolItems = remember(dayLogs) {
-        dayLogs.groupBy { it.localDate }
+        dayLogs.groupBy { it.activityLog.localDate }
             .toSortedMap(compareByDescending { it })
             .flatMap {
                 val date = LocalDate.of(it.key / 10000, (it.key / 100) % 100, it.key % 100)
@@ -228,18 +227,21 @@ private fun ProtocolTab(vm: OverviewViewModel) {
                 Text(stringResource(R.string.protocol_tab_empty), modifier = Modifier.padding(top = UiConstants.PADDING_LARGE))
             }
         } else {
+            item {
+                ProtocolColumnHeaderRow()
+            }
             items(
                 items = protocolItems,
                 key = {
                     when (it) {
                         is ProtocolScreenItem.Header -> "header_${it.date.toEpochDay()}"
-                        is ProtocolScreenItem.LogRow -> "log_${it.log.key}"
+                        is ProtocolScreenItem.LogRow -> "log_${it.row.activityLog.key}"
                     }
                 }
             ) { item ->
                 when (item) {
                     is ProtocolScreenItem.Header -> DateHeader(date = item.date)
-                    is ProtocolScreenItem.LogRow -> ProtocolRow(item.log)
+                    is ProtocolScreenItem.LogRow -> ProtocolRow(item.row)
                 }
             }
         }
@@ -358,11 +360,65 @@ private fun RatingBar(rating: Double, maxRating: Int = 5) {
 }
 
 @Composable
-private fun ProtocolRow(log: ActivityLogEntity) {
+private fun ProtocolColumnHeaderRow() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.protocol_column_time),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_TIME_WEIGHT)
+        )
+        Text(
+            text = stringResource(R.string.protocol_column_activity),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_ACTIVITY_WEIGHT)
+        )
+        Text(
+            text = stringResource(R.string.protocol_column_mood),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_VALENCE_WEIGHT)
+        )
+        Text(
+            text = stringResource(R.string.protocol_column_steps),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_STEPS_WEIGHT)
+        )
+    }
+}
+
+@Composable
+private fun ProtocolRow(row: ProtocolLogUiModel) {
+    val log = row.activityLog
+    val stepCountText = row.stepCount?.toString() ?: "–"
+
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Text(String.format("%02d:%02d", log.hour, 0), style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_TIME_WEIGHT))
-        Text(log.activityText, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_ACTIVITY_WEIGHT))
-        Text(valenceLabel(log.valence), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_VALENCE_WEIGHT))
+        Text(
+            String.format("%02d:%02d", log.hour, 0),
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_TIME_WEIGHT)
+        )
+        Text(
+            log.activityText.ifBlank { "–" },
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_ACTIVITY_WEIGHT)
+        )
+        Text(
+            valenceLabel(log.valence),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_VALENCE_WEIGHT)
+        )
+        Text(
+            stepCountText,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(UiConstants.PROTOCOL_ROW_STEPS_WEIGHT)
+        )
     }
 }
 
@@ -553,5 +609,5 @@ private fun valenceLabel(v: Int): String = when (v) {
     0 -> "0"
     1 -> "+"
     2 -> "++"
-    else -> "0"
+    else -> "–"
 }

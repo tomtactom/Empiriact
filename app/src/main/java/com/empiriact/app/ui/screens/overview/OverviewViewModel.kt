@@ -3,11 +3,13 @@ package com.empiriact.app.ui.screens.overview
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.empiriact.app.data.ExerciseRepository
 import com.empiriact.app.data.db.ActivityLogEntity
 import com.empiriact.app.data.repo.ActivityLogRepository
-import com.empiriact.app.data.ExerciseRepository
+import com.empiriact.app.data.repo.PassiveMarkerRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
@@ -15,13 +17,20 @@ import java.time.LocalDate
 data class ActivityAnalysis(val activity: String, val averageRating: Double)
 data class ActivityFrequency(val activity: String, val count: Int)
 data class ValenceTrend(val date: LocalDate, val averageValence: Double)
+data class ProtocolLogUiModel(
+    val activityLog: ActivityLogEntity,
+    val stepCount: Int?
+)
 
 class OverviewViewModel(
     private val activityLogRepository: ActivityLogRepository,
-    private val exerciseRepository: ExerciseRepository
+    private val exerciseRepository: ExerciseRepository,
+    private val passiveMarkerRepository: PassiveMarkerRepository
 ) : ViewModel() {
 
     private val SIGNIFICANCE_THRESHOLD = 3
+    private val protocolStartDate = LocalDate.now().minusDays(7)
+    private val protocolEndDateExclusive = LocalDate.now().plusDays(1)
 
     val exerciseRatings: StateFlow<List<ExerciseWithRating>> = exerciseRepository.getAllExercisesWithRatings()
         .map { list -> list.map { ExerciseWithRating(it.exerciseId, it.averageRating) } }
@@ -41,10 +50,24 @@ class OverviewViewModel(
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Flow for the protocol overviews
-    val dayLogs: StateFlow<List<ActivityLogEntity>> = activityLogRepository.getLogsForDay(
-        startDate = LocalDate.now().minusDays(7),
-        endDate = LocalDate.now().plusDays(1)
-    ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val dayLogs: StateFlow<List<ProtocolLogUiModel>> = combine(
+        activityLogRepository.getLogsForDay(
+            startDate = protocolStartDate,
+            endDate = protocolEndDateExclusive
+        ),
+        passiveMarkerRepository.observeRange(
+            startDate = protocolStartDate,
+            endDateExclusive = protocolEndDateExclusive
+        )
+    ) { logs, passiveMarkers ->
+        val markerByDateAndHour = passiveMarkers.associateBy { it.localDate to it.hour }
+        logs.map { log ->
+            ProtocolLogUiModel(
+                activityLog = log,
+                stepCount = markerByDateAndHour[log.localDate to log.hour]?.stepCount
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Flow for activity frequency
     val activityFrequency: StateFlow<List<ActivityFrequency>> = activityLogRepository.getAll()

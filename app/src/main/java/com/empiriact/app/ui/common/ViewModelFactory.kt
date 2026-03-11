@@ -7,6 +7,7 @@ import com.empiriact.app.data.ExerciseRepository
 import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.db.ExerciseRatingDao
 import com.empiriact.app.data.repo.GratitudeRepository
+import com.empiriact.app.data.repo.PassiveMarkerRepository
 import com.empiriact.app.services.JsonExportService
 import com.empiriact.app.ui.screens.overview.OverviewViewModel
 import com.empiriact.app.ui.screens.rating.ExerciseRatingViewModel
@@ -20,7 +21,8 @@ class ViewModelFactory(
     private val exerciseRatingDao: ExerciseRatingDao,
     private val gratitudeRepository: GratitudeRepository,
     private val jsonExportService: JsonExportService,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val passiveMarkerRepository: PassiveMarkerRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TodayViewModel::class.java)) {
@@ -29,7 +31,7 @@ class ViewModelFactory(
         }
         if (modelClass.isAssignableFrom(OverviewViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return OverviewViewModel(activityLogRepository, exerciseRepository) as T
+            return OverviewViewModel(activityLogRepository, exerciseRepository, passiveMarkerRepository) as T
         }
         if (modelClass.isAssignableFrom(GratitudeViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
