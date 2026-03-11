@@ -137,9 +137,15 @@ fun OnboardingScreen(onFinished: () -> Unit) {
         HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
             when {
                 page < pages.size -> IntroContentPage(page = pages[page])
-                page == pages.size -> SystemPermissionsPage(onContinue = { scope.launch { pagerState.animateScrollToPage(page + 1) } })
-                else -> OnboardingCompletionPage(onFinished = onFinished)
+                page == pages.size -> SystemPermissionsPage()
+                else -> OnboardingCompletionPage()
             }
+        }
+
+        val ctaLabel = when (pagerState.currentPage) {
+            pages.size -> "Weiter zur Zusammenfassung"
+            pageCount - 1 -> "App starten"
+            else -> "Weiter"
         }
 
         Button(
@@ -154,7 +160,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 .fillMaxWidth()
                 .padding(top = 8.dp)
         ) {
-            Text(if (pagerState.currentPage == pageCount - 1) "App starten" else "Weiter")
+            Text(ctaLabel)
         }
 
         PagerDots(pageCount = pageCount, currentPage = pagerState.currentPage, modifier = Modifier.padding(top = 12.dp, bottom = 16.dp))
@@ -188,7 +194,7 @@ private fun IntroContentPage(page: IntroPage) {
 }
 
 @Composable
-private fun SystemPermissionsPage(onContinue: () -> Unit) {
+private fun SystemPermissionsPage() {
     val context = LocalContext.current
     val settingsRepository = remember(context) { SettingsRepository(context.applicationContext) }
     val permissionStateProvider = remember(context) { AndroidPermissionStateProvider(context.applicationContext) }
@@ -266,9 +272,6 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
             onDataDonationToggle = viewModel::setDataDonationEnabled,
             onPassiveMarkerToggle = viewModel::setPassiveMarkersOptIn
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedButton(onClick = onContinue, modifier = Modifier.fillMaxWidth()) { Text("Weiter zur Zusammenfassung") }
     }
 }
 
@@ -324,7 +327,7 @@ private fun SettingToggleRow(label: String, checked: Boolean, onCheckedChange: (
 }
 
 @Composable
-private fun OnboardingCompletionPage(onFinished: () -> Unit) {
+private fun OnboardingCompletionPage() {
     val context = LocalContext.current
     val settingsRepository = remember(context) { SettingsRepository(context.applicationContext) }
     val permissionStateProvider = remember(context) { AndroidPermissionStateProvider(context.applicationContext) }
@@ -339,8 +342,6 @@ private fun OnboardingCompletionPage(onFinished: () -> Unit) {
         Text("Empiriact begleitet dich ab jetzt mit empirischer Selbstbeobachtung und werteorientierter Behavioral Activation im Alltag.")
         Spacer(modifier = Modifier.height(16.dp))
         SummaryCard(uiState)
-        Spacer(modifier = Modifier.height(20.dp))
-        OutlinedButton(onClick = onFinished, modifier = Modifier.fillMaxWidth()) { Text("App starten") }
     }
 }
 
