@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.db.ActivityLogEntity
 import com.empiriact.app.data.repo.ActivityLogRepository
+import com.empiriact.app.services.PassiveSnapshotRefresher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +45,8 @@ data class BaMaintenanceUiStatus(
 
 class TodayViewModel(
     private val repository: ActivityLogRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val passiveSnapshotRefresher: PassiveSnapshotRefresher? = null
 ) : ViewModel() {
 
     // Cache for unsaved changes. Key is the hour of the day.
@@ -176,7 +178,8 @@ class TodayViewModel(
         peopleText: String = "",
         durationMinutes: Int? = null,
         difficultyRating: Int? = null,
-        activationLatencyMinutes: Int? = null
+        activationLatencyMinutes: Int? = null,
+        refreshPassiveSnapshot: Boolean = false
     ) {
         viewModelScope.launch {
             repository.upsert(
@@ -193,6 +196,9 @@ class TodayViewModel(
             val currentCache = _unsavedChanges.value.toMutableMap()
             currentCache.remove(HourEntryKey(date = date, hour = hour))
             _unsavedChanges.value = currentCache
+            if (refreshPassiveSnapshot) {
+                passiveSnapshotRefresher?.refreshSnapshot()
+            }
         }
     }
 

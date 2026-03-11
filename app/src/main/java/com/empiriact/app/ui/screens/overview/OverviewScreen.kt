@@ -22,6 +22,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import com.empiriact.app.EmpiriactApplication
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -73,6 +75,12 @@ fun OverviewScreen(
     navController: NavController
 ) {
     val vm: OverviewViewModel = viewModel(factory = factory)
+
+    val application = LocalContext.current.applicationContext as EmpiriactApplication
+
+    LaunchedEffect(Unit) {
+        application.passiveSnapshotRefresher.refreshSnapshot()
+    }
 
     val tabs = listOf(
         stringResource(R.string.overview_tab_protocol),

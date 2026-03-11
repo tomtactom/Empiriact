@@ -89,6 +89,10 @@ fun TodayScreen(navController: NavController) {
     val baPreferenceTags by vm.baActivityPreferenceTags.collectAsState()
     val baMaintenanceUiStatus by vm.baMaintenanceUiStatus.collectAsState()
 
+    LaunchedEffect(Unit) {
+        application.passiveSnapshotRefresher.refreshSnapshot()
+    }
+
     val now = LocalDateTime.now()
     val today = now.toLocalDate()
     val currentHour = now.hour
@@ -200,7 +204,8 @@ fun TodayScreen(navController: NavController) {
                                 people,
                                 durationMinutes,
                                 difficultyRating,
-                                activationLatencyMinutes
+                                activationLatencyMinutes,
+                                refreshPassiveSnapshot = true
                             )
                         },
                         suggestions = uniqueActivities,
