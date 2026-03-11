@@ -409,13 +409,18 @@ private fun SystemPermissionsPage(context: Context, onContinue: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = "Setup-Checkliste",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+        SetupChecklistOverview(
+            notificationsEnabled = notificationsEnabled,
+            batteryOptimizationDisabled = batteryOptimizationDisabled,
+            activityRecognitionEnabled = activityRecognitionEnabled,
+            activityRecognitionRequired = activityRecognitionRequired,
+            dataDonationEnabled = dataDonationEnabled,
+            donationChoiceMade = donationChoiceMade,
+            donationDeferred = donationDeferred
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(14.dp))
+
 
         PermissionCard(
             title = "Benachrichtigungen",
@@ -554,22 +559,67 @@ private fun DataDonationCard(
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = if (enabled) "Status: Aktiviert" else if (!choiceMade || deferred) "Status: Noch keine Auswahl" else "Status: Nicht aktiviert (Opt-out)",
+                text = if (enabled) "Status: Aktiviert" else "Status: Nicht aktiviert${if (deferred || !choiceMade) " (vorerst übersprungen)" else ""}",
                 style = MaterialTheme.typography.labelLarge,
                 color = if (enabled) MaterialTheme.colorScheme.primary else Color(0xFFB45309)
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                OutlinedButton(onClick = onOptOut, modifier = Modifier.weight(1f)) {
-                    Text("Nein, nicht teilen")
-                }
                 Button(onClick = onOptIn, modifier = Modifier.weight(1f)) {
                     Text("Ja, anonym teilen")
+                }
+                OutlinedButton(onClick = onOptOut, modifier = Modifier.weight(1f)) {
+                    Text("Nicht aktivieren")
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
             TextButton(onClick = onDefer, modifier = Modifier.align(Alignment.End)) {
-                Text("Noch nicht entscheiden")
+                Text("Später")
+            }
+        }
+    }
+}
+
+@Composable
+private fun SetupChecklistOverview(
+    notificationsEnabled: Boolean,
+    batteryOptimizationDisabled: Boolean,
+    activityRecognitionEnabled: Boolean,
+    activityRecognitionRequired: Boolean,
+    dataDonationEnabled: Boolean,
+    donationChoiceMade: Boolean,
+    donationDeferred: Boolean
+) {
+    val activityCompleted = !activityRecognitionRequired || activityRecognitionEnabled
+    val donationCompleted = dataDonationEnabled || donationChoiceMade || donationDeferred
+    val checklistItems = listOf(
+        "Benachrichtigungen" to notificationsEnabled,
+        "Akku-Optimierung" to batteryOptimizationDisabled,
+        "Aktivitätserkennung" to activityCompleted,
+        "Datenspende-Entscheidung" to donationCompleted
+    )
+
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = "Setup-Checkliste",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            checklistItems.forEach { (label, completed) ->
+                Text(
+                    text = "${if (completed) "☑" else "☐"} $label",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (completed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
@@ -647,7 +697,7 @@ private fun PermissionCard(
                     Text(actionText)
                 }
                 TextButton(onClick = onDefer, modifier = Modifier.weight(1f)) {
-                    Text("Noch nicht entscheiden")
+                    Text("Später")
                 }
             }
         }
