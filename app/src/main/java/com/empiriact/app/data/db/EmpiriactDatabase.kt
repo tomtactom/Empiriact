@@ -15,7 +15,7 @@ import com.empiriact.app.data.UserValue
 
 @Database(
     entities = [ActivityLogEntity::class, Routine::class, Resource::class, Evaluation::class, UserValue::class, ExerciseRatingEntity::class, ExerciseReflectionEntity::class, GratitudeEntity::class, PsychoeducationalModuleEntity::class],
-    version = 12,
+    version = 13,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -89,6 +89,14 @@ abstract class EmpiriactDatabase : RoomDatabase() {
             }
         }
 
+        internal val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `activity_logs` ADD COLUMN `durationMinutes` INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE `activity_logs` ADD COLUMN `difficultyRating` INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE `activity_logs` ADD COLUMN `activationLatencyMinutes` INTEGER DEFAULT NULL")
+            }
+        }
+
         @Volatile
         internal var INSTANCE: EmpiriactDatabase? = null
 
@@ -99,7 +107,7 @@ abstract class EmpiriactDatabase : RoomDatabase() {
                     EmpiriactDatabase::class.java,
                     "empiriact_database"
                 )
-                    .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
+                    .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
                     .apply {
                         val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
                         if (isDebuggable) {

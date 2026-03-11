@@ -173,13 +173,16 @@ fun TodayScreen(navController: NavController) {
                                 HourEntryKey(item.date, item.hour)
                             }
                         },
-                        onSave = { activity, valence, people ->
+                        onSave = { activity, valence, people, durationMinutes, difficultyRating, activationLatencyMinutes ->
                             vm.upsertActivityForHour(
                                 item.date,
                                 item.hour,
                                 activity,
                                 valence,
-                                people
+                                people,
+                                durationMinutes,
+                                difficultyRating,
+                                activationLatencyMinutes
                             )
                         },
                         suggestions = uniqueActivities,
@@ -333,7 +336,7 @@ private fun HourEntry(
     log: ActivityLogEntity?,
     isExpanded: Boolean,
     onExpand: () -> Unit,
-    onSave: (String, Int, String) -> Unit,
+    onSave: (String, Int, String, Int?, Int?, Int?) -> Unit,
     suggestions: List<String>,
     peopleSuggestions: List<String>,
     cachedData: HourEntryCache?,
@@ -349,12 +352,19 @@ private fun HourEntry(
         ?: log?.peopleText?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }
         ?: emptyList()
     val initialPeopleInput = cachedData?.peopleInputText ?: ""
+    val initialDurationMinutes = cachedData?.durationMinutes ?: log?.durationMinutes
+    val initialDifficultyRating = cachedData?.difficultyRating ?: log?.difficultyRating
+    val initialActivationLatencyMinutes = cachedData?.activationLatencyMinutes ?: log?.activationLatencyMinutes
 
     var activityInputText by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialActivityInput) }
     var activityChips by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialChips) }
     var valence by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialValence) }
     var peopleInputText by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialPeopleInput) }
     var peopleChips by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialPeopleChips) }
+    var durationMinutesInput by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialDurationMinutes?.toString().orEmpty()) }
+    var difficultyRatingInput by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialDifficultyRating?.toString().orEmpty()) }
+    var activationLatencyInput by remember(hour, isExpanded, log, cachedData) { mutableStateOf(initialActivationLatencyMinutes?.toString().orEmpty()) }
+    var advancedObservationExpanded by remember(hour, isExpanded, log, cachedData) { mutableStateOf(false) }
 
     // Synchronize state when underlying data changes (e.g., after app restart or data refresh)
     LaunchedEffect(log, cachedData, isExpanded) {
@@ -364,8 +374,13 @@ private fun HourEntry(
             valence = initialValence
             peopleInputText = initialPeopleInput
             peopleChips = initialPeopleChips
+            durationMinutesInput = initialDurationMinutes?.toString().orEmpty()
+            difficultyRatingInput = initialDifficultyRating?.toString().orEmpty()
+            activationLatencyInput = initialActivationLatencyMinutes?.toString().orEmpty()
         }
     }
+
+    fun parseOptionalInt(value: String): Int? = value.trim().toIntOrNull()
 
     val updateCache = {
         onCacheChanged(
@@ -375,7 +390,10 @@ private fun HourEntry(
                 inputText = activityInputText,
                 peopleText = "",
                 peopleChips = peopleChips,
-                peopleInputText = peopleInputText
+                peopleInputText = peopleInputText,
+                durationMinutes = parseOptionalInt(durationMinutesInput),
+                difficultyRating = parseOptionalInt(difficultyRatingInput),
+                activationLatencyMinutes = parseOptionalInt(activationLatencyInput)
             )
         )
     }
@@ -402,7 +420,14 @@ private fun HourEntry(
         if (activityChips.isNotEmpty()) {
             val activityText = activityChips.joinToString(", ")
             val peopleText = if (peopleChips.isNotEmpty()) peopleChips.joinToString(", ") else ""
-            onSave(activityText, valence, peopleText)
+            onSave(
+                activityText,
+                valence,
+                peopleText,
+                parseOptionalInt(durationMinutesInput),
+                parseOptionalInt(difficultyRatingInput),
+                parseOptionalInt(activationLatencyInput)
+            )
             // Clear the cache immediately to prevent stale data
             onCacheChanged(HourEntryCache())
             // Clear the local input fields immediately after saving
@@ -411,6 +436,9 @@ private fun HourEntry(
             valence = 0
             peopleInputText = ""
             peopleChips = emptyList()
+            durationMinutesInput = ""
+            difficultyRatingInput = ""
+            activationLatencyInput = ""
             // Collapse after save
             onExpand()
         }
@@ -423,6 +451,9 @@ private fun HourEntry(
         valence = initialValence
         peopleInputText = initialPeopleInput
         peopleChips = initialPeopleChips
+        durationMinutesInput = initialDurationMinutes?.toString().orEmpty()
+        difficultyRatingInput = initialDifficultyRating?.toString().orEmpty()
+        activationLatencyInput = initialActivationLatencyMinutes?.toString().orEmpty()
         onExpand()
     }
 
@@ -699,6 +730,51 @@ private fun HourEntry(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+
+                FilledTonalButton(
+                    onClick = { advancedObservationExpanded = !advancedObservationExpanded },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Erweiterte Beobachtung (optional)")
+                }
+
+                AnimatedVisibility(visible = advancedObservationExpanded) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = durationMinutesInput,
+                            onValueChange = { value ->
+                                durationMinutesInput = value.filter { it.isDigit() }
+                                updateCache()
+                            },
+                            label = { Text("Dauer (Minuten)") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                        )
+                        OutlinedTextField(
+                            value = difficultyRatingInput,
+                            onValueChange = { value ->
+                                difficultyRatingInput = value.filter { it.isDigit() }
+                                updateCache()
+                            },
+                            label = { Text("Schwierigkeit (0-10)") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                        )
+                        OutlinedTextField(
+                            value = activationLatencyInput,
+                            onValueChange = { value ->
+                                activationLatencyInput = value.filter { it.isDigit() }
+                                updateCache()
+                            },
+                            label = { Text("Aktivierungslatenz (Minuten)") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                        )
+                    }
                 }
 
                 // Save/Cancel buttons

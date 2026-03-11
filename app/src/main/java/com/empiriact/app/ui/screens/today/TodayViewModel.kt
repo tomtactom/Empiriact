@@ -17,7 +17,17 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 // Data class to hold the unsaved state for an hour entry.
-data class HourEntryCache(val activities: List<String> = emptyList(), val valence: Int = 0, val inputText: String = "", val peopleText: String = "", val peopleChips: List<String> = emptyList(), val peopleInputText: String = "")
+data class HourEntryCache(
+    val activities: List<String> = emptyList(),
+    val valence: Int = 0,
+    val inputText: String = "",
+    val peopleText: String = "",
+    val peopleChips: List<String> = emptyList(),
+    val peopleInputText: String = "",
+    val durationMinutes: Int? = null,
+    val difficultyRating: Int? = null,
+    val activationLatencyMinutes: Int? = null
+)
 data class HourEntryKey(val date: LocalDate, val hour: Int)
 
 
@@ -123,14 +133,26 @@ class TodayViewModel(
      * Inserts or updates an activity log for a specific hour on a specific date,
      * then clears the cache for that hour.
      */
-    fun upsertActivityForHour(date: LocalDate, hour: Int, activityText: String, valence: Int, peopleText: String = "") {
+    fun upsertActivityForHour(
+        date: LocalDate,
+        hour: Int,
+        activityText: String,
+        valence: Int,
+        peopleText: String = "",
+        durationMinutes: Int? = null,
+        difficultyRating: Int? = null,
+        activationLatencyMinutes: Int? = null
+    ) {
         viewModelScope.launch {
             repository.upsert(
                 date = date,
                 hour = hour,
                 text = activityText.trim(),
                 valence = valence,
-                peopleText = peopleText.trim()
+                peopleText = peopleText.trim(),
+                durationMinutes = durationMinutes,
+                difficultyRating = difficultyRating,
+                activationLatencyMinutes = activationLatencyMinutes
             )
             // Clear the cache for the successfully saved hour.
             val currentCache = _unsavedChanges.value.toMutableMap()

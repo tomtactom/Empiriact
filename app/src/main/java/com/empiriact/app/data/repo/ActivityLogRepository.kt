@@ -34,7 +34,16 @@ class ActivityLogRepository(
         return dao.getLogsForMonth(startDate.toYyyyMmDdInt(), endDate.toYyyyMmDdInt())
     }
 
-    suspend fun upsert(date: LocalDate, hour: Int, text: String, valence: Int, peopleText: String = "") {
+    suspend fun upsert(
+        date: LocalDate,
+        hour: Int,
+        text: String,
+        valence: Int,
+        peopleText: String = "",
+        durationMinutes: Int? = null,
+        difficultyRating: Int? = null,
+        activationLatencyMinutes: Int? = null
+    ) {
         val key = "${date.toYyyyMmDdInt()}-$hour"
         dao.upsert(
             ActivityLogEntity(
@@ -44,6 +53,9 @@ class ActivityLogRepository(
                 activityText = text.trim(),
                 valence = valence.coerceIn(-2, 2),
                 peopleText = peopleText.trim(),
+                durationMinutes = durationMinutes,
+                difficultyRating = difficultyRating,
+                activationLatencyMinutes = activationLatencyMinutes,
                 updatedAtEpochMs = System.currentTimeMillis()
             )
         )
