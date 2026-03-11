@@ -142,7 +142,9 @@ class PassiveMarkerService(
     private companion object {
         const val EXPLANATION_TEXT =
             "Passive Marker dienen nur als Kontext für deine aktiven Einträge – sie treffen keine Diagnose. " +
-                "Du kannst jede Quelle einzeln ein- oder ausschalten. Verarbeitung erfolgt lokal auf dem Gerät."
+                "Du kannst jede Quelle einzeln ein- oder ausschalten. Verarbeitung erfolgt lokal auf dem Gerät. " +
+                "Für Schrittzahl ist zusätzlich die Android-Berechtigung zur Aktivitätserkennung nötig; " +
+                "bei Entzug wird das Schritt-Tracking automatisch gestoppt."
     }
 }
 

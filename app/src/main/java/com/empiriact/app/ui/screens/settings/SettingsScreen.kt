@@ -1,5 +1,6 @@
 package com.empiriact.app.ui.screens.settings
 
+import android.Manifest
 import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,7 +27,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,7 +39,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,6 +56,7 @@ fun SettingsScreen() {
     val context = LocalContext.current
     val activity = context as? Activity
     val application = context.applicationContext as EmpiriactApplication
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val settingsViewModel: SettingsViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -78,6 +87,31 @@ fun SettingsScreen() {
     }
 
     var isThemeMenuExpanded by remember { mutableStateOf(false) }
+    val activityRecognitionPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            settingsViewModel.setPassiveStepsEnabled(true)
+        } else {
+            settingsViewModel.onPassiveStepsPermissionDenied()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        settingsViewModel.syncPassiveStepsPermissionState()
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                settingsViewModel.syncPassiveStepsPermissionState()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -171,6 +205,11 @@ fun SettingsScreen() {
                     "Wenn aktiviert, werden Werte stündlich lokal gespeichert (pro Stunde) und mit aktiven Einträgen verglichen.",
                 style = MaterialTheme.typography.bodySmall
             )
+            Text(
+                text = "Für Schrittzahl braucht Android zusätzlich die Berechtigung \"Aktivität erkennen\". " +
+                    "Ohne Zustimmung bleibt Schritt-Tracking deaktiviert; du kannst weiterhin alle anderen Funktionen nutzen.",
+                style = MaterialTheme.typography.bodySmall
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -195,7 +234,15 @@ fun SettingsScreen() {
                 Text("Schrittzahl")
                 Switch(
                     checked = passiveMarkersOptIn && passiveStepsEnabled,
-                    onCheckedChange = { settingsViewModel.setPassiveStepsEnabled(it) },
+                    onCheckedChange = { enabled ->
+                        if (!enabled) {
+                            settingsViewModel.setPassiveStepsEnabled(false)
+                        } else if (settingsViewModel.hasActivityRecognitionPermission()) {
+                            settingsViewModel.setPassiveStepsEnabled(true)
+                        } else {
+                            activityRecognitionPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                        }
+                    },
                     enabled = passiveMarkersOptIn
                 )
             }
