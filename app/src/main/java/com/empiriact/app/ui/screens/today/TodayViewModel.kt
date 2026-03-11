@@ -37,6 +37,11 @@ data class BaselineUiStatus(
     val baselineDays: Int = 7
 )
 
+data class BaMaintenanceUiStatus(
+    val isActive: Boolean = false,
+    val interval: SettingsRepository.BaMaintenanceInterval = SettingsRepository.BaMaintenanceInterval.DAILY
+)
+
 class TodayViewModel(
     private val repository: ActivityLogRepository,
     private val settingsRepository: SettingsRepository
@@ -91,6 +96,22 @@ class TodayViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = BaselineUiStatus()
     )
+
+
+    val baMaintenanceUiStatus: StateFlow<BaMaintenanceUiStatus> = combine(
+        settingsRepository.baMaintenanceStatus,
+        settingsRepository.baMaintenanceInterval
+    ) { status, interval ->
+        BaMaintenanceUiStatus(
+            isActive = status == SettingsRepository.BaMaintenanceStatus.ACTIVE,
+            interval = interval
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = BaMaintenanceUiStatus()
+    )
+
 
 
     // Flow for logs of the last 2 days to cover "yesterday" entries shown after midnight.
@@ -193,6 +214,14 @@ class TodayViewModel(
     fun completeTodayIntro() {
         viewModelScope.launch {
             settingsRepository.setTodayIntroCompleted(true)
+        }
+    }
+
+
+    fun switchMaintenanceToDaily() {
+        viewModelScope.launch {
+            settingsRepository.setBaMaintenanceStatus(SettingsRepository.BaMaintenanceStatus.ACTIVE)
+            settingsRepository.setBaMaintenanceInterval(SettingsRepository.BaMaintenanceInterval.DAILY)
         }
     }
 

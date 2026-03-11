@@ -87,6 +87,7 @@ fun TodayScreen(navController: NavController) {
     val baselineUiStatus by vm.baselineUiStatus.collectAsState()
     val baCriteriaAcknowledged by vm.baActivityCriteriaAcknowledged.collectAsState()
     val baPreferenceTags by vm.baActivityPreferenceTags.collectAsState()
+    val baMaintenanceUiStatus by vm.baMaintenanceUiStatus.collectAsState()
 
     val now = LocalDateTime.now()
     val today = now.toLocalDate()
@@ -154,6 +155,14 @@ fun TodayScreen(navController: NavController) {
                 BaselineInfoCard(
                     hint = baselineUiStatus.observationHint.orEmpty(),
                     onDismiss = { showBaselineInfoCard = false }
+                )
+            }
+        }
+
+        if (baMaintenanceUiStatus.isActive) {
+            item(key = "maintenance_notice") {
+                MaintenanceModeNoticeCard(
+                    onSwitchToDaily = vm::switchMaintenanceToDaily
                 )
             }
         }
@@ -298,6 +307,38 @@ private fun TodayIntroCoachCard(
     }
 }
 
+
+
+@Composable
+private fun MaintenanceModeNoticeCard(
+    onSwitchToDaily: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Dimensions.spacingSmall),
+            modifier = Modifier.padding(Dimensions.paddingMedium)
+        ) {
+            Text(
+                text = "Heute kein Pflicht-Check-in – du kannst trotzdem eintragen",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            Text(
+                text = "Wenn es dir hilft, kannst du mit einem Tipp wieder auf tägliche Erinnerung umstellen.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            TextButton(onClick = onSwitchToDaily) {
+                Text("Täglich erinnern")
+            }
+        }
+    }
+}
 
 @Composable
 private fun BaselineInfoCard(
