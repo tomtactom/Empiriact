@@ -72,10 +72,19 @@ class StepTrackingService(
             }
         }
 
-        settingsRepository.setPassiveStepsLastSnapshot(
-            totalSteps = currentTotalSteps,
-            hour = currentHour
-        )
+        val shouldUpdateSnapshot = when {
+            previousHour == null || previousTotalSteps == null -> true
+            currentHour.isAfter(previousHour) -> true
+            currentHour.isEqual(previousHour) -> currentTotalSteps < previousTotalSteps
+            else -> true
+        }
+
+        if (shouldUpdateSnapshot) {
+            settingsRepository.setPassiveStepsLastSnapshot(
+                totalSteps = currentTotalSteps,
+                hour = currentHour
+            )
+        }
         return true
     }
 }
