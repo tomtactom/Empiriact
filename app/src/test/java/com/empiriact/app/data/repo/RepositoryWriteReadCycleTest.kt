@@ -6,6 +6,8 @@ import com.empiriact.app.data.db.ActivityLogEntity
 import com.empiriact.app.data.db.ExerciseRatingDao
 import com.empiriact.app.data.db.ExerciseRatingEntity
 import com.empiriact.app.data.db.GratitudeDao
+import com.empiriact.app.data.db.PassiveMarkerDao
+import com.empiriact.app.data.db.PassiveMarkerHourlyEntity
 import com.empiriact.app.data.db.GratitudeEntity
 import com.empiriact.app.ui.screens.overview.ActivityAnalysis
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,6 +80,46 @@ class RepositoryWriteReadCycleTest {
         assertEquals(3.0, averages.getValue("grounding").averageRating, 0.0001)
         assertEquals(5.0, averages.getValue("breathing").averageRating, 0.0001)
     }
+
+    @Test
+    fun `passive marker repository keeps existing fields when same hour updated`() = runTest {
+        val dao = FakePassiveMarkerDao()
+        val repository = PassiveMarkerRepository(dao)
+        val date = LocalDate.of(2026, 2, 5)
+
+        repository.upsertHour(date, hour = 9, stepCount = 1500)
+        repository.upsertHour(date, hour = 9, sleepDurationMinutesPreviousNight = 420)
+        repository.upsertHour(date, hour = 9, screenTimeMinutesInHour = 12)
+
+        val stored = dao.getByDateHour(20260205, 9)
+        assertNotNull(stored)
+        assertEquals(1500, stored?.stepCount)
+        assertEquals(420, stored?.sleepDurationMinutesPreviousNight)
+        assertEquals(12, stored?.screenTimeMinutesInHour)
+    }
+
+    @Test
+    fun `passive marker repository allows overriding existing field while keeping others`() = runTest {
+        val dao = FakePassiveMarkerDao()
+        val repository = PassiveMarkerRepository(dao)
+        val date = LocalDate.of(2026, 2, 5)
+
+        repository.upsertHour(
+            date,
+            hour = 10,
+            stepCount = 1000,
+            sleepDurationMinutesPreviousNight = 400,
+            screenTimeMinutesInHour = 25
+        )
+        repository.upsertHour(date, hour = 10, stepCount = 1200)
+
+        val stored = dao.getByDateHour(20260205, 10)
+        assertNotNull(stored)
+        assertEquals(1200, stored?.stepCount)
+        assertEquals(400, stored?.sleepDurationMinutesPreviousNight)
+        assertEquals(25, stored?.screenTimeMinutesInHour)
+    }
+
 }
 
 private class FakeActivityLogDao : ActivityLogDao {
@@ -132,6 +174,28 @@ private class FakeGratitudeDao : GratitudeDao {
 
     override suspend fun upsert(log: GratitudeEntity) {
         entries[log.date] = log
+    }
+}
+
+
+private class FakePassiveMarkerDao : PassiveMarkerDao {
+    private val entries = mutableMapOf<String, PassiveMarkerHourlyEntity>()
+
+    override fun observeDay(localDate: Int): Flow<List<PassiveMarkerHourlyEntity>> =
+        MutableStateFlow(entries.values.filter { it.localDate == localDate }.sortedBy { it.hour })
+
+    override fun observeRange(startDate: Int, endDate: Int): Flow<List<PassiveMarkerHourlyEntity>> =
+        MutableStateFlow(
+            entries.values
+                .filter { it.localDate in startDate until endDate }
+                .sortedWith(compareBy({ it.localDate }, { it.hour }))
+        )
+
+    override suspend fun getByDateHour(localDate: Int, hour: Int): PassiveMarkerHourlyEntity? =
+        entries["$localDate-$hour"]
+
+    override suspend fun upsert(entity: PassiveMarkerHourlyEntity) {
+        entries[entity.key] = entity
     }
 }
 

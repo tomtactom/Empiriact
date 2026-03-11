@@ -21,14 +21,17 @@ class PassiveMarkerRepository(
         sleepDurationMinutesPreviousNight: Int? = null,
         screenTimeMinutesInHour: Int? = null
     ) {
+        val dateInt = date.toYyyyMmDdInt()
+        val existing = dao.getByDateHour(dateInt, hour)
         dao.upsert(
             PassiveMarkerHourlyEntity(
-                key = "${date.toYyyyMmDdInt()}-$hour",
-                localDate = date.toYyyyMmDdInt(),
+                key = existing?.key ?: "$dateInt-$hour",
+                localDate = dateInt,
                 hour = hour,
-                stepCount = stepCount,
-                sleepDurationMinutesPreviousNight = sleepDurationMinutesPreviousNight,
-                screenTimeMinutesInHour = screenTimeMinutesInHour,
+                stepCount = stepCount ?: existing?.stepCount,
+                sleepDurationMinutesPreviousNight = sleepDurationMinutesPreviousNight
+                    ?: existing?.sleepDurationMinutesPreviousNight,
+                screenTimeMinutesInHour = screenTimeMinutesInHour ?: existing?.screenTimeMinutesInHour,
                 updatedAtEpochMs = System.currentTimeMillis()
             )
         )
