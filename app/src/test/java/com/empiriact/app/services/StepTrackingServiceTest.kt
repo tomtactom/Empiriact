@@ -44,7 +44,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_350)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_350))
         )
 
         val captureTime = ZonedDateTime.of(2026, 1, 1, 11, 5, 0, 0, ZoneId.of("UTC"))
@@ -78,7 +78,7 @@ class StepTrackingServiceTest {
         val baselineCapture = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_000)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_000))
         )
 
         assertTrue(
@@ -91,7 +91,7 @@ class StepTrackingServiceTest {
         val nextHourCapture = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_120)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_120))
         )
 
         assertTrue(
@@ -122,7 +122,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_350)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_350))
         )
 
         val captured = service.captureHourlySnapshot(
@@ -148,7 +148,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_350)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_350))
         )
 
         val captured = service.captureHourlySnapshot(
@@ -176,7 +176,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_401)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_401))
         )
 
         val captured = service.captureHourlySnapshot(
@@ -207,7 +207,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(2_305)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(2_305))
         )
 
         val captured = service.captureHourlySnapshot(
@@ -237,7 +237,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_900)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_900))
         )
 
         val captured = service.captureHourlySnapshot(
@@ -273,7 +273,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(620)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(620))
         )
 
         passive.upsertHour(
@@ -310,13 +310,13 @@ class StepTrackingServiceTest {
         val firstRetry = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_100)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_100))
         )
 
         val secondHourCapture = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(1_160)
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_160))
         )
 
         assertTrue(
@@ -353,7 +353,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(total = 900, sensorAvailable = false)
+            stepCounterSource = FakeStepCounterSource(readResult = StepReadResult.SensorUnavailable, sensorAvailable = false)
         )
 
         val captured = service.captureHourlySnapshot(
@@ -384,7 +384,7 @@ class StepTrackingServiceTest {
         val service = StepTrackingService(
             settingsRepository = settings,
             passiveMarkerRepository = passive,
-            stepCounterSource = FakeStepCounterSource(total = 900, hasPermission = false)
+            stepCounterSource = FakeStepCounterSource(readResult = StepReadResult.PermissionMissing, hasPermission = false)
         )
 
         val captured = service.captureHourlySnapshot(
@@ -398,12 +398,108 @@ class StepTrackingServiceTest {
         assertFalse(settings.passiveStepsBaselineHourPending.first())
     }
 
+    @Test
+    fun `repeated timeouts keep tracking enabled and retain latest timeout diagnosis`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 500,
+            hour = ZonedDateTime.of(2026, 1, 4, 9, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val firstAttempt = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Timeout)
+        )
+
+        val secondAttempt = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Timeout)
+        )
+
+        assertFalse(
+            firstAttempt.captureHourlySnapshot(
+                ZonedDateTime.of(2026, 1, 4, 10, 5, 0, 0, ZoneId.of("UTC"))
+            )
+        )
+        assertFalse(
+            secondAttempt.captureHourlySnapshot(
+                ZonedDateTime.of(2026, 1, 4, 10, 25, 0, 0, ZoneId.of("UTC"))
+            )
+        )
+
+        assertTrue(settings.passiveStepsCollectionEnabled())
+        assertEquals(500, settings.getPassiveStepsLastCounterTotal())
+
+        val diagnostic = settings.passiveStepsLastReadError.first()
+        assertEquals(SettingsRepository.PassiveStepsReadErrorReason.TIMEOUT, diagnostic?.reason)
+        assertEquals(
+            ZonedDateTime.of(2026, 1, 4, 10, 25, 0, 0, ZoneId.of("UTC")),
+            diagnostic?.timestamp
+        )
+    }
+
+    @Test
+    fun `timeout diagnosis is cleared after next successful capture`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 1_000,
+            hour = ZonedDateTime.of(2026, 1, 4, 10, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val timeoutService = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Timeout)
+        )
+
+        assertFalse(
+            timeoutService.captureHourlySnapshot(
+                ZonedDateTime.of(2026, 1, 4, 11, 5, 0, 0, ZoneId.of("UTC"))
+            )
+        )
+        assertEquals(
+            SettingsRepository.PassiveStepsReadErrorReason.TIMEOUT,
+            settings.passiveStepsLastReadError.first()?.reason
+        )
+
+        val recoveryService = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(1_120))
+        )
+
+        assertTrue(
+            recoveryService.captureHourlySnapshot(
+                ZonedDateTime.of(2026, 1, 4, 12, 5, 0, 0, ZoneId.of("UTC"))
+            )
+        )
+
+        assertEquals(null, settings.passiveStepsLastReadError.first())
+        val day = passive.observeDay(LocalDate.of(2026, 1, 4)).first().sortedBy { it.hour }
+        assertEquals(listOf(11, 12), day.map { it.hour })
+        assertEquals(listOf(60, 60), day.map { it.stepCount })
+    }
+
     private class FakeStepCounterSource(
-        private val total: Long?,
+        private val readResult: StepReadResult,
         private val sensorAvailable: Boolean = true,
         private val hasPermission: Boolean = true
     ) : StepCounterSource {
-        override suspend fun readCurrentTotalSteps(): Long? = total
+        override suspend fun readCurrentTotalSteps(): StepReadResult = readResult
 
         override fun isSensorAvailable(): Boolean = sensorAvailable
 

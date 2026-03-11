@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -107,6 +108,21 @@ class SettingsViewModel(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = false
+        )
+
+
+    val passiveStepsDiagnosticMessage: StateFlow<String?> = settingsRepository.passiveStepsLastReadError
+        .map { errorState ->
+            if (errorState == null) {
+                null
+            } else {
+                "Messung gerade nicht möglich; wir versuchen es automatisch erneut."
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
         )
 
     val stepCounterSensorAvailable: Boolean by lazy {

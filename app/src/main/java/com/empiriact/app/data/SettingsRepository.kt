@@ -49,6 +49,8 @@ class SettingsRepository(context: Context) {
         val PASSIVE_STEPS_LAST_COUNTER_TOTAL = longPreferencesKey("passive_steps_last_counter_total")
         val PASSIVE_STEPS_LAST_COUNTER_HOUR = stringPreferencesKey("passive_steps_last_counter_hour")
         val PASSIVE_STEPS_BASELINE_HOUR_PENDING = booleanPreferencesKey("passive_steps_baseline_hour_pending")
+        val PASSIVE_STEPS_LAST_READ_ERROR_REASON = stringPreferencesKey("passive_steps_last_read_error_reason")
+        val PASSIVE_STEPS_LAST_READ_ERROR_AT = stringPreferencesKey("passive_steps_last_read_error_at")
     }
 
     enum class ThemeMode {
@@ -90,6 +92,23 @@ class SettingsRepository(context: Context) {
             }
         }
     }
+
+    enum class PassiveStepsReadErrorReason(val persistedValue: String) {
+        TIMEOUT("timeout"),
+        SENSOR_UNAVAILABLE("sensor_unavailable"),
+        PERMISSION_MISSING("permission_missing");
+
+        companion object {
+            fun fromPersisted(value: String?): PassiveStepsReadErrorReason? {
+                return entries.firstOrNull { it.persistedValue == value }
+            }
+        }
+    }
+
+    data class PassiveStepsReadErrorState(
+        val reason: PassiveStepsReadErrorReason,
+        val timestamp: ZonedDateTime
+    )
 
     val hourlyPromptsEnabled: Flow<Boolean> = dataStore.data
         .map { preferences ->
@@ -290,6 +309,8 @@ class SettingsRepository(context: Context) {
                 settings[PreferencesKeys.PASSIVE_SCREEN_TIME_PROXIMITY_ENABLED] = false
                 settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL)
                 settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR)
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_REASON)
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_AT)
             }
         }
     }
@@ -306,6 +327,8 @@ class SettingsRepository(context: Context) {
                 settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL)
                 settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR)
                 settings.remove(PreferencesKeys.PASSIVE_STEPS_BASELINE_HOUR_PENDING)
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_REASON)
+                settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_AT)
             }
         }
     }
@@ -351,6 +374,35 @@ class SettingsRepository(context: Context) {
             settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_TOTAL)
             settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_COUNTER_HOUR)
             settings.remove(PreferencesKeys.PASSIVE_STEPS_BASELINE_HOUR_PENDING)
+            settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_REASON)
+            settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_AT)
+        }
+    }
+
+    val passiveStepsLastReadError: Flow<PassiveStepsReadErrorState?> = dataStore.data
+        .map { preferences ->
+            val reason = PassiveStepsReadErrorReason.fromPersisted(
+                preferences[PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_REASON]
+            )
+            val timestamp = preferences[PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_AT]?.let(ZonedDateTime::parse)
+            if (reason != null && timestamp != null) {
+                PassiveStepsReadErrorState(reason = reason, timestamp = timestamp)
+            } else {
+                null
+            }
+        }
+
+    suspend fun setPassiveStepsReadError(reason: PassiveStepsReadErrorReason, capturedAt: ZonedDateTime) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_REASON] = reason.persistedValue
+            settings[PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_AT] = capturedAt.toString()
+        }
+    }
+
+    suspend fun clearPassiveStepsReadError() {
+        dataStore.edit { settings ->
+            settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_REASON)
+            settings.remove(PreferencesKeys.PASSIVE_STEPS_LAST_READ_ERROR_AT)
         }
     }
 
