@@ -46,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -222,7 +223,8 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
     val batteryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         viewModel.onResume()
     }
-    var showNotificationSettingsHint by remember { mutableStateOf(false) }
+    var showNotificationSettingsHint by rememberSaveable { mutableStateOf(false) }
+    var hasRequestedNotificationPermission by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
         Text("Berechtigungen und Datennutzung", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -244,13 +246,17 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
                         viewModel.onResume()
                     }
 
-                    isNotificationPermissionPermanentlyDenied(context) -> {
+                    isNotificationPermissionPermanentlyDenied(
+                        context = context,
+                        hasRequestedPermission = hasRequestedNotificationPermission
+                    ) -> {
                         showNotificationSettingsHint = true
                         openNotificationSettings(context)
                     }
 
                     else -> {
                         showNotificationSettingsHint = false
+                        hasRequestedNotificationPermission = true
                         notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
                 }
@@ -325,8 +331,9 @@ private fun PermissionCard(
 private fun isPermissionGranted(context: Context, permission: String): Boolean =
     ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
-private fun isNotificationPermissionPermanentlyDenied(context: Context): Boolean {
+private fun isNotificationPermissionPermanentlyDenied(context: Context, hasRequestedPermission: Boolean): Boolean {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
+    if (!hasRequestedPermission) return false
     if (isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)) return false
 
     val activity = context.findActivity() ?: return false
