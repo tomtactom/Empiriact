@@ -30,6 +30,8 @@ class SettingsRepository(context: Context) {
         val HOURLY_PROMPTS_ENABLED = booleanPreferencesKey("hourly_prompts_enabled")
         val DATA_DONATION_ENABLED = booleanPreferencesKey("data_donation_enabled")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val LAST_ONBOARDING_VERSION_CODE = intPreferencesKey("last_onboarding_version_code")
+        val LAST_ONBOARDING_COMPLETED_AT = longPreferencesKey("last_onboarding_completed_at")
         val TODAY_INTRO_COMPLETED = booleanPreferencesKey("today_intro_completed")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val BA_INPUT_MODE = stringPreferencesKey("ba_input_mode")
@@ -112,12 +114,39 @@ class SettingsRepository(context: Context) {
 
     val onboardingCompleted: Flow<Boolean> = dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false
+            preferences[PreferencesKeys.LAST_ONBOARDING_VERSION_CODE] != null ||
+                (preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false)
         }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { settings ->
             settings[PreferencesKeys.ONBOARDING_COMPLETED] = completed
+            if (!completed) {
+                settings.remove(PreferencesKeys.LAST_ONBOARDING_VERSION_CODE)
+                settings.remove(PreferencesKeys.LAST_ONBOARDING_COMPLETED_AT)
+            }
+        }
+    }
+
+    fun shouldShowOnboarding(currentVersionCode: Int): Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            val lastOnboardingVersionCode = preferences[PreferencesKeys.LAST_ONBOARDING_VERSION_CODE]
+            when {
+                lastOnboardingVersionCode == null -> {
+                    val legacyOnboardingCompleted = preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false
+                    !legacyOnboardingCompleted
+                }
+
+                currentVersionCode > lastOnboardingVersionCode -> true
+                else -> false
+            }
+        }
+
+    suspend fun markOnboardingCompletedForVersion(currentVersionCode: Int) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.ONBOARDING_COMPLETED] = true
+            settings[PreferencesKeys.LAST_ONBOARDING_VERSION_CODE] = currentVersionCode
+            settings[PreferencesKeys.LAST_ONBOARDING_COMPLETED_AT] = System.currentTimeMillis()
         }
     }
 
@@ -132,9 +161,9 @@ class SettingsRepository(context: Context) {
         }
     }
 
-    fun completeOnboarding() {
+    fun completeOnboarding(currentVersionCode: Int) {
         scope.launch {
-            setOnboardingCompleted(true)
+            markOnboardingCompletedForVersion(currentVersionCode)
         }
     }
 

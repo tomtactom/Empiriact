@@ -26,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.empiriact.app.BuildConfig
 import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.ui.common.ViewModelFactory
 import androidx.compose.runtime.collectAsState
@@ -61,7 +62,9 @@ import com.empiriact.app.ui.screens.resources.LearningPathScreen
 @Composable
 fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRepository) {
     val navController = rememberNavController()
-    val onboardingCompleted by settingsRepository.onboardingCompleted.collectAsState(initial = false)
+    val shouldShowOnboarding by settingsRepository
+        .shouldShowOnboarding(BuildConfig.VERSION_CODE)
+        .collectAsState(initial = true)
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
@@ -104,7 +107,7 @@ fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRep
             startDestination = Route.Entry.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            introGraph(navController, settingsRepository, onboardingCompleted)
+            introGraph(navController, settingsRepository, shouldShowOnboarding)
             staticGraph(factory, navController)
             modularGraph(factory, navController)
         }
@@ -114,12 +117,12 @@ fun EmpiriactNavGraph(factory: ViewModelFactory, settingsRepository: SettingsRep
 private fun NavGraphBuilder.introGraph(
     navController: NavController,
     settingsRepository: SettingsRepository,
-    onboardingCompleted: Boolean
+    shouldShowOnboarding: Boolean
 ) {
     composable(Route.Entry.route) {
-        LaunchedEffect(onboardingCompleted) {
+        LaunchedEffect(shouldShowOnboarding) {
             navController.navigate(
-                if (onboardingCompleted) Route.Today.route else Route.Onboarding.route
+                if (shouldShowOnboarding) Route.Onboarding.route else Route.Today.route
             ) {
                 popUpTo(Route.Entry.route) { inclusive = true }
             }
@@ -128,7 +131,7 @@ private fun NavGraphBuilder.introGraph(
 
     composable(Route.Onboarding.route) {
         OnboardingScreen {
-            settingsRepository.completeOnboarding()
+            settingsRepository.completeOnboarding(BuildConfig.VERSION_CODE)
             navController.navigate(Route.Today.route) {
                 popUpTo(Route.Onboarding.route) { inclusive = true }
             }
