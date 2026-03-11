@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.empiriact.app.data.ActivityLogRepository
 import com.empiriact.app.data.db.ActivityLogEntity
+import com.empiriact.app.services.PassiveMarkerContext
+import com.empiriact.app.services.PassiveMarkerService
+import com.empiriact.app.services.PassiveVsActiveDataPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -12,7 +16,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class InsightsViewModel(
-    private val activityLogRepository: ActivityLogRepository
+    private val activityLogRepository: ActivityLogRepository,
+    private val passiveMarkerService: PassiveMarkerService
 ) : ViewModel() {
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
@@ -21,18 +26,24 @@ class InsightsViewModel(
     private val _activities = MutableStateFlow<Map<LocalDate, List<HourlyActivity>>>(emptyMap())
     val activities: StateFlow<Map<LocalDate, List<HourlyActivity>>> = _activities
 
+    private val _passiveContextByCheckin = MutableStateFlow<Map<String, PassiveMarkerContext>>(emptyMap())
+    val passiveContextByCheckin: StateFlow<Map<String, PassiveMarkerContext>> = _passiveContextByCheckin
+
+    private val _passiveVsActive = MutableStateFlow<List<PassiveVsActiveDataPoint>>(emptyList())
+    val passiveVsActive: StateFlow<List<PassiveVsActiveDataPoint>> = _passiveVsActive
+
+    private var passiveContextJob: Job? = null
+    private var passiveComparisonJob: Job? = null
+
     init {
-        // Observe changes for the selected date
         _selectedDate.onEach { date ->
             activityLogRepository.getLogsForDay(
                 startDate = date,
                 endDate = date.plusDays(1)
             ).onEach { entities ->
-                val hourlyActivities = List(24) { hour ->
-                    val entity = entities.find { it.hour == hour }
-                    HourlyActivity(hour, entity?.activityText ?: "", entity?.valence ?: 0)
-                }
-                _activities.value = _activities.value + (date to hourlyActivities)
+                updateDailyActivities(date, entities)
+                observePassiveContext(entities)
+                observePassiveComparison(entities)
             }.launchIn(viewModelScope)
         }.launchIn(viewModelScope)
     }
@@ -51,7 +62,33 @@ class InsightsViewModel(
             )
         }
     }
+
+    private fun updateDailyActivities(date: LocalDate, entities: List<ActivityLogEntity>) {
+        val hourlyActivities = List(24) { hour ->
+            val entity = entities.find { it.hour == hour }
+            HourlyActivity(hour, entity?.key.orEmpty(), entity?.activityText ?: "", entity?.valence ?: 0)
+        }
+        _activities.value = _activities.value + (date to hourlyActivities)
+    }
+
+    private fun observePassiveContext(entities: List<ActivityLogEntity>) {
+        passiveContextJob?.cancel()
+        passiveContextJob = passiveMarkerService.contextForCheckins(entities)
+            .onEach { context -> _passiveContextByCheckin.value = context }
+            .launchIn(viewModelScope)
+    }
+
+    private fun observePassiveComparison(entities: List<ActivityLogEntity>) {
+        passiveComparisonJob?.cancel()
+        passiveComparisonJob = passiveMarkerService.passiveVsActiveDailyComparison(entities)
+            .onEach { points -> _passiveVsActive.value = points }
+            .launchIn(viewModelScope)
+    }
 }
 
-data class HourlyActivity(val hour: Int, val activity: String, val valence: Int)
-
+data class HourlyActivity(
+    val hour: Int,
+    val checkinKey: String,
+    val activity: String,
+    val valence: Int
+)

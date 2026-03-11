@@ -64,6 +64,10 @@ fun SettingsScreen() {
     val hourlyPromptsEnabled by settingsViewModel.hourlyPromptsEnabled.collectAsState()
     val dataDonationEnabled by settingsViewModel.dataDonationEnabled.collectAsState()
     val statusMessage by settingsViewModel.statusMessage.collectAsState()
+    val passiveMarkersOptIn by settingsViewModel.passiveMarkersOptIn.collectAsState()
+    val passiveStepsEnabled by settingsViewModel.passiveStepsEnabled.collectAsState()
+    val passiveSleepEnabled by settingsViewModel.passiveSleepEnabled.collectAsState()
+    val passiveScreenTimeProximityEnabled by settingsViewModel.passiveScreenTimeProximityEnabled.collectAsState()
     val baselineEnabled by settingsViewModel.baselineEnabled.collectAsState()
     val baselineDays by settingsViewModel.baBaselineDays.collectAsState()
     val baCriteriaAcknowledged by settingsViewModel.baActivityCriteriaAcknowledged.collectAsState()
@@ -154,6 +158,71 @@ fun SettingsScreen() {
                 checked = dataDonationEnabled,
                 onCheckedChange = settingsViewModel::setDataDonationEnabled
             )
+        }
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Passive Marker (nur mit Einwilligung)", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "Passive Marker (z. B. Schritte, Schlafdauer, Screen-Time-Nähe) werden ausschließlich lokal verarbeitet. " +
+                    "Sie dienen nur als Kontext für deine aktiven Check-ins und ersetzen keine diagnostische Einschätzung. " +
+                    "Wenn aktiviert, werden Werte stündlich lokal gespeichert (pro Stunde) und mit aktiven Einträgen verglichen.",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Globale Einwilligung")
+                Switch(
+                    checked = passiveMarkersOptIn,
+                    onCheckedChange = settingsViewModel::setPassiveMarkersOptIn
+                )
+            }
+            Text(
+                text = "Quellensteuerung (fein granular):",
+                style = MaterialTheme.typography.labelMedium
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Schrittzahl")
+                Switch(
+                    checked = passiveMarkersOptIn && passiveStepsEnabled,
+                    onCheckedChange = { settingsViewModel.setPassiveStepsEnabled(it) },
+                    enabled = passiveMarkersOptIn
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Schlafdauer (Health Connect)")
+                Switch(
+                    checked = passiveMarkersOptIn && passiveSleepEnabled,
+                    onCheckedChange = { settingsViewModel.setPassiveSleepEnabled(it) },
+                    enabled = passiveMarkersOptIn
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Screen-Time-Nähe")
+                Switch(
+                    checked = passiveMarkersOptIn && passiveScreenTimeProximityEnabled,
+                    onCheckedChange = { settingsViewModel.setPassiveScreenTimeProximityEnabled(it) },
+                    enabled = passiveMarkersOptIn
+                )
+            }
         }
 
         Text("Verhaltensaktivierung", style = MaterialTheme.typography.headlineSmall)

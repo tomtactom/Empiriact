@@ -8,6 +8,7 @@ import com.empiriact.app.data.CheckinRepository
 import com.empiriact.app.data.ExerciseRepository
 import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.repo.GratitudeRepository
+import com.empiriact.app.data.repo.PassiveMarkerRepository
 import com.empiriact.app.services.JsonExportService
 import com.empiriact.app.ui.common.ViewModelFactory
 
@@ -25,6 +26,7 @@ class EmpiriactApplication : Application() {
     val gratitudeRepository by lazy { GratitudeRepository(database.gratitudeDao()) }
     val checkinRepository by lazy { CheckinRepository() }
     val settingsRepository by lazy { SettingsRepository(this) }
+    val passiveMarkerRepository by lazy { PassiveMarkerRepository(database.passiveMarkerDao()) }
 
     private val jsonExportService by lazy { JsonExportService() }
 

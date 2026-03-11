@@ -37,6 +37,10 @@ class SettingsRepository(context: Context) {
         val BA_MAINTENANCE_STATUS = stringPreferencesKey("ba_maintenance_status")
         val BA_MAINTENANCE_INTERVAL = stringPreferencesKey("ba_maintenance_interval")
         val BA_MAINTENANCE_LAST_REMINDER_DATE = stringPreferencesKey("ba_maintenance_last_reminder_date")
+        val PASSIVE_MARKERS_OPT_IN = booleanPreferencesKey("passive_markers_opt_in")
+        val PASSIVE_STEPS_ENABLED = booleanPreferencesKey("passive_steps_enabled")
+        val PASSIVE_SLEEP_ENABLED = booleanPreferencesKey("passive_sleep_enabled")
+        val PASSIVE_SCREEN_TIME_PROXIMITY_ENABLED = booleanPreferencesKey("passive_screen_time_proximity_enabled")
     }
 
     enum class ThemeMode {
@@ -234,6 +238,55 @@ class SettingsRepository(context: Context) {
             } else {
                 settings[PreferencesKeys.BA_MAINTENANCE_LAST_REMINDER_DATE] = date.toString()
             }
+        }
+    }
+
+    val passiveMarkersOptIn: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PASSIVE_MARKERS_OPT_IN] ?: false
+        }
+
+    suspend fun setPassiveMarkersOptIn(enabled: Boolean) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.PASSIVE_MARKERS_OPT_IN] = enabled
+            if (!enabled) {
+                settings[PreferencesKeys.PASSIVE_STEPS_ENABLED] = false
+                settings[PreferencesKeys.PASSIVE_SLEEP_ENABLED] = false
+                settings[PreferencesKeys.PASSIVE_SCREEN_TIME_PROXIMITY_ENABLED] = false
+            }
+        }
+    }
+
+    val passiveStepsEnabled: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PASSIVE_STEPS_ENABLED] ?: false
+        }
+
+    suspend fun setPassiveStepsEnabled(enabled: Boolean) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.PASSIVE_STEPS_ENABLED] = enabled
+        }
+    }
+
+    val passiveSleepEnabled: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PASSIVE_SLEEP_ENABLED] ?: false
+        }
+
+    suspend fun setPassiveSleepEnabled(enabled: Boolean) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.PASSIVE_SLEEP_ENABLED] = enabled
+        }
+    }
+
+    val passiveScreenTimeProximityEnabled: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PASSIVE_SCREEN_TIME_PROXIMITY_ENABLED] ?: false
+        }
+
+    suspend fun setPassiveScreenTimeProximityEnabled(enabled: Boolean) {
+        dataStore.edit { settings ->
+            settings[PreferencesKeys.PASSIVE_SCREEN_TIME_PROXIMITY_ENABLED] = enabled
         }
     }
 
