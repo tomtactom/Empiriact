@@ -60,7 +60,7 @@ class StepTrackingService(
                 val remainder = delta % missingHours
 
                 repeat(missingHours) { index ->
-                    val hourToFill = previousHour.plusHours(index.toLong())
+                    val hourToFill = previousHour.plusHours(index.toLong() + 1)
                     val distributedSteps = baseDistribution + if (index >= missingHours - remainder) 1 else 0
 
                     passiveMarkerRepository.upsertHour(
