@@ -96,7 +96,9 @@ class SettingsRepository(context: Context) {
     enum class PassiveStepsReadErrorReason(val persistedValue: String) {
         TIMEOUT("timeout"),
         SENSOR_UNAVAILABLE("sensor_unavailable"),
-        PERMISSION_MISSING("permission_missing");
+        PERMISSION_MISSING("permission_missing"),
+        SOURCE_EMPTY("source_empty"),
+        SYNC_FAILED("sync_failed");
 
         companion object {
             fun fromPersisted(value: String?): PassiveStepsReadErrorReason? {
