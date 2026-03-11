@@ -1,14 +1,11 @@
 package com.empiriact.app.ui.screens.settings
 
 import android.app.ActivityManager
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.empiriact.app.EmpiriactApplication
 import com.empiriact.app.data.SettingsRepository
+import com.empiriact.app.util.ActivityRecognitionPermissionUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -142,19 +139,11 @@ class SettingsViewModel(
         }
     }
 
-    fun hasActivityRecognitionPermission(): Boolean {
-        if (!isActivityRecognitionPermissionRequired()) {
-            return true
-        }
-
-        return ContextCompat.checkSelfPermission(
-            application,
-            Manifest.permission.ACTIVITY_RECOGNITION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
+    fun hasActivityRecognitionPermission(): Boolean =
+        ActivityRecognitionPermissionUtils.hasPermission(application)
 
     fun isActivityRecognitionPermissionRequired(): Boolean =
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        ActivityRecognitionPermissionUtils.isPermissionRequired()
 
     fun onPassiveStepsPermissionDenied() {
         viewModelScope.launch {
