@@ -49,7 +49,7 @@ class TodayViewModelTest {
         viewModel.upsertActivityForHour(date, 8, "  Gehen  ", 2)
         advanceUntilIdle()
 
-        verify(repository).upsert(eq(date), eq(8), eq("Gehen"), eq(2))
+        verify(repository).upsert(eq(date), eq(8), eq("Gehen"), eq(2), eq(""), eq(null), eq(null), eq(null))
         assertTrue(viewModel.unsavedChanges.value.containsKey(key).not())
     }
 
@@ -61,7 +61,7 @@ class TodayViewModelTest {
         whenever(settingsRepository.baInputMode).thenReturn(MutableStateFlow(SettingsRepository.InputMode.STANDARD))
         whenever(settingsRepository.baBaselineStart).thenReturn(MutableStateFlow(null))
         whenever(settingsRepository.baBaselineDays).thenReturn(MutableStateFlow(7))
-        whenever(repository.upsert(any(), any(), any(), any())).thenThrow(IllegalStateException("db down"))
+        whenever(repository.upsert(any(), any(), any(), any(), any(), any(), any(), any())).thenThrow(IllegalStateException("db down"))
 
         val viewModel = TodayViewModel(repository, settingsRepository)
         val date = LocalDate.of(2026, 1, 11)
@@ -90,7 +90,7 @@ class TodayViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf("Lesen", "Spazieren"), viewModel.uniqueActivities.value)
-        verify(repository, never()).upsert(any(), any(), any(), any())
+        verify(repository, never()).upsert(any(), any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
