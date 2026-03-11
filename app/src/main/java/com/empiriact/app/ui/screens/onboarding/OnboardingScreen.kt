@@ -58,12 +58,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.core.content.ContextCompat
 import com.empiriact.app.data.SettingsRepository
 import kotlinx.coroutines.launch
 
@@ -81,36 +81,36 @@ fun OnboardingScreen(onFinished: () -> Unit) {
     val pages = remember {
         listOf(
             IntroPage(
-                label = "Schritt 1 · Orientierung",
+                label = "Schritt 1 · Dein Einstieg",
                 icon = Icons.Default.AutoAwesome,
                 title = "Willkommen bei Empiriact",
-                subtitle = "Der Name Empiriact verbindet Empirie und ACT: du sammelst alltagsnahe Beobachtungen und setzt werteorientiertes Handeln bewusst um.",
+                subtitle = "Hier kannst du in deinem Tempo herausfinden, was dir im Alltag funktional hilft. Du entscheidest, wie viel du ausprobieren möchtest.",
                 highlights = listOf(
-                    "Empirie bedeutet hier: du prüfst mit deinen eigenen Daten, was dir im Alltag wirklich hilft.",
-                    "ACT unterstützt Selbstwirksamkeit: du triffst Entscheidungen auf Basis deiner Werte.",
-                    "Behavioral Activation heißt: kleine machbare Handlungen bringen dich zuverlässig in Bewegung."
+                    "Du kannst mit kleinen Beobachtungen starten, statt alles sofort zu verändern.",
+                    "Wenn es für dich passt, nutzt du Werte als Kompass für nächste Schritte.",
+                    "Es geht nicht um richtig oder falsch, sondern um nützliche Erfahrungen im Kontext."
                 )
             ),
             IntroPage(
-                label = "Schritt 2 · Anwendung",
+                label = "Schritt 2 · Im Alltag testen",
                 icon = Icons.Default.PsychologyAlt,
-                title = "Empirie im Alltag nutzen",
-                subtitle = "Regelmäßige Einträge machen Muster sichtbar. Du erkennst förderliche Situationen und leitest konkrete nächste Schritte für deinen Tag ab.",
+                title = "Muster flexibel erkennen",
+                subtitle = "Einträge können dir zeigen, wann etwas hilfreich ist und wann nicht. So leitest du Schritte ab, die zu deinem Tag und Energielevel passen.",
                 highlights = listOf(
-                    "Du beobachtest Verhalten, Stimmung und Kontext strukturiert.",
-                    "Du entwickelst realistische Schritte, die du direkt umsetzen kannst.",
-                    "Du trainierst flexible Aufmerksamkeit und aktives Handeln im Alltag."
+                    "Du wählst, ob du kurz notierst oder genauer hinschaust.",
+                    "Kleine Schritte sind ausreichend, auch an Tagen mit wenig Energie.",
+                    "Rückschläge sind normal und liefern Hinweise für eine passende Anpassung."
                 )
             ),
             IntroPage(
-                label = "Schritt 3 · Aktiv werden",
+                label = "Schritt 3 · Dranbleiben auf deine Art",
                 icon = Icons.Default.TrackChanges,
-                title = "Behavioral Activation klar umsetzen",
-                subtitle = "Du setzt tägliche Handlungen mit kleinem Einstieg um und stärkst dadurch Handlungsfähigkeit, Stabilität und Selbstvertrauen.",
+                title = "Handeln, das zu dir passt",
+                subtitle = "Du kannst Handlungen so klein wählen, dass sie heute machbar sind. Mit der Zeit entsteht aus vielen kleinen Schritten mehr Stabilität.",
                 highlights = listOf(
-                    "Du wählst Handlungen, die zu deinen Werten und deinem aktuellen Energielevel passen.",
-                    "Du wiederholst hilfreiche Schritte und baust tragfähige Routinen auf.",
-                    "Du übernimmst aktiv Verantwortung für deinen Weg im Alltag."
+                    "Du entscheidest täglich neu, was aktuell funktional und umsetzbar ist.",
+                    "Wenn etwas nicht klappt, kannst du den Plan flexibel vereinfachen.",
+                    "Jeder umgesetzte Mini-Schritt stärkt Vertrauen in deinen eigenen Weg."
                 )
             )
         )
@@ -138,15 +138,25 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Einführung", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(
+                "Einführung",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
         HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
             when {
                 page < pages.size -> IntroContentPage(page = pages[page])
-                page == pages.size -> SystemPermissionsPage(onContinue = { scope.launch { pagerState.animateScrollToPage(page + 1) } })
-                else -> OnboardingCompletionPage(onFinished = onFinished)
+                page == pages.size -> SystemPermissionsPage()
+                else -> OnboardingCompletionPage()
             }
+        }
+
+        val ctaLabel = when (pagerState.currentPage) {
+            pages.size -> "Weiter zur Zusammenfassung"
+            pageCount - 1 -> "App starten"
+            else -> "Weiter"
         }
 
         Button(
@@ -161,10 +171,14 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 .fillMaxWidth()
                 .padding(top = 8.dp)
         ) {
-            Text(if (pagerState.currentPage == pageCount - 1) "App starten" else "Weiter")
+            Text(ctaLabel)
         }
 
-        PagerDots(pageCount = pageCount, currentPage = pagerState.currentPage, modifier = Modifier.padding(top = 12.dp, bottom = 16.dp))
+        PagerDots(
+            pageCount = pageCount,
+            currentPage = pagerState.currentPage,
+            modifier = Modifier.padding(top = 12.dp, bottom = 16.dp)
+        )
     }
 }
 
@@ -177,28 +191,58 @@ private fun IntroContentPage(page: IntroPage) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(imageVector = page.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Text(page.label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = page.icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                page.label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
         }
+
         Spacer(modifier = Modifier.height(10.dp))
-        Text(page.title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(
+            page.title,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(12.dp))
         Text(page.subtitle, style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.height(20.dp))
-        Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                page.highlights.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
+
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                page.highlights.forEach {
+                    Text("• $it", style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SystemPermissionsPage(onContinue: () -> Unit) {
+private fun SystemPermissionsPage() {
     val context = LocalContext.current
     val settingsRepository = remember(context) { SettingsRepository(context.applicationContext) }
-    val permissionStateProvider = remember(context) { AndroidPermissionStateProvider(context.applicationContext) }
+    val permissionStateProvider = remember(context) {
+        AndroidPermissionStateProvider(context.applicationContext)
+    }
     val viewModel: OnboardingSetupViewModel = viewModel(
         factory = OnboardingSetupViewModel.Factory(settingsRepository, permissionStateProvider)
     )
@@ -213,21 +257,34 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    val notificationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-        viewModel.onResume()
-    }
-    val activityLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (!granted) viewModel.onActivityRecognitionDenied()
-        viewModel.onResume()
-    }
-    val batteryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        viewModel.onResume()
-    }
+    val notificationLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            viewModel.onResume()
+        }
+    val activityLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) viewModel.onActivityRecognitionDenied()
+            viewModel.onResume()
+        }
+    val batteryLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            viewModel.onResume()
+        }
+
     var showNotificationSettingsHint by rememberSaveable { mutableStateOf(false) }
     var hasRequestedNotificationPermission by rememberSaveable { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
-        Text("Berechtigungen und Datennutzung", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            "Berechtigungen und Datennutzung",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Text("Du richtest Empiriact hier einheitlich ein. Jede Freigabe unterstützt alltagsnahe Begleitung und bleibt jederzeit durch dich anpassbar.")
         Spacer(modifier = Modifier.height(16.dp))
@@ -237,57 +294,71 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
             description = "Erinnerungen unterstützen dich bei geplanten Schritten der Behavioral Activation.",
             statusText = if (uiState.setupItems.notifications.enabled) "Aktiv" else "Offen",
             actionText = "Freigabe öffnen",
-            helperText = if (showNotificationSettingsHint) "Wenn der Dialog nicht erscheint, öffne bitte die Einstellungen." else null
-        ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                when {
-                    isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS) -> {
-                        showNotificationSettingsHint = false
-                        viewModel.onResume()
-                    }
-
-                    isNotificationPermissionPermanentlyDenied(
-                        context = context,
-                        hasRequestedPermission = hasRequestedNotificationPermission
-                    ) -> {
-                        showNotificationSettingsHint = true
-                        openNotificationSettings(context)
-                    }
-
-                    else -> {
-                        showNotificationSettingsHint = false
-                        hasRequestedNotificationPermission = true
-                        notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                }
+            helperText = if (showNotificationSettingsHint) {
+                "Wenn der Dialog nicht erscheint, öffne bitte die Einstellungen."
             } else {
-                showNotificationSettingsHint = false
-                openNotificationSettings(context)
+                null
+            },
+            onAction = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    when {
+                        isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS) -> {
+                            showNotificationSettingsHint = false
+                            viewModel.onResume()
+                        }
+
+                        isNotificationPermissionPermanentlyDenied(
+                            context = context,
+                            hasRequestedPermission = hasRequestedNotificationPermission
+                        ) -> {
+                            showNotificationSettingsHint = true
+                            openNotificationSettings(context)
+                        }
+
+                        else -> {
+                            showNotificationSettingsHint = false
+                            hasRequestedNotificationPermission = true
+                            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+                } else {
+                    showNotificationSettingsHint = false
+                    openNotificationSettings(context)
+                }
             }
-        }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         PermissionCard(
             title = "Akku-Optimierung",
             description = "Eine passende Einstellung verbessert die Zuverlässigkeit von Erinnerungen im Hintergrund.",
-            statusText = if (uiState.setupItems.batteryOptimization.enabled) "Aktiv" else "Offen",
-            actionText = "Einstellungen öffnen"
-        ) {
-            openBatteryOptimizationSettings(context) { batteryLauncher.launch(it) }
-        }
+            statusText = if (uiState.setupItems.batteryOptimization.enabled) "Abgeschlossen" else "Noch offen",
+            actionText = "Einstellungen öffnen",
+            onAction = { openBatteryOptimizationSettings(context) { batteryLauncher.launch(it) } }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
+
+        val activityRecognitionRequired = uiState.setupItems.activityRecognition.required
+        val activityRecognitionDone =
+            uiState.setupItems.activityRecognition.enabled || !activityRecognitionRequired
 
         PermissionCard(
             title = "Aktivitätserkennung",
             description = "Optional für passive Marker wie Schritte, damit Alltagstrends besser sichtbar werden.",
-            statusText = if (uiState.setupItems.activityRecognition.enabled || !uiState.setupItems.activityRecognition.required) "Aktiv" else "Offen",
-            actionText = if (uiState.setupItems.activityRecognition.required) "Freigabe öffnen" else "Bereits geklärt"
-        ) {
-            if (!uiState.setupItems.activityRecognition.required) return@PermissionCard
-            activityLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
-        }
+            statusText = if (activityRecognitionDone) "Abgeschlossen" else "Noch offen",
+            actionText = if (activityRecognitionRequired) {
+                "Freigabe öffnen"
+            } else {
+                "Keine Aktion erforderlich"
+            },
+            onAction = if (activityRecognitionRequired) {
+                { activityLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION) }
+            } else {
+                null
+            }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -296,9 +367,6 @@ private fun SystemPermissionsPage(onContinue: () -> Unit) {
             onDataDonationToggle = viewModel::setDataDonationEnabled,
             onPassiveMarkerToggle = viewModel::setPassiveMarkersOptIn
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedButton(onClick = onContinue, modifier = Modifier.fillMaxWidth()) { Text("Weiter zur Zusammenfassung") }
     }
 }
 
@@ -309,29 +377,73 @@ private fun PermissionCard(
     statusText: String,
     actionText: String,
     helperText: String? = null,
-    onAction: () -> Unit
+    onAction: (() -> Unit)? = null
 ) {
-    Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
             Text(description, style = MaterialTheme.typography.bodyMedium)
             Text(
                 text = "Status: $statusText",
                 style = MaterialTheme.typography.labelLarge,
-                color = if (statusText == "Aktiv") MaterialTheme.colorScheme.primary else Color(0xFFB45309)
+                color = if (isPositiveStatus(statusText)) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    Color(0xFFB45309)
+                }
             )
+
             helperText?.let {
-                Text(text = it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            OutlinedButton(onClick = onAction, modifier = Modifier.fillMaxWidth()) { Text(actionText) }
+
+            if (onAction != null) {
+                OutlinedButton(
+                    onClick = onAction,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(actionText)
+                }
+            } else {
+                Text(
+                    text = actionText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
+}
+
+private fun isPositiveStatus(statusText: String): Boolean {
+    return statusText == "Abgeschlossen" ||
+        statusText == "Aktiv" ||
+        statusText == "Auswahl gesetzt"
 }
 
 private fun isPermissionGranted(context: Context, permission: String): Boolean =
     ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
-private fun isNotificationPermissionPermanentlyDenied(context: Context, hasRequestedPermission: Boolean): Boolean {
+private fun isNotificationPermissionPermanentlyDenied(
+    context: Context,
+    hasRequestedPermission: Boolean
+): Boolean {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
     if (!hasRequestedPermission) return false
     if (isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)) return false
@@ -352,55 +464,100 @@ private fun DataCollectionCard(
     onDataDonationToggle: (Boolean) -> Unit,
     onPassiveMarkerToggle: (Boolean) -> Unit
 ) {
-    Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Datennutzung", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                "Datennutzung",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
             Text("Du steuerst Datenspende und passive Marker selbst. Beide Optionen dienen der empirischen Auswertung und deiner individuellen Orientierung im Alltag.")
             SettingToggleRow("Anonymisierte Datenspende", state.dataDonationEnabled, onDataDonationToggle)
             SettingToggleRow("Passive Marker", state.passiveMarkersOptIn, onPassiveMarkerToggle)
             Text(
                 text = if (state.done) "Status: Auswahl gesetzt" else "Status: Auswahl ausstehend",
                 style = MaterialTheme.typography.labelLarge,
-                color = if (state.done) MaterialTheme.colorScheme.primary else Color(0xFFB45309)
+                color = if (state.done) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    Color(0xFFB45309)
+                }
             )
         }
     }
 }
 
 @Composable
-private fun SettingToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+private fun SettingToggleRow(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(label, modifier = Modifier.weight(1f))
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
 @Composable
-private fun OnboardingCompletionPage(onFinished: () -> Unit) {
+private fun OnboardingCompletionPage() {
     val context = LocalContext.current
     val settingsRepository = remember(context) { SettingsRepository(context.applicationContext) }
-    val permissionStateProvider = remember(context) { AndroidPermissionStateProvider(context.applicationContext) }
+    val permissionStateProvider = remember(context) {
+        AndroidPermissionStateProvider(context.applicationContext)
+    }
     val viewModel: OnboardingSetupViewModel = viewModel(
         factory = OnboardingSetupViewModel.Factory(settingsRepository, permissionStateProvider)
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
-        Text("Dein Start ist vorbereitet", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            "Dein Start ist vorbereitet",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(10.dp))
         Text("Empiriact begleitet dich ab jetzt mit empirischer Selbstbeobachtung und werteorientierter Behavioral Activation im Alltag.")
         Spacer(modifier = Modifier.height(16.dp))
         SummaryCard(uiState)
-        Spacer(modifier = Modifier.height(20.dp))
-        OutlinedButton(onClick = onFinished, modifier = Modifier.fillMaxWidth()) { Text("App starten") }
     }
 }
 
 @Composable
 private fun SummaryCard(uiState: OnboardingSetupUiState) {
-    Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("Zusammenfassung", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                "Zusammenfassung",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
             Text("• Benachrichtigungen: ${if (uiState.setupItems.notifications.enabled) "Aktiv" else "Nicht aktiv"}")
             Text("• Akkuoptimierung: ${if (uiState.setupItems.batteryOptimization.enabled) "Deaktiviert" else "Aktiv"}")
             Text("• Aktivitätserkennung: ${if (uiState.setupItems.activityRecognition.enabled) "Aktiv" else "Nicht aktiv"}")
@@ -417,9 +574,16 @@ private fun openNotificationSettings(context: Context) {
     context.startActivity(intent)
 }
 
-private fun openBatteryOptimizationSettings(context: Context, launchIntent: (Intent) -> Unit) {
-    val requestIntent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:${context.packageName}"))
+private fun openBatteryOptimizationSettings(
+    context: Context,
+    launchIntent: (Intent) -> Unit
+) {
+    val requestIntent = Intent(
+        Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+        Uri.parse("package:${context.packageName}")
+    )
     val settingsIntent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+
     try {
         launchIntent(requestIntent)
     } catch (_: Exception) {
@@ -428,10 +592,23 @@ private fun openBatteryOptimizationSettings(context: Context, launchIntent: (Int
 }
 
 @Composable
-private fun PagerDots(pageCount: Int, currentPage: Int, modifier: Modifier = Modifier) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+private fun PagerDots(
+    pageCount: Int,
+    currentPage: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         repeat(pageCount) { index ->
-            val color = if (index == currentPage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+            val color = if (index == currentPage) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+            }
+
             Box(
                 modifier = Modifier
                     .padding(horizontal = 4.dp)
