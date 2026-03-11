@@ -161,7 +161,7 @@ class StepTrackingServiceTest {
     }
 
     @Test
-    fun `gap over three hours stores current hour only and marks estimate`() = runTest {
+    fun `gap over three hours distributes across missing hours and marks estimate`() = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val settings = settingsRepo()
         val passive = passiveRepo(context)
@@ -185,10 +185,44 @@ class StepTrackingServiceTest {
 
         assertTrue(captured)
         val jan1 = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
-        assertEquals(1, jan1.size)
-        assertEquals(listOf(14), jan1.map { it.hour })
-        assertEquals(listOf(401), jan1.map { it.stepCount })
-        assertEquals(listOf(true), jan1.map { it.isEstimated })
+        assertEquals(listOf(11, 12, 13, 14), jan1.map { it.hour })
+        assertEquals(listOf(100, 100, 100, 101), jan1.map { it.stepCount })
+        assertEquals(listOf(true, true, true, true), jan1.map { it.isEstimated })
+    }
+
+    @Test
+    fun `gap above twenty four hours only distributes latest twenty four hours`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 10_000,
+            hour = ZonedDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(11_200))
+        )
+
+        val captured = service.captureHourlySnapshot(
+            ZonedDateTime.of(2026, 1, 2, 6, 10, 0, 0, ZoneId.of("UTC"))
+        )
+
+        assertTrue(captured)
+
+        val jan1 = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
+        val jan2 = passive.observeDay(LocalDate.of(2026, 1, 2)).first().sortedBy { it.hour }
+
+        assertEquals((7..23).toList(), jan1.map { it.hour })
+        assertEquals((0..6).toList(), jan2.map { it.hour })
+        assertEquals(24, jan1.size + jan2.size)
+        assertEquals(1_200, (jan1 + jan2).sumOf { it.stepCount })
+        assertTrue((jan1 + jan2).all { it.isEstimated })
     }
 
     @Test

@@ -24,6 +24,10 @@ class StepTrackingService(
     private val stepCounterSource: StepCounterSource,
     private val hourlyStepHistorySource: HourlyStepHistorySource = NoOpHourlyStepHistorySource()
 ) {
+    companion object {
+        private const val MAX_HOURLY_BACKFILL_HOURS = 24
+    }
+
 
     suspend fun captureHourlySnapshot(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
         val optIn = settingsRepository.passiveMarkersOptInEnabled()
@@ -170,29 +174,27 @@ class StepTrackingService(
             if (missingHours > 0) {
                 settingsRepository.setPassiveStepsBaselineHourPending(false)
 
-                if (missingHours > 3) {
-                    passiveMarkerRepository.upsertHour(
-                        date = currentHour.toLocalDate(),
-                        hour = currentHour.hour,
-                        stepCount = delta,
-                        isEstimated = true
-                    )
+                val hoursToDistribute = missingHours.coerceAtMost(MAX_HOURLY_BACKFILL_HOURS)
+                val baseDistribution = delta / hoursToDistribute
+                val remainder = delta % hoursToDistribute
+                val startsWithTruncatedGap = missingHours > MAX_HOURLY_BACKFILL_HOURS
+                val firstHourToFill = if (startsWithTruncatedGap) {
+                    currentHour.minusHours(hoursToDistribute.toLong()).plusHours(1)
                 } else {
-                    val baseDistribution = delta / missingHours
-                    val remainder = delta % missingHours
-                    val isBackfillEstimate = missingHours > 1
+                    previousHour.plusHours(1)
+                }
+                val isBackfillEstimate = missingHours > 1
 
-                    repeat(missingHours) { index ->
-                        val hourToFill = previousHour.plusHours(index.toLong() + 1)
-                        val distributedSteps = baseDistribution + if (index >= missingHours - remainder) 1 else 0
+                repeat(hoursToDistribute) { index ->
+                    val hourToFill = firstHourToFill.plusHours(index.toLong())
+                    val distributedSteps = baseDistribution + if (index >= hoursToDistribute - remainder) 1 else 0
 
-                        passiveMarkerRepository.upsertHour(
-                            date = hourToFill.toLocalDate(),
-                            hour = hourToFill.hour,
-                            stepCount = distributedSteps,
-                            isEstimated = isBackfillEstimate
-                        )
-                    }
+                    passiveMarkerRepository.upsertHour(
+                        date = hourToFill.toLocalDate(),
+                        hour = hourToFill.hour,
+                        stepCount = distributedSteps,
+                        isEstimated = isBackfillEstimate
+                    )
                 }
             }
         }
