@@ -16,7 +16,6 @@ import com.empiriact.app.services.SensorStepCounterSource
 import com.empiriact.app.services.StepTrackingService
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 class HourlyPromptWorker(
     appContext: Context,
@@ -47,15 +46,13 @@ class HourlyPromptWorker(
     }
 
     private suspend fun shouldSendReminder(settingsRepository: SettingsRepository): Boolean {
-        val status = settingsRepository.baMaintenanceStatus.first()
-        if (status != SettingsRepository.BaMaintenanceStatus.ACTIVE) {
-            return true
-        }
-
-        val interval = settingsRepository.baMaintenanceInterval.first()
-        val lastReminderDate = settingsRepository.baMaintenanceLastReminderDate.first() ?: return true
-        val daysSinceReminder = ChronoUnit.DAYS.between(lastReminderDate, LocalDate.now())
-        return daysSinceReminder >= interval.requiredDays
+        return HourlyPromptPolicy.shouldSendReminder(
+            inputMode = settingsRepository.baInputMode.first(),
+            maintenanceStatus = settingsRepository.baMaintenanceStatus.first(),
+            maintenanceInterval = settingsRepository.baMaintenanceInterval.first(),
+            lastReminderDate = settingsRepository.baMaintenanceLastReminderDate.first(),
+            today = LocalDate.now()
+        )
     }
 
     private fun showNotification() {
