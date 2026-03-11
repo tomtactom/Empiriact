@@ -1,6 +1,9 @@
 package com.empiriact.app.ui.screens.settings
 
 import android.app.ActivityManager
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.empiriact.app.EmpiriactApplication
@@ -106,6 +109,11 @@ class SettingsViewModel(
             initialValue = false
         )
 
+    val stepCounterSensorAvailable: Boolean by lazy {
+        val sensorManager = application.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+        sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null
+    }
+
     private val _statusMessage = MutableStateFlow<String?>(null)
     val statusMessage: StateFlow<String?> = _statusMessage.asStateFlow()
 
@@ -135,6 +143,12 @@ class SettingsViewModel(
 
     fun setPassiveStepsEnabled(enabled: Boolean) {
         viewModelScope.launch {
+            if (enabled && !stepCounterSensorAvailable) {
+                settingsRepository.setPassiveStepsEnabled(false)
+                _statusMessage.value =
+                    "Dieses Gerät unterstützt keinen Schrittzähler-Sensor. Schritt-Tracking bleibt deaktiviert."
+                return@launch
+            }
             settingsRepository.setPassiveStepsEnabled(enabled)
         }
     }
@@ -154,11 +168,18 @@ class SettingsViewModel(
     }
 
     fun syncPassiveStepsPermissionState() {
-        if (!isActivityRecognitionPermissionRequired()) {
-            return
-        }
-
         viewModelScope.launch {
+            if (!stepCounterSensorAvailable && settingsRepository.passiveStepsCollectionEnabled()) {
+                settingsRepository.setPassiveStepsEnabled(false)
+                _statusMessage.value =
+                    "Dieses Gerät unterstützt keinen Schrittzähler-Sensor. Schritt-Tracking bleibt deaktiviert."
+                return@launch
+            }
+
+            if (!isActivityRecognitionPermissionRequired()) {
+                return@launch
+            }
+
             if (settingsRepository.passiveStepsCollectionEnabled() && !hasActivityRecognitionPermission()) {
                 settingsRepository.setPassiveStepsEnabled(false)
                 _statusMessage.value =

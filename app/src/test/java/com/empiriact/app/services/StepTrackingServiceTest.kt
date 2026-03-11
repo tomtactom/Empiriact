@@ -302,9 +302,77 @@ class StepTrackingServiceTest {
         assertEquals(listOf(60), day.map { it.stepCount })
     }
 
+    @Test
+    fun `disables passive steps and clears tracking state when sensor is unavailable`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 800,
+            hour = ZonedDateTime.of(2026, 1, 2, 9, 0, 0, 0, ZoneId.of("UTC"))
+        )
+        settings.setPassiveStepsBaselineHourPending(true)
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(total = 900, sensorAvailable = false)
+        )
+
+        val captured = service.captureHourlySnapshot(
+            ZonedDateTime.of(2026, 1, 2, 10, 5, 0, 0, ZoneId.of("UTC"))
+        )
+
+        assertFalse(captured)
+        assertFalse(settings.passiveStepsCollectionEnabled())
+        assertEquals(null, settings.getPassiveStepsLastCounterTotal())
+        assertEquals(null, settings.getPassiveStepsLastCounterHour())
+        assertFalse(settings.passiveStepsBaselineHourPending.first())
+    }
+
+    @Test
+    fun `disables passive steps and clears tracking state when permission is missing`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 800,
+            hour = ZonedDateTime.of(2026, 1, 2, 9, 0, 0, 0, ZoneId.of("UTC"))
+        )
+        settings.setPassiveStepsBaselineHourPending(true)
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(total = 900, hasPermission = false)
+        )
+
+        val captured = service.captureHourlySnapshot(
+            ZonedDateTime.of(2026, 1, 2, 10, 5, 0, 0, ZoneId.of("UTC"))
+        )
+
+        assertFalse(captured)
+        assertFalse(settings.passiveStepsCollectionEnabled())
+        assertEquals(null, settings.getPassiveStepsLastCounterTotal())
+        assertEquals(null, settings.getPassiveStepsLastCounterHour())
+        assertFalse(settings.passiveStepsBaselineHourPending.first())
+    }
+
     private class FakeStepCounterSource(
-        private val total: Long?
+        private val total: Long?,
+        private val sensorAvailable: Boolean = true,
+        private val hasPermission: Boolean = true
     ) : StepCounterSource {
         override suspend fun readCurrentTotalSteps(): Long? = total
+
+        override fun isSensorAvailable(): Boolean = sensorAvailable
+
+        override fun hasRequiredPermission(): Boolean = hasPermission
     }
 }

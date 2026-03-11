@@ -75,6 +75,7 @@ fun SettingsScreen() {
     val statusMessage by settingsViewModel.statusMessage.collectAsState()
     val passiveMarkersOptIn by settingsViewModel.passiveMarkersOptIn.collectAsState()
     val passiveStepsEnabled by settingsViewModel.passiveStepsEnabled.collectAsState()
+    val stepCounterSensorAvailable = settingsViewModel.stepCounterSensorAvailable
     val passiveSleepEnabled by settingsViewModel.passiveSleepEnabled.collectAsState()
     val passiveScreenTimeProximityEnabled by settingsViewModel.passiveScreenTimeProximityEnabled.collectAsState()
     val baselineEnabled by settingsViewModel.baselineEnabled.collectAsState()
@@ -210,6 +211,13 @@ fun SettingsScreen() {
                     "Ohne Zustimmung bleibt Schritt-Tracking deaktiviert; du kannst weiterhin alle anderen Funktionen nutzen.",
                 style = MaterialTheme.typography.bodySmall
             )
+            if (!stepCounterSensorAvailable) {
+                Text(
+                    text = "Hardware-Hinweis: Dieses Gerät unterstützt keinen Schrittzähler-Sensor. Schritt-Tracking ist daher nicht verfügbar.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -243,7 +251,7 @@ fun SettingsScreen() {
                             activityRecognitionPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
                         }
                     },
-                    enabled = passiveMarkersOptIn
+                    enabled = passiveMarkersOptIn && stepCounterSensorAvailable
                 )
             }
             Row(
