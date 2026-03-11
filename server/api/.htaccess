@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block direct access to all CSV files under /api
+    RewriteRule ^data/.*\.csv$ - [F,L,NC]
+</IfModule>
+
+<FilesMatch "\.csv$">
+    Require all denied
+</FilesMatch>

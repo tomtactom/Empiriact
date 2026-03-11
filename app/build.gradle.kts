@@ -20,7 +20,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "DATA_DONATION_URL", "\"\"")
+        }
+
         release {
+            buildConfigField("String", "DATA_DONATION_URL", "\"https://empiriact.tomaschmann.de/api/donations.php\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -36,6 +41,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     sourceSets {
@@ -102,6 +108,7 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
 
     testImplementation(libs.test.junit)
+    testImplementation("io.ktor:ktor-client-mock:2.3.12")
     testImplementation(libs.room.testing)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
