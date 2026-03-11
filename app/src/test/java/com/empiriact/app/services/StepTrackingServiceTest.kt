@@ -161,7 +161,7 @@ class StepTrackingServiceTest {
     }
 
     @Test
-    fun `backfills evenly across multi-hour gap`() = runTest {
+    fun `gap over three hours stores current hour only and marks estimate`() = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val settings = settingsRepo()
         val passive = passiveRepo(context)
@@ -185,9 +185,40 @@ class StepTrackingServiceTest {
 
         assertTrue(captured)
         val jan1 = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
-        assertEquals(4, jan1.size)
-        assertEquals(listOf(11, 12, 13, 14), jan1.map { it.hour })
-        assertEquals(listOf(100, 100, 100, 101), jan1.map { it.stepCount })
+        assertEquals(1, jan1.size)
+        assertEquals(listOf(14), jan1.map { it.hour })
+        assertEquals(listOf(401), jan1.map { it.stepCount })
+        assertEquals(listOf(true), jan1.map { it.isEstimated })
+    }
+
+    @Test
+    fun `multi-hour backfill up to three hours is distributed and marked estimated`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 2_000,
+            hour = ZonedDateTime.of(2026, 1, 1, 10, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(2_305)
+        )
+
+        val captured = service.captureHourlySnapshot(
+            ZonedDateTime.of(2026, 1, 1, 13, 10, 0, 0, ZoneId.of("UTC"))
+        )
+
+        assertTrue(captured)
+        val day = passive.observeDay(LocalDate.of(2026, 1, 1)).first().sortedBy { it.hour }
+        assertEquals(listOf(11, 12, 13), day.map { it.hour })
+        assertEquals(listOf(101, 102, 102), day.map { it.stepCount })
+        assertEquals(listOf(true, true, true), day.map { it.isEstimated })
     }
 
     @Test
@@ -220,8 +251,10 @@ class StepTrackingServiceTest {
 
         assertEquals(listOf(23), jan1.map { it.hour })
         assertEquals(listOf(0), jan1.map { it.stepCount })
+        assertEquals(listOf(false), jan1.map { it.isEstimated })
         assertEquals(listOf(0, 1), jan2.map { it.hour })
         assertEquals(listOf(0, 0), jan2.map { it.stepCount })
+        assertEquals(listOf(false, false), jan2.map { it.isEstimated })
     }
 
     @Test
@@ -258,6 +291,7 @@ class StepTrackingServiceTest {
         assertEquals(2, day.size)
         assertEquals(listOf(7, 8), day.map { it.hour })
         assertEquals(listOf(55, 120), day.map { it.stepCount })
+        assertEquals(listOf(false, false), day.map { it.isEstimated })
     }
 
     @Test

@@ -72,18 +72,30 @@ class StepTrackingService(
 
             if (missingHours > 0) {
                 settingsRepository.setPassiveStepsBaselineHourPending(false)
-                val baseDistribution = delta / missingHours
-                val remainder = delta % missingHours
 
-                repeat(missingHours) { index ->
-                    val hourToFill = previousHour.plusHours(index.toLong() + 1)
-                    val distributedSteps = baseDistribution + if (index >= missingHours - remainder) 1 else 0
-
+                if (missingHours > 3) {
                     passiveMarkerRepository.upsertHour(
-                        date = hourToFill.toLocalDate(),
-                        hour = hourToFill.hour,
-                        stepCount = distributedSteps
+                        date = currentHour.toLocalDate(),
+                        hour = currentHour.hour,
+                        stepCount = delta,
+                        isEstimated = true
                     )
+                } else {
+                    val baseDistribution = delta / missingHours
+                    val remainder = delta % missingHours
+                    val isBackfillEstimate = missingHours > 1
+
+                    repeat(missingHours) { index ->
+                        val hourToFill = previousHour.plusHours(index.toLong() + 1)
+                        val distributedSteps = baseDistribution + if (index >= missingHours - remainder) 1 else 0
+
+                        passiveMarkerRepository.upsertHour(
+                            date = hourToFill.toLocalDate(),
+                            hour = hourToFill.hour,
+                            stepCount = distributedSteps,
+                            isEstimated = isBackfillEstimate
+                        )
+                    }
                 }
             }
         }

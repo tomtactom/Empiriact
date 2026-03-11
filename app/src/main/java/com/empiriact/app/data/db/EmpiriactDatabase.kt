@@ -15,7 +15,7 @@ import com.empiriact.app.data.UserValue
 
 @Database(
     entities = [ActivityLogEntity::class, Routine::class, Resource::class, Evaluation::class, UserValue::class, ExerciseRatingEntity::class, ExerciseReflectionEntity::class, GratitudeEntity::class, PsychoeducationalModuleEntity::class, PassiveMarkerHourlyEntity::class],
-    version = 14,
+    version = 15,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -124,6 +124,15 @@ abstract class EmpiriactDatabase : RoomDatabase() {
             }
         }
 
+
+        internal val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE `passive_marker_hourly` ADD COLUMN `isEstimated` INTEGER NOT NULL DEFAULT 0"
+                )
+            }
+        }
+
         @Volatile
         internal var INSTANCE: EmpiriactDatabase? = null
 
@@ -134,7 +143,7 @@ abstract class EmpiriactDatabase : RoomDatabase() {
                     EmpiriactDatabase::class.java,
                     "empiriact_database"
                 )
-                     .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
+                     .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15)
                     .apply {
                         val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
                         if (isDebuggable) {
