@@ -627,6 +627,57 @@ class StepTrackingServiceTest {
         assertEquals(listOf(180), day.map { it.stepCount })
     }
 
+
+    @Test
+    fun `worker ausgefallen app geoeffnet fuehrt backfill beim naechsten snapshot aus`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+        settings.setPassiveStepsLastSnapshot(
+            totalSteps = 4_000,
+            hour = ZonedDateTime.of(2026, 1, 8, 9, 0, 0, 0, ZoneId.of("UTC"))
+        )
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(4_360))
+        )
+
+        assertTrue(service.captureHourlySnapshot(ZonedDateTime.of(2026, 1, 8, 12, 3, 0, 0, ZoneId.of("UTC"))))
+
+        val day = passive.observeDay(LocalDate.of(2026, 1, 8)).first().sortedBy { it.hour }
+        assertEquals(listOf(10, 11, 12), day.map { it.hour })
+        assertEquals(360, day.sumOf { it.stepCount })
+    }
+
+    @Test
+    fun `throttling verhindert zu haeufige reads innerhalb von fuenfzehn minuten`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = settingsRepo()
+        val passive = passiveRepo(context)
+
+        settings.clearAllSettings()
+        settings.setPassiveMarkersOptIn(true)
+        settings.setPassiveStepsEnabled(true)
+
+        val service = StepTrackingService(
+            settingsRepository = settings,
+            passiveMarkerRepository = passive,
+            stepCounterSource = FakeStepCounterSource(StepReadResult.Success(900))
+        )
+
+        val first = service.captureHourlySnapshot(ZonedDateTime.of(2026, 1, 9, 10, 0, 0, 0, ZoneId.of("UTC")))
+        val second = service.captureHourlySnapshot(ZonedDateTime.of(2026, 1, 9, 10, 10, 0, 0, ZoneId.of("UTC")))
+
+        assertTrue(first)
+        assertFalse(second)
+    }
+
     private class FakeStepCounterSource(
         private val readResult: StepReadResult,
         private val sensorAvailable: Boolean = true,

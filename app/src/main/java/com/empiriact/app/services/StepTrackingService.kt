@@ -13,6 +13,7 @@ import com.empiriact.app.data.SettingsRepository
 import com.empiriact.app.data.repo.PassiveMarkerRepository
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
+import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.time.ZonedDateTime
 import kotlin.coroutines.resume
@@ -22,14 +23,26 @@ class StepTrackingService(
     private val settingsRepository: SettingsRepository,
     private val passiveMarkerRepository: PassiveMarkerRepository,
     private val stepCounterSource: StepCounterSource,
-    private val hourlyStepHistorySource: HourlyStepHistorySource = NoOpHourlyStepHistorySource()
+    private val hourlyStepHistorySource: HourlyStepHistorySource = NoOpHourlyStepHistorySource(),
+    private val minCaptureInterval: Duration = Duration.ofMinutes(15)
 ) {
     companion object {
         private const val MAX_HOURLY_BACKFILL_HOURS = 24
     }
 
+    private var lastCaptureAttemptAt: ZonedDateTime? = null
+
 
     suspend fun captureHourlySnapshot(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
+        val previousAttempt = lastCaptureAttemptAt
+        if (
+            previousAttempt != null &&
+            Duration.between(previousAttempt, now).abs() < minCaptureInterval
+        ) {
+            return false
+        }
+        lastCaptureAttemptAt = now
+
         val optIn = settingsRepository.passiveMarkersOptInEnabled()
         val stepsEnabled = settingsRepository.passiveStepsCollectionEnabled()
         if (!optIn || !stepsEnabled) {

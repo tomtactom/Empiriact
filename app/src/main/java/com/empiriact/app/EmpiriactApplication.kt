@@ -11,6 +11,9 @@ import com.empiriact.app.data.repo.GratitudeRepository
 import com.empiriact.app.data.repo.PassiveMarkerRepository
 import com.empiriact.app.notifications.HourlyPromptScheduler
 import com.empiriact.app.services.JsonExportService
+import com.empiriact.app.services.SensorStepCounterSource
+import com.empiriact.app.services.StepTrackingService
+import com.empiriact.app.services.StepTrackingSnapshotRefresher
 import com.empiriact.app.ui.common.ViewModelFactory
 
 class EmpiriactApplication : Application() {
@@ -29,6 +32,14 @@ class EmpiriactApplication : Application() {
     val checkinRepository by lazy { CheckinRepository() }
     val settingsRepository by lazy { SettingsRepository(this) }
     val passiveMarkerRepository by lazy { PassiveMarkerRepository(database.passiveMarkerDao()) }
+    private val stepTrackingService by lazy {
+        StepTrackingService(
+            settingsRepository = settingsRepository,
+            passiveMarkerRepository = passiveMarkerRepository,
+            stepCounterSource = SensorStepCounterSource(applicationContext)
+        )
+    }
+    val passiveSnapshotRefresher by lazy { StepTrackingSnapshotRefresher(stepTrackingService) }
 
     private val jsonExportService by lazy { JsonExportService() }
 
@@ -40,7 +51,8 @@ class EmpiriactApplication : Application() {
             gratitudeRepository = gratitudeRepository,
             jsonExportService = jsonExportService,
             settingsRepository = settingsRepository,
-            passiveMarkerRepository = passiveMarkerRepository
+            passiveMarkerRepository = passiveMarkerRepository,
+            passiveSnapshotRefresher = passiveSnapshotRefresher
         )
     }
 }
