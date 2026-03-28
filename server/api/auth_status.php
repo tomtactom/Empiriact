@@ -15,8 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-http_response_code(200);
-echo json_encode([
+$initialized = auth_is_initialized();
+$response = [
     'success' => true,
-    'initialized' => auth_is_initialized()
-]);
+    'initialized' => $initialized
+];
+
+if ($initialized) {
+    $loadedConfig = auth_load_config();
+    if ($loadedConfig['success'] && !empty($loadedConfig['config']['algorithm'])) {
+        $response['algorithm'] = (string)$loadedConfig['config']['algorithm'];
+    }
+}
+
+http_response_code(200);
+echo json_encode($response);

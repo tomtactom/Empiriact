@@ -406,6 +406,12 @@ Siehe **BUILD_AND_TEST_GUIDE.md**
 - ✅ Graceful Error Handling
 - ✅ Permissions Dialog-basiert
 
+### Admin-Auth-Flow
+- `GET /server/api/auth_status.php` liefert den Auth-Setup-Status für das Frontend vor Login/Setup.
+- Response: `{ "success": true, "initialized": true|false }`.
+- Optionales Feld `algorithm` wird nur gesetzt, wenn der Admin-Login bereits initialisiert ist.
+- Das Setup/der Login läuft weiterhin über `POST /server/api/login.php`.
+
 ---
 
 ## 📚 Dokumentation
