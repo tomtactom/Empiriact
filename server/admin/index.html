@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main id="adminMain" class="admin-main is-disabled" aria-busy="true">
+    <section class="card" aria-labelledby="adminTitle">
+      <h1 id="adminTitle">Admin-Bereich</h1>
+      <p id="statusHint" class="hint">Prüfe Initialisierungsstatus …</p>
+
+      <form id="loginForm" novalidate>
+        <label for="loginPassword">Passwort</label>
+        <input id="loginPassword" name="password" type="password" autocomplete="current-password" required />
+
+        <button id="loginButton" type="submit" disabled>Anmelden</button>
+      </form>
+
+      <p id="loginMessage" role="status" class="message"></p>
+    </section>
+  </main>
+
+  <div id="initModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="initTitle" hidden>
+    <div class="modal-content">
+      <h2 id="initTitle">Admin-Passwort einmalig setzen</h2>
+      <p class="calm-text">Du richtest jetzt einmalig den Admin-Zugang ein. Nimm dir einen ruhigen Moment – danach kannst du dich normal anmelden.</p>
+
+      <form id="initForm" novalidate>
+        <label for="initPassword">Passwort</label>
+        <input id="initPassword" name="password" type="password" autocomplete="new-password" required minlength="8" />
+
+        <label for="initPasswordRepeat">Passwort wiederholen</label>
+        <input id="initPasswordRepeat" name="passwordRepeat" type="password" autocomplete="new-password" required minlength="8" />
+
+        <button id="initSaveButton" type="submit">Passwort speichern</button>
+      </form>
+
+      <p id="initMessage" role="alert" class="message"></p>
+    </div>
+  </div>
+
+  <script src="./main.js" defer></script>
+</body>
+</html>
