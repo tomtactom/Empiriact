@@ -49,7 +49,8 @@ if (!auth_is_initialized()) {
     $created = auth_create_config_from_password($password);
 
     if (!$created['success']) {
-        http_response_code(500);
+        $isValidationError = isset($created['error']) && str_contains((string)$created['error'], 'mindestens 8 Zeichen');
+        http_response_code($isValidationError ? 400 : 500);
         echo json_encode($created);
         exit;
     }
