@@ -49,9 +49,15 @@ if (!auth_is_initialized()) {
     $created = auth_create_config_from_password($password);
 
     if (!$created['success']) {
-        $isValidationError = isset($created['error']) && str_contains((string)$created['error'], 'mindestens 8 Zeichen');
-        http_response_code($isValidationError ? 400 : 500);
-        echo json_encode($created);
+        $errorType = (string)($created['error_type'] ?? 'internal');
+        $errorMessage = (string)($created['error'] ?? 'Ein unbekannter Fehler ist aufgetreten.');
+        http_response_code($errorType === 'validation' ? 400 : 500);
+        echo json_encode([
+            'success' => false,
+            'error' => $errorMessage,
+            'message' => $errorMessage,
+            'error_type' => $errorType
+        ]);
         exit;
     }
 
