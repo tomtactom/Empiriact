@@ -13,3 +13,6 @@ local.properties
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# Server runtime secrets
+server/api/config.inc.php

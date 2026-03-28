@@ -1,0 +1,57 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * ============================================================================
+ *  config.inc.php.bak
+ * ============================================================================
+ *  Diese Datei ist eine Vorlage (Backup-Template) für die produktive
+ *  `config.inc.php`. Sie wird NICHT direkt verwendet.
+ *
+ *  Ziel:
+ *  - Im Repository liegt nur diese .bak-Version.
+ *  - Die echte `config.inc.php` wird erst auf dem Server beim ersten Login
+ *    automatisch erstellt.
+ *
+ *  Warum ist das sicherer?
+ *  - Es wird niemals ein Klartext-Passwort gespeichert.
+ *  - Es wird nur ein Passwort-Hash persistiert.
+ *
+ *  --------------------------------------------------------------------------
+ *  Verwendete Verschlüsselungs-/Hash-Methode
+ *  --------------------------------------------------------------------------
+ *  WICHTIG: Bei Passwörtern handelt es sich technisch NICHT um reversible
+ *  Verschlüsselung, sondern um EINWEG-HASHING.
+ *
+ *  1) Primärverfahren: ARGON2ID
+ *     - Moderner, speicherharter Passwort-Hashing-Algorithmus.
+ *     - Schutz gegen Brute-Force und GPU/ASIC-Angriffe durch hohen
+ *       Ressourcenbedarf (insbesondere RAM).
+ *     - In PHP über `password_hash(..., PASSWORD_ARGON2ID)`.
+ *
+ *  2) Fallback: BCRYPT
+ *     - Wird verwendet, falls ARGON2ID in der PHP-Installation nicht
+ *       verfügbar ist.
+ *     - In PHP über `password_hash(..., PASSWORD_BCRYPT)`.
+ *
+ *  3) Verifikation
+ *     - Prüfen des Passworts erfolgt mit `password_verify(...)`.
+ *     - Dabei wird das eingegebene Klartext-Passwort erneut gehasht und mit
+ *       dem gespeicherten Hash verglichen.
+ *
+ *  4) Transparenz
+ *     - Das Feld `algorithm` dokumentiert explizit, welches Verfahren bei der
+ *       Erstellung des Hashes genutzt wurde (ARGON2ID oder BCRYPT).
+ *
+ *  Hinweis:
+ *  - Der Wert in `password_hash` ist ein Beispiel-Platzhalter.
+ *  - In der produktiven `config.inc.php` wird dieser Wert beim ersten Login
+ *    automatisch gesetzt.
+ */
+
+return [
+    'password_hash' => '$argon2id$v=19$m=65536,t=4,p=1$EXAMPLE_SALT$EXAMPLE_HASH',
+    'algorithm' => 'ARGON2ID',
+    'created_at_utc' => '1970-01-01T00:00:00+00:00',
+];
