@@ -32,7 +32,8 @@ function auth_create_config_from_password(string $password): array
     if (!auth_validate_plain_password($password)) {
         return [
             'success' => false,
-            'error' => 'Passwort muss mindestens 8 Zeichen enthalten.'
+            'error' => 'Passwort muss mindestens 8 Zeichen enthalten.',
+            'error_type' => 'validation'
         ];
     }
 
@@ -42,7 +43,8 @@ function auth_create_config_from_password(string $password): array
     if ($hash === false) {
         return [
             'success' => false,
-            'error' => 'Passwort-Hash konnte nicht erstellt werden.'
+            'error' => 'Passwort-Hash konnte nicht erstellt werden.',
+            'error_type' => 'internal'
         ];
     }
 
@@ -75,7 +77,8 @@ PHP;
     if (file_put_contents($tmpPath, $renderedConfig . PHP_EOL, LOCK_EX) === false) {
         return [
             'success' => false,
-            'error' => 'Config-Datei konnte nicht geschrieben werden.'
+            'error' => 'Config-Datei konnte nicht geschrieben werden.',
+            'error_type' => 'io'
         ];
     }
 
@@ -85,7 +88,8 @@ PHP;
         @unlink($tmpPath);
         return [
             'success' => false,
-            'error' => 'Config-Datei konnte nicht finalisiert werden.'
+            'error' => 'Config-Datei konnte nicht finalisiert werden.',
+            'error_type' => 'io'
         ];
     }
 
